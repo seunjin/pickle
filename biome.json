@@ -30,6 +30,16 @@
       },
       "complexity": {
         "noImportantStyles": "off"
+      },
+      "style": {},
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "fix": "safe",
+          "options": {
+            "functions": ["clsx", "cva", "tw"]
+          }
+        }
       }
     }
   },

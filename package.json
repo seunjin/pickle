@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "lint": "biome lint .",
     "postinstall": "lefthook install",
+    "lint:fix": "biome check . --write",
     "format": "biome format . --write",
     "check": "biome check .",
     "clean": "turbo clean"
