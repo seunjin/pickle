@@ -1,0 +1,35 @@
+{
+  "name": "@inspire/ui",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.tsx",
+    "./src/theme.css": "./src/theme.css",
+    "./lib/utils": "./src/lib/utils.ts"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome format . --write",
+    "check": "biome check .",
+    "clean": "rm -rf .turbo node_modules"
+  },
+  "peerDependencies": {
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
+  },
+  "devDependencies": {
+    "@inspire/tsconfig": "workspace:*",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.559.0",
+    "tailwind-merge": "^3.4.0"
+  }
+}

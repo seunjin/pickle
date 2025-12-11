@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "@inspire/ui/src/theme.css";
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Override dark mode variables if needed, but they are already in theme.css .dark class */
+    /* Next.js doesn't automatically toggle .dark class unless designed, keeping media query for system preference or moving to class based */
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
