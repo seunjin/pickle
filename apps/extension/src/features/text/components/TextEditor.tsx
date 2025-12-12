@@ -11,19 +11,19 @@ import type { NoteData } from "@shared/types";
 interface TextEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
-  onBack: () => void;
   onClose: () => void;
+  onSave?: () => void;
 }
 
 export function TextEditor({
   note,
   onUpdate,
-  onBack,
   onClose,
+  onSave,
 }: TextEditorProps) {
   return (
     <div className="flex h-full flex-col gap-3 p-4">
-      <Header title="텍스트 저장" onBack={onBack} onClose={onClose} />
+      <Header title="텍스트 저장" onClose={onClose} />
       <div className="flex flex-col gap-1">
         <label
           htmlFor="url-input"
@@ -56,6 +56,7 @@ export function TextEditor({
       </div>
       <button
         type="button"
+        onClick={onSave}
         className="w-full rounded-lg bg-green-600 py-3 font-bold text-white shadow-md transition-colors hover:bg-green-700"
       >
         Save to Pickle

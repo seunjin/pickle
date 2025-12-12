@@ -5,7 +5,6 @@ import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
-import { Menu } from "@overlay/components/Menu";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
 
@@ -23,7 +22,7 @@ export default function OverlayApp({
   onClose: () => void;
   tabId: number;
 }) {
-  const [view, setView] = useState<ViewType>("menu");
+  const [view, setView] = useState<ViewType>("text");
   const [note, setNote] = useState<NoteData>({});
 
   // Storage Key: Tab ID 기반으로 분리
@@ -67,50 +66,48 @@ export default function OverlayApp({
     return () => chrome.storage.onChanged.removeListener(handleStorageChange);
   }, [STORAGE_KEY]); // handleStorageChange is stable thanks to useEffectEvent
 
-  const handleBack = () => setView("menu");
-  const openWebApp = () => {
-    chrome.tabs.create({ url: "https://picklenote.vercel.app" });
-  };
-
   const handleUpdateNote = (data: Partial<NoteData>) => {
     setNote((prev) => ({ ...prev, ...data }));
   };
 
+  const handleSave = () => {
+    console.log("Saving note (Overlay):", note);
+    // TODO: Implement actual save logic
+    onClose();
+  };
+
   return (
     <div className="fade-in slide-in-from-right-4 fixed top-4 right-4 z-50 h-[600px] w-[360px] animate-in overflow-hidden rounded-2xl border border-gray-200 bg-white font-sans text-gray-900 shadow-2xl duration-300">
-      {view === "menu" && (
-        <Menu onNavigate={setView} onClose={onClose} openWebApp={openWebApp} />
-      )}
       {view === "text" && (
         <TextEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onBack={handleBack}
           onClose={onClose}
+          onSave={handleSave}
         />
       )}
       {view === "capture" && (
         <CaptureEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onBack={handleBack}
           onClose={onClose}
+          onSave={handleSave}
         />
       )}
       {view === "image" && (
         <ImageEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onBack={handleBack}
           onClose={onClose}
+          onSave={handleSave}
         />
       )}
       {view === "bookmark" && (
         <BookmarkEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onBack={handleBack}
           onClose={onClose}
+          onSave={handleSave}
         />
       )}
     </div>

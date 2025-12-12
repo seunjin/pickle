@@ -11,19 +11,19 @@ import type { NoteData } from "@shared/types";
 interface BookmarkEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
-  onBack: () => void;
   onClose: () => void;
+  onSave?: () => void;
 }
 
 export function BookmarkEditor({
   note,
   onUpdate,
-  onBack,
   onClose,
+  onSave,
 }: BookmarkEditorProps) {
   return (
     <div className="flex h-full flex-col gap-3 p-4">
-      <Header title="북마크 저장" onBack={onBack} onClose={onClose} />
+      <Header title="북마크 저장" onClose={onClose} />
       {note.isLoading ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-yellow-600">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-600 border-t-transparent"></div>
@@ -74,7 +74,9 @@ export function BookmarkEditor({
                   {note.bookmarkData.url}
                 </a>
                 <span className="text-right text-[10px] text-gray-400">
-                  {new Date(note.timestamp || Date.now()).toLocaleDateString()}
+                  {note.timestamp
+                    ? new Date(note.timestamp).toLocaleDateString()
+                    : ""}
                 </span>
               </div>
             </div>
@@ -102,6 +104,7 @@ export function BookmarkEditor({
       <button
         type="button"
         disabled={!note.bookmarkData}
+        onClick={onSave}
         className="w-full rounded-lg bg-yellow-500 py-3 font-bold text-white shadow-md transition-colors hover:bg-yellow-600"
       >
         Save Bookmark

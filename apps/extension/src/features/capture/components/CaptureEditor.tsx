@@ -12,8 +12,8 @@ import { useEffect, useState } from "react";
 interface CaptureEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
-  onBack: () => void;
   onClose: () => void;
+  onSave?: () => void;
 }
 
 function CapturePreview({ captureData }: { captureData: CaptureData }) {
@@ -50,12 +50,12 @@ function CapturePreview({ captureData }: { captureData: CaptureData }) {
 export function CaptureEditor({
   note,
   onUpdate,
-  onBack,
   onClose,
+  onSave,
 }: CaptureEditorProps) {
   return (
     <div className="flex h-full flex-col gap-3 p-4">
-      <Header title="캡쳐 저장" onBack={onBack} onClose={onClose} />
+      <Header title="캡쳐 저장" onClose={onClose} />
       <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
         {note.isLoading ? (
           <div className="flex flex-col items-center gap-2 text-blue-600">
@@ -90,6 +90,7 @@ export function CaptureEditor({
       <button
         type="button"
         disabled={!note.captureData}
+        onClick={onSave}
         className={`w-full rounded-lg py-3 font-bold text-white shadow-md transition-colors ${
           note.captureData
             ? "bg-blue-600 hover:bg-blue-700"

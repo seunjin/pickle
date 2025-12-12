@@ -11,19 +11,19 @@ import type { NoteData } from "@shared/types";
 interface ImageEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
-  onBack: () => void;
   onClose: () => void;
+  onSave?: () => void;
 }
 
 export function ImageEditor({
   note,
-  onUpdate, // Note: Currently unused but kept for interface consistency
-  onBack,
+  onUpdate,
   onClose,
+  onSave,
 }: ImageEditorProps) {
   return (
     <div className="flex h-full flex-col gap-3 p-4">
-      <Header title="이미지 저장" onBack={onBack} onClose={onClose} />
+      <Header title="이미지 저장" onClose={onClose} />
 
       <div className="group relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
         {note.srcUrl ? (
@@ -58,6 +58,7 @@ export function ImageEditor({
       <button
         type="button"
         disabled={!note.srcUrl}
+        onClick={onSave}
         className={`w-full rounded-lg py-3 font-bold text-white shadow-md transition-colors ${
           note.srcUrl
             ? "bg-purple-600 hover:bg-purple-700"
