@@ -4,7 +4,7 @@ import OverlayApp from "./OverlayApp";
 
 const MOUNT_ID = "pickle-note-overlay-root";
 
-export function mountOverlay() {
+export function mountOverlay(tabId: number) {
   const existing = document.getElementById(MOUNT_ID);
   if (existing) {
     // 이미 존재하면 닫지 않고 유지 (상태 업데이트는 React가 storage listener로 처리)
@@ -39,13 +39,18 @@ export function mountOverlay() {
     host.remove();
   };
 
-  root.render(<OverlayApp onClose={handleClose} />);
+  root.render(<OverlayApp onClose={handleClose} tabId={tabId} />);
 }
 
 // Global Message Listener for Opening Overlay
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "OPEN_OVERLAY") {
-    mountOverlay();
+    // Background에서 tabId를 함께 보내줘야 함
+    if (request.tabId) {
+      mountOverlay(request.tabId);
+    } else {
+      console.error("Tab ID missing in OPEN_OVERLAY request");
+    }
     sendResponse({ status: "opened" });
   }
 });

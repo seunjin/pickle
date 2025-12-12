@@ -61,9 +61,11 @@ chrome.runtime.onInstalled.addListener(() => {
 async function startCaptureFlow(tab: chrome.tabs.Tab) {
   if (!tab.windowId || !tab.id) return;
 
+  const storageKey = `note_${tab.id}`;
+
   // 1. 초기 상태 저장
   await chrome.storage.local.set({
-    pendingNote: {
+    [storageKey]: {
       text: "",
       url: tab.url,
       timestamp: Date.now(),
@@ -75,6 +77,7 @@ async function startCaptureFlow(tab: chrome.tabs.Tab) {
   await sendMessageToContentScript(tab.id, {
     action: "OPEN_OVERLAY",
     mode: "capture",
+    tabId: tab.id, // tabId 전달
   });
 
   // 3. Content Script에 캡쳐 시작 요청
@@ -135,9 +138,11 @@ async function sendMessageToContentScript(tabId: number, message: any) {
 async function startBookmarkFlow(tab: chrome.tabs.Tab) {
   if (!tab.windowId || !tab.id) return;
 
+  const storageKey = `note_${tab.id}`;
+
   // 1. 초기 상태 저장
   await chrome.storage.local.set({
-    pendingNote: {
+    [storageKey]: {
       text: "",
       url: tab.url,
       timestamp: Date.now(),
@@ -151,6 +156,7 @@ async function startBookmarkFlow(tab: chrome.tabs.Tab) {
   await sendMessageToContentScript(tab.id, {
     action: "OPEN_OVERLAY",
     mode: "bookmark",
+    tabId: tab.id, // tabId 전달
   });
 
   try {
@@ -161,7 +167,7 @@ async function startBookmarkFlow(tab: chrome.tabs.Tab) {
 
     // 결과 저장 및 로딩 해제
     await chrome.storage.local.set({
-      pendingNote: {
+      [storageKey]: {
         text: "",
         url: tab.url,
         timestamp: Date.now(),
@@ -175,7 +181,7 @@ async function startBookmarkFlow(tab: chrome.tabs.Tab) {
 
     // 실패 시 기본 데이터로 저장 (Fallback)
     await chrome.storage.local.set({
-      pendingNote: {
+      [storageKey]: {
         text: "",
         url: tab.url,
         timestamp: Date.now(),
@@ -223,9 +229,11 @@ chrome.contextMenus.onClicked.addListener(
     else if (info.menuItemId === "save-image") mode = "image";
     // bookmark 처리는 위로 이동됨
 
-    if (tab?.windowId) {
+    if (tab?.windowId && tab.id) {
+      const storageKey = `note_${tab.id}`;
+
       await chrome.storage.local.set({
-        pendingNote: {
+        [storageKey]: {
           text: info.selectionText,
           url: info.pageUrl,
           srcUrl: info.srcUrl, // 이미지 URL
@@ -235,12 +243,11 @@ chrome.contextMenus.onClicked.addListener(
       });
 
       // 사이드 패널 대신 Overlay 열기 메시지 전송
-      if (tab.id) {
-        await sendMessageToContentScript(tab.id, {
-          action: "OPEN_OVERLAY",
-          mode: mode,
-        });
-      }
+      await sendMessageToContentScript(tab.id, {
+        action: "OPEN_OVERLAY",
+        mode: mode,
+        tabId: tab.id, // tabId 전달
+      });
 
       // Capture Mode일 경우 별도 처리 (이미지 캡쳐 후 전송 등)
       if (mode === "capture") {
@@ -278,12 +285,14 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
 chrome.runtime.onMessage.addListener((request, sender) => {
   if (request.action === "CAPTURE_AREA") {
     const windowId = sender.tab?.windowId;
+    const tabId = sender.tab?.id;
 
-    if (windowId) {
+    if (windowId && tabId) {
+      const storageKey = `note_${tabId}`;
       // 1. "로딩 중" 상태로 먼저 업데이트 (UI 피드백)
       chrome.storage.local
         .set({
-          pendingNote: {
+          [storageKey]: {
             text: "",
             url: request.pageUrl,
             timestamp: Date.now(),
@@ -301,7 +310,7 @@ chrome.runtime.onMessage.addListener((request, sender) => {
             async (dataUrl) => {
               // 3. 캡쳐 데이터 저장 및 로딩 해제
               await chrome.storage.local.set({
-                pendingNote: {
+                [storageKey]: {
                   text: "",
                   url: request.pageUrl,
                   timestamp: Date.now(),
@@ -318,4 +327,10 @@ chrome.runtime.onMessage.addListener((request, sender) => {
         });
     }
   }
+});
+
+// Clean up storage when tab is closed
+chrome.tabs.onRemoved.addListener((tabId) => {
+  const storageKey = `note_${tabId}`;
+  chrome.storage.local.remove(storageKey);
 });

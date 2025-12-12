@@ -28,43 +28,53 @@ interface NoteData {
   isLoading?: boolean;
 }
 
-interface OverlayAppProps {
-  initialMode?: ViewType;
+export default function OverlayApp({
+  onClose,
+  tabId,
+}: {
   onClose: () => void;
-}
+  tabId: number;
+}) {
+  const [view, setView] = useState<ViewType>("menu");
+  const [note, setNote] = useState<NoteData>({});
 
-export default function OverlayApp({ initialMode, onClose }: OverlayAppProps) {
-  const [view, setView] = useState<ViewType>(initialMode || "menu");
-  const [note, setNote] = useState<NoteData>({ text: "", url: "" });
+  // Storage Key: Tab ID 기반으로 분리
+  const STORAGE_KEY = `note_${tabId}`;
 
+  // 1. Initial Load & Change Listener
   useEffect(() => {
-    // 1. Initial Load: Check for pending data from background
-    chrome.storage.local.get("pendingNote", (result) => {
-      if (result.pendingNote) {
-        const data = result.pendingNote as NoteData;
+    // 초기 로드
+    chrome.storage.local.get(STORAGE_KEY, (result) => {
+      if (result[STORAGE_KEY]) {
+        console.log("Loaded note:", result[STORAGE_KEY]);
+        const data = result[STORAGE_KEY] as NoteData;
         setNote(data);
-        if (data.mode) {
-          setView(data.mode);
-        }
+        if (data.mode) setView(data.mode);
       }
     });
 
-    // 2. Storage Change Listener
-    const handleStorageChange = (changes: {
-      [key: string]: chrome.storage.StorageChange;
-    }) => {
-      if (changes.pendingNote?.newValue) {
-        const newData = changes.pendingNote.newValue as NoteData;
-        setNote(newData);
-        if (newData.mode) {
-          setView(newData.mode);
+    // 변경 감지
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string,
+    ) => {
+      if (areaName === "local" && changes[STORAGE_KEY]) {
+        console.log("Storage changed:", changes[STORAGE_KEY]);
+        const newValue = changes[STORAGE_KEY].newValue as NoteData;
+        if (newValue) {
+          setNote(newValue);
+          // 모드가 변경되었으면 뷰도 업데이트 (단, 사용자가 수동으로 이동한 경우 고려 필요)
+          // 여기서는 모드가 명시적으로 바뀌었을 때만 뷰 전환
+          if (newValue.mode && newValue.mode !== view) {
+            setView(newValue.mode);
+          }
         }
       }
     };
 
     chrome.storage.onChanged.addListener(handleStorageChange);
     return () => chrome.storage.onChanged.removeListener(handleStorageChange);
-  }, []);
+  }, [STORAGE_KEY, view]);
 
   const handleBack = () => setView("menu");
   const openWebApp = () => {
