@@ -9,7 +9,11 @@
     "lint:fix": "biome check . --write",
     "format": "biome format . --write",
     "check": "biome check .",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "dev:web": "pnpm --filter web dev",
+    "dev:extension": "pnpm --filter extension dev",
+    "build:web": "pnpm --filter web build",
+    "build:extension": "pnpm --filter extension build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
