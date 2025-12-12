@@ -1,5 +1,5 @@
 {
-  "name": "inspire-monorepo",
+  "name": "pickle-note-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo build",

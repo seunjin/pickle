@@ -26,7 +26,7 @@ importers:
 
   apps/extension:
     dependencies:
-      '@inspire/ui':
+      '@pickle/ui':
         specifier: workspace:^
         version: link:../../packages/ui
       react:
@@ -93,7 +93,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@inspire/ui':
+      '@pickle/ui':
         specifier: workspace:^
         version: link:../../packages/ui
       next:
@@ -145,7 +145,7 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
     devDependencies:
-      '@inspire/tsconfig':
+      '@pickle/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       '@types/react':
