@@ -57,29 +57,32 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Helper: 캡쳐 흐름 시작 (Context Menu & Shortcut 공용)
+// Helper: 캡쳐 흐름 시작 (Context Menu & Shortcut 공용)
 async function startCaptureFlow(tab: chrome.tabs.Tab) {
   if (!tab.windowId || !tab.id) return;
 
-  await Promise.all([
-    // 1. 사이드 패널 즉시 열기
-    chrome.sidePanel.open({ windowId: tab.windowId }),
-    // 2. 초기 상태 저장
-    chrome.storage.local.set({
-      pendingNote: {
-        text: "",
-        url: tab.url,
-        timestamp: Date.now(),
-        mode: "capture",
-        captureData: undefined,
-      },
-    }),
-    // 3. Content Script에 캡쳐 시작 요청
-    chrome.tabs
-      .sendMessage(tab.id, { action: "START_CAPTURE" })
-      .catch((error) => {
-        console.warn("캡쳐 스크립트 연결 실패:", error);
-      }),
-  ]);
+  // 1. 초기 상태 저장
+  await chrome.storage.local.set({
+    pendingNote: {
+      text: "",
+      url: tab.url,
+      timestamp: Date.now(),
+      mode: "capture",
+    },
+  });
+
+  // 2. Open Overlay (instead of Side Panel)
+  await sendMessageToContentScript(tab.id, {
+    action: "OPEN_OVERLAY",
+    mode: "capture",
+  });
+
+  // 3. Content Script에 캡쳐 시작 요청
+  sendMessageToContentScript(tab.id, { action: "START_CAPTURE" }).catch(
+    (error) => {
+      console.warn("캡쳐 스크립트 연결 실패:", error);
+    },
+  );
 }
 
 // Helper: Content Script 존재 여부 확인 및 주입 후 메시지 전송
@@ -217,20 +220,29 @@ chrome.contextMenus.onClicked.addListener(
     // bookmark 처리는 위로 이동됨
 
     if (tab?.windowId) {
-      await Promise.all([
-        // 1. 데이터 및 모드 저장
-        chrome.storage.local.set({
-          pendingNote: {
-            text: info.selectionText,
-            url: info.pageUrl,
-            srcUrl: info.srcUrl, // 이미지 URL
-            timestamp: Date.now(),
-            mode: mode, // 화면 전환을 위한 모드 값
-          },
-        }),
-        // 2. 사이드 패널 열기
-        chrome.sidePanel.open({ windowId: tab.windowId }),
-      ]);
+      await chrome.storage.local.set({
+        pendingNote: {
+          text: info.selectionText,
+          url: info.pageUrl,
+          srcUrl: info.srcUrl, // 이미지 URL
+          timestamp: Date.now(),
+          mode: mode, // 화면 전환을 위한 모드 값
+        },
+      });
+
+      // 사이드 패널 대신 Overlay 열기 메시지 전송
+      if (tab.id) {
+        await sendMessageToContentScript(tab.id, {
+          action: "OPEN_OVERLAY",
+          mode: mode,
+        });
+      }
+
+      // Capture Mode일 경우 별도 처리 (이미지 캡쳐 후 전송 등)
+      if (mode === "capture") {
+        // 캡쳐 로직은 기존 startCaptureFlow 등을 재활용하거나 Overlay 내부에서 처리
+        // 여기서는 일단 Overlay만 열어둠 using OPEN_OVERLAY
+      }
     }
   },
 );
