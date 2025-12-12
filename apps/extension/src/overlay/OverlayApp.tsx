@@ -20,6 +20,7 @@ interface BookmarkData {
 interface NoteData {
   text?: string;
   url?: string;
+  srcUrl?: string;
   timestamp?: number;
   mode?: ViewType;
   captureData?: CaptureData;
@@ -294,13 +295,50 @@ export default function OverlayApp({ initialMode, onClose }: OverlayAppProps) {
     </div>
   );
 
-  const renderPlaceholder = (title: string, icon: string) => (
-    <div className="flex h-full flex-col p-4">
-      <Header title={title} onBack={handleBack} onClose={onClose} />
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 text-gray-400">
-        <span className="text-6xl">{icon}</span>
-        <p className="text-sm">기능 준비 중입니다.</p>
+  const renderImageEditor = () => (
+    <div className="flex h-full flex-col gap-3 p-4">
+      <Header title="이미지 저장" onBack={handleBack} onClose={onClose} />
+
+      <div className="group relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
+        {note.srcUrl ? (
+          <img
+            src={note.srcUrl}
+            alt="Captured content"
+            className="max-h-full max-w-full object-contain shadow-lg"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-gray-400">
+            <span className="text-4xl">🖼️</span>
+            <p className="text-sm">이미지를 찾을 수 없습니다.</p>
+          </div>
+        )}
       </div>
+
+      <div className="flex flex-col gap-1">
+        <label
+          htmlFor="image-note"
+          className="font-medium text-gray-500 text-xs"
+        >
+          Note
+        </label>
+        <textarea
+          id="image-note"
+          className="h-20 w-full resize-none rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="이미지에 대한 메모를 남겨보세요..."
+        />
+      </div>
+
+      <button
+        type="button"
+        disabled={!note.srcUrl}
+        className={`w-full rounded-lg py-3 font-bold text-white shadow-md transition-colors ${
+          note.srcUrl
+            ? "bg-purple-600 hover:bg-purple-700"
+            : "cursor-not-allowed bg-gray-400"
+        }`}
+      >
+        Save Image
+      </button>
     </div>
   );
 
@@ -309,7 +347,7 @@ export default function OverlayApp({ initialMode, onClose }: OverlayAppProps) {
       {view === "menu" && renderMenu()}
       {view === "text" && renderTextEditor()}
       {view === "capture" && renderCaptureEditor()}
-      {view === "image" && renderPlaceholder("이미지 저장", "🖼️")}
+      {view === "image" && renderImageEditor()}
       {view === "bookmark" && renderBookmarkEditor()}
     </div>
   );

@@ -135,19 +135,23 @@ async function sendMessageToContentScript(tabId: number, message: any) {
 async function startBookmarkFlow(tab: chrome.tabs.Tab) {
   if (!tab.windowId || !tab.id) return;
 
-  await Promise.all([
-    chrome.sidePanel.open({ windowId: tab.windowId }),
-    chrome.storage.local.set({
-      pendingNote: {
-        text: "",
-        url: tab.url,
-        timestamp: Date.now(),
-        mode: "bookmark",
-        isLoading: true, // 로딩 시작
-        bookmarkData: undefined,
-      },
-    }),
-  ]);
+  // 1. 초기 상태 저장
+  await chrome.storage.local.set({
+    pendingNote: {
+      text: "",
+      url: tab.url,
+      timestamp: Date.now(),
+      mode: "bookmark",
+      isLoading: true, // 로딩 시작
+      bookmarkData: undefined,
+    },
+  });
+
+  // 2. Open Overlay (Instead of Side Panel)
+  await sendMessageToContentScript(tab.id, {
+    action: "OPEN_OVERLAY",
+    mode: "bookmark",
+  });
 
   try {
     // Content Script에 메타데이터 요청 (Robust)

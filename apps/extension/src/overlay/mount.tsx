@@ -7,7 +7,7 @@ const MOUNT_ID = "pickle-note-overlay-root";
 export function mountOverlay() {
   const existing = document.getElementById(MOUNT_ID);
   if (existing) {
-    existing.remove();
+    // 이미 존재하면 닫지 않고 유지 (상태 업데이트는 React가 storage listener로 처리)
     return;
   }
 
