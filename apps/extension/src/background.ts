@@ -82,6 +82,110 @@ async function startCaptureFlow(tab: chrome.tabs.Tab) {
   ]);
 }
 
+// Helper: Content Script 존재 여부 확인 및 주입 후 메시지 전송
+async function sendMessageToContentScript(tabId: number, message: any) {
+  try {
+    return await chrome.tabs.sendMessage(tabId, message);
+  } catch (error: any) {
+    // Content Script가 로드되지 않은 경우
+    if (error.message?.includes("Receiving end does not exist")) {
+      console.log(
+        "Found 'Receiving end does not exist' error. Attempting injection...",
+      );
+
+      try {
+        const manifest = chrome.runtime.getManifest();
+        const contentScripts = manifest.content_scripts?.[0]?.js;
+
+        if (contentScripts && contentScripts.length > 0) {
+          console.log(
+            `Injecting content scripts: ${contentScripts.join(", ")} into tab ${tabId}`,
+          );
+
+          await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            files: contentScripts,
+          });
+
+          console.log(
+            "Injection successful. Waiting for script initialization...",
+          );
+          await new Promise((resolve) => setTimeout(resolve, 500)); // 대기 시간 500ms로 증가
+
+          console.log("Retrying message send...");
+          const response = await chrome.tabs.sendMessage(tabId, message);
+          console.log("Retry response received:", response);
+          return response;
+        } else {
+          console.error("No content scripts found in manifest to inject.");
+        }
+      } catch (injectionError) {
+        console.error("Script injection failed:", injectionError);
+        throw injectionError; // 상위 catch로 전달
+      }
+    }
+    throw error;
+  }
+}
+
+// Helper: 북마크 흐름 시작
+async function startBookmarkFlow(tab: chrome.tabs.Tab) {
+  if (!tab.windowId || !tab.id) return;
+
+  await Promise.all([
+    chrome.sidePanel.open({ windowId: tab.windowId }),
+    chrome.storage.local.set({
+      pendingNote: {
+        text: "",
+        url: tab.url,
+        timestamp: Date.now(),
+        mode: "bookmark",
+        isLoading: true, // 로딩 시작
+        bookmarkData: undefined,
+      },
+    }),
+  ]);
+
+  try {
+    // Content Script에 메타데이터 요청 (Robust)
+    const metadata = await sendMessageToContentScript(tab.id, {
+      action: "GET_METADATA",
+    });
+
+    // 결과 저장 및 로딩 해제
+    await chrome.storage.local.set({
+      pendingNote: {
+        text: "",
+        url: tab.url,
+        timestamp: Date.now(),
+        mode: "bookmark",
+        isLoading: false,
+        bookmarkData: metadata,
+      },
+    });
+  } catch (error) {
+    console.warn("메타데이터 추출 실패 (Retry Failed):", error);
+
+    // 실패 시 기본 데이터로 저장 (Fallback)
+    await chrome.storage.local.set({
+      pendingNote: {
+        text: "",
+        url: tab.url,
+        timestamp: Date.now(),
+        mode: "bookmark",
+        isLoading: false,
+        bookmarkData: {
+          title: tab.title || "No Title",
+          url: tab.url || "",
+          description:
+            "메타데이터를 가져올 수 없습니다. (페이지를 새로고침 해보세요)",
+          image: "", // 이미지가 없으면 기본 아이콘 표시됨
+        },
+      },
+    });
+  }
+}
+
 chrome.contextMenus.onClicked.addListener(
   async (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
     // 앱 열기는 별도 처리
@@ -98,11 +202,19 @@ chrome.contextMenus.onClicked.addListener(
       return;
     }
 
+    // 북마크 기능 별도 처리
+    if (info.menuItemId === "bookmark") {
+      if (tab) {
+        await startBookmarkFlow(tab);
+      }
+      return;
+    }
+
     // View 모드 매핑
     let mode = "menu";
     if (info.menuItemId === "save-text") mode = "text";
     else if (info.menuItemId === "save-image") mode = "image";
-    else if (info.menuItemId === "bookmark") mode = "bookmark";
+    // bookmark 처리는 위로 이동됨
 
     if (tab?.windowId) {
       await Promise.all([

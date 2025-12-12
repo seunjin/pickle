@@ -1,11 +1,63 @@
 console.log("Pickle Note Content Script Loaded");
 
-// 캡쳐 시작 메시지 수신
-chrome.runtime.onMessage.addListener((request) => {
+// 캡쳐 및 메타데이터 요청 수신
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+  console.log("Content Script Received Message:", request);
+
   if (request.action === "START_CAPTURE") {
     startCapture();
+  } else if (request.action === "GET_METADATA") {
+    try {
+      const metadata = extractMetadata();
+      console.log("Metadata extracted:", metadata);
+      sendResponse(metadata);
+    } catch (e) {
+      console.error("Metadata extraction failed:", e);
+      sendResponse(null);
+    }
   }
 });
+
+function extractMetadata() {
+  const getMeta = (property: string) =>
+    document
+      .querySelector(`meta[property="${property}"]`)
+      ?.getAttribute("content") ||
+    document.querySelector(`meta[name="${property}"]`)?.getAttribute("content");
+
+  const getFavicon = () => {
+    // 1. Try different link selectors
+    const selectors = [
+      "link[rel='icon']",
+      "link[rel='shortcut icon']",
+      "link[rel='apple-touch-icon']",
+    ];
+
+    for (const selector of selectors) {
+      const link = document.querySelector(selector) as HTMLLinkElement;
+      if (link?.href) {
+        return link.href; // href is absolute
+      }
+    }
+
+    // 2. Fallback to default /favicon.ico (Check if it exists can't be done easily synchronously, so we allow it or try google)
+    // 3. Ultimate Fallback: Google S2 Service
+    return `https://www.google.com/s2/favicons?domain=${window.location.hostname}&sz=64`;
+  };
+
+  return {
+    title: getMeta("og:title") || getMeta("twitter:title") || document.title,
+    description:
+      getMeta("og:description") ||
+      getMeta("twitter:description") ||
+      getMeta("description") ||
+      "",
+    image: getMeta("og:image") || getMeta("twitter:image") || "",
+    site_name: getMeta("og:site_name") || window.location.hostname,
+    favicon: getFavicon(),
+    url: window.location.href,
+  };
+}
 
 function startCapture() {
   document.body.style.cursor = "crosshair";
