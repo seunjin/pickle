@@ -2,8 +2,8 @@
 
 import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { LoginButton } from "@/components/auth/LoginButton";
-import { createClient } from "@/lib/supabase/client";
+import { LoginButton } from "@/features/auth";
+import { createClient } from "@/shared/lib/supabase/client";
 
 export default function TestConnectionPage() {
   const [status, setStatus] = useState<string>("Checking connection...");
