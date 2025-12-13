@@ -90,7 +90,7 @@ export default function OverlayApp({
       // This mapping logic should ideally be robust.
 
       let type: "text" | "image" | "capture" | "bookmark" = "text";
-      let data: any = {};
+      let data: Record<string, unknown> = {};
 
       switch (view) {
         case "text":
@@ -210,7 +210,7 @@ export default function OverlayApp({
               href="http://localhost:3000/auth/sync"
               target="_blank"
               rel="noreferrer"
-              className="absolute bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
+              className="-translate-x-1/2 absolute bottom-16 left-1/2 whitespace-nowrap rounded-full bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow hover:bg-blue-700"
             >
               Connect Account
             </a>

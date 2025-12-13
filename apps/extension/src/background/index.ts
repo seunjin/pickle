@@ -109,7 +109,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-async function handleSaveNote(note: any) {
+import type { CreateNoteInput } from "@pickle/contracts/src/note";
+
+// ... existing imports
+
+async function handleSaveNote(note: CreateNoteInput) {
   try {
     const result = await chrome.storage.local.get("supabaseSession");
     const supabaseSession = result.supabaseSession as

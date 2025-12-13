@@ -1,3 +1,4 @@
+import type { Database } from "@pickle/contracts";
 import { createNoteSchema } from "@pickle/contracts/src/note";
 import { NextResponse } from "next/server";
 import { createClient } from "@/shared/lib/supabase/server";
@@ -25,17 +26,19 @@ export async function POST(request: Request) {
 
     const { type, url, content, data, tags } = result.data;
 
+    const insertPayload: Database["public"]["Tables"]["notes"]["Insert"] = {
+      user_id: user.id,
+      type,
+      url,
+      content: content ?? null,
+      data: data as unknown as Database["public"]["Tables"]["notes"]["Insert"]["data"],
+      tags: tags ?? [],
+    };
+
     // Supabase client is typed with Database, so it knows the schema of 'notes' table
     const { data: note, error } = await supabase
       .from("notes")
-      .insert({
-        user_id: user.id,
-        type,
-        url,
-        content: content ?? null,
-        data: data,
-        tags: tags ?? [],
-      } as any)
+      .insert(insertPayload)
       .select()
       .single();
 

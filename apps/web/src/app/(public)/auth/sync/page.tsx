@@ -1,8 +1,8 @@
 "use client";
 
-import { useSessionContext } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSessionContext } from "@/features/auth";
 
 export default function AuthSyncPage() {
   const { user, isLoading } = useSessionContext();
@@ -58,10 +58,10 @@ export default function AuthSyncPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-      <h1 className="mb-4 text-2xl font-bold">Pickle Note Sync</h1>
+      <h1 className="mb-4 font-bold text-2xl">Pickle Note Sync</h1>
       <p className="text-gray-600">{status}</p>
       {status === "Connected! You can close this tab." && (
-        <div className="mt-8 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200">
+        <div className="mt-8 rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
           Browser Extension is now connected.
         </div>
       )}
