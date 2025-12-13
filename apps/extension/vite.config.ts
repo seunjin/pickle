@@ -13,8 +13,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@features": path.resolve(__dirname, "./src/features"),
       "@shared": path.resolve(__dirname, "./src/shared"),
-      "@overlay": path.resolve(__dirname, "./src/overlay"),
+      "@overlay": path.resolve(__dirname, "./src/content/ui"),
       "@background": path.resolve(__dirname, "./src/background"),
+      "@content": path.resolve(__dirname, "./src/content"),
     },
   },
 });

@@ -26,8 +26,9 @@
       "@/*": ["./src/*"],
       "@features/*": ["./src/features/*"],
       "@shared/*": ["./src/shared/*"],
-      "@overlay/*": ["./src/overlay/*"],
-      "@background/*": ["./src/background/*"]
+      "@overlay/*": ["./src/content/ui/*"],
+      "@background/*": ["./src/background/*"],
+      "@content/*": ["./src/content/*"]
     }
   },
   "include": ["src"]

@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import styles from "../index.css?inline"; // CSS를 문자열로 가져옴
+import styles from "../../index.css?inline"; // CSS를 문자열로 가져옴
 import OverlayApp from "./OverlayApp";
 
 const MOUNT_ID = "pickle-note-overlay-root";

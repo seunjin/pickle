@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useState } from "react";
-import "../index.css"; // Ensure Tailwind is processed
+import "../../index.css"; // Ensure Tailwind is processed
 
 import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
