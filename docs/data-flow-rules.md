@@ -18,7 +18,7 @@
 | **Contract** | 데이터의 모양에 대한 약속 (타입, Zod 스키마) | `@pickle/contracts` |
 | **Transport** | 데이터를 가져오는 물리적 방식 | DB SDK 호출, fetch, RPC |
 | **Feature API** | 기능(Feature) 내부에서 제공하는 데이터 및 로직의 공개 인터페이스 | `features/auth/api/*` |
-| **Service** | 실제 데이터 접근 및 비즈니스 로직을 수행하는 함수. Transport 상세를 캡슐화함. | `UserService.getUser()` |
+| **Service** | 실제 데이터 접근 및 비즈니스 로직을 수행하는 함수. Transport 상세를 캡슐화하며, UI는 이를 직접 알지 못한다. | `UserService.getUser()` |
 
 ---
 
@@ -84,6 +84,10 @@ Next.js의 Route Handler(`app/api/**`)는 **HTTP 경계**로서의 역할만 수
 ---
 
 ## 7. 캐싱 정책 (Web Only)
+
+> **기본 원칙: 이 프로젝트에서 데이터는 기본적으로 캐시하지 않습니다.**
+> 캐싱은 명확한 성능 이점과 안전성이 검증된 경우에만,
+> 의도를 가지고 선택적으로(opt-in) 적용합니다.
 
 Next.js의 캐싱 기능은 강력하지만 주의해서 사용해야 합니다.
 
