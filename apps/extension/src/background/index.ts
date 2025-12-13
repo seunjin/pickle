@@ -74,8 +74,8 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
   }
 });
 
-// 4. Message Handler (Capture Area)
-chrome.runtime.onMessage.addListener((request, sender) => {
+// 4. Message Handler (Capture Area & Save Note)
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "CAPTURE_AREA") {
     const windowId = sender.tab?.windowId;
     const tabId = sender.tab?.id;
@@ -103,10 +103,74 @@ chrome.runtime.onMessage.addListener((request, sender) => {
         );
       });
     }
+  } else if (request.action === "SAVE_NOTE") {
+    handleSaveNote(request.note).then((result) => sendResponse(result));
+    return true; // Keep channel open for async response
   }
 });
 
-// 5. Cleanup Handler
+async function handleSaveNote(note: any) {
+  try {
+    const result = await chrome.storage.local.get("supabaseSession");
+    const supabaseSession = result.supabaseSession as
+      | { access_token?: string }
+      | undefined;
+
+    if (!supabaseSession?.access_token) {
+      return {
+        success: false,
+        error: "Unauthorized: No active session found.",
+      };
+    }
+
+    const API_BASE_URL = "http://localhost:3000/api/internal/notes";
+
+    const response = await fetch(API_BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseSession.access_token}`,
+      },
+      body: JSON.stringify(note),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        return {
+          success: false,
+          error: "Unauthorized: Session expired or invalid.",
+        };
+      }
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.message || "Failed to save note.",
+      };
+    }
+
+    const data = await response.json();
+    return { success: true, data: data.note };
+  } catch (error) {
+    console.error("Background Save Error:", error);
+    return { success: false, error: (error as Error).message };
+  }
+}
+
+// 5. External Message Handler (Auth Sync)
+chrome.runtime.onMessageExternal.addListener(
+  (message, _sender, sendResponse) => {
+    if (message.type === "SYNC_SESSION" && message.session) {
+      console.log("Session received from Web:", message.session);
+      chrome.storage.local.set({ supabaseSession: message.session }, () => {
+        console.log("Session saved to local storage");
+        sendResponse({ success: true });
+      });
+      return true; // Keep channel open for async response
+    }
+  },
+);
+
+// 6. Cleanup Handler
 chrome.tabs.onRemoved.addListener((tabId) => {
   clearNote(tabId);
 });

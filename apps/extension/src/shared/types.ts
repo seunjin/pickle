@@ -23,4 +23,13 @@ export interface NoteData {
   captureData?: CaptureData;
   bookmarkData?: BookmarkData;
   isLoading?: boolean;
+
+  // Fields used in OverlayApp but previously missing from type
+  title?: string;
+  description?: string;
+  previewImage?: string;
+  favicon?: string;
+  siteName?: string;
+  memo?: string;
+  altText?: string;
 }

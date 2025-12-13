@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pickle/contracts": "workspace:^",
     "@pickle/ui": "workspace:^",
     "react": "19.2.1",
     "react-dom": "19.2.1"

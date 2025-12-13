@@ -39,5 +39,12 @@
       },
       "description": "Start Capture Area"
     }
+  },
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:3000/*",
+      "https://picklenote.vercel.app/*",
+      "https://*.vercel.app/*"
+    ]
   }
 }

@@ -5,6 +5,7 @@ import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
+import { saveNote } from "@shared/api/note";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
 
@@ -70,10 +71,81 @@ export default function OverlayApp({
     setNote((prev) => ({ ...prev, ...data }));
   };
 
-  const handleSave = () => {
+  // State for saving
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSave = async () => {
     console.log("Saving note (Overlay):", note);
-    // TODO: Implement actual save logic
-    onClose();
+    setIsSaving(true);
+    setErrorMessage(null);
+
+    try {
+      // Construct CreateNoteInput from current note state
+      // Validating required fields minimally here, zod will check on server
+      if (!note.url) throw new Error("URL is missing");
+
+      // Map Overlay NoteData to Contract's CreateNoteInput
+      // We need to determine 'type' and 'data' based on 'mode'
+      // This mapping logic should ideally be robust.
+
+      let type: "text" | "image" | "capture" | "bookmark" = "text";
+      let data: any = {};
+
+      switch (view) {
+        case "text":
+          type = "text";
+          data = { text: note.text || "" };
+          break;
+        case "image":
+          type = "image";
+          data = {
+            image_url: note.srcUrl || "",
+            alt_text: note.altText,
+          };
+          break;
+        case "capture":
+          type = "capture";
+          data = {
+            screenshot_url: note.captureData?.image || "",
+            width: note.captureData?.area?.width || 0,
+            height: note.captureData?.area?.height || 0,
+          };
+          break;
+        case "bookmark":
+          type = "bookmark";
+          data = {
+            title: note.title || "",
+            description: note.description,
+            image: note.previewImage,
+            favicon: note.favicon,
+            site_name: note.siteName,
+          };
+          break;
+      }
+
+      const input = {
+        type,
+        url: note.url,
+        content: note.memo, // Assuming editor saves user memo here? Or maybe we need to wire it up.
+        // Looking at Editor components, they usually have local state.
+        // OverlayApp needs to receive 'onUpdate' correctly.
+        data,
+        tags: [],
+      };
+
+      await saveNote(input);
+
+      // Success
+      onClose();
+      // Optional: Send success message to background to show notification?
+    } catch (e: unknown) {
+      console.error("Save failed:", e);
+      const msg = e instanceof Error ? e.message : "Unknown error occurred";
+      setErrorMessage(msg);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -109,6 +181,41 @@ export default function OverlayApp({
           onClose={onClose}
           onSave={handleSave}
         />
+      )}
+
+      {/* Loading & Error Overlay */}
+      {isSaving && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-green-600" />
+            <span className="font-medium text-gray-600 text-sm">Saving...</span>
+          </div>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="slide-in-from-bottom-2 fade-in absolute right-4 bottom-4 left-4 z-50 flex animate-in items-center justify-between rounded-lg border border-red-100 bg-red-50 p-3 text-red-600 text-sm shadow-lg">
+          <span>{errorMessage}</span>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="ml-2 font-bold text-red-400 hover:text-red-700"
+          >
+            ✕
+          </button>
+
+          {/* Show Connect Button if Unauthorized (basic string assumption for now) */}
+          {errorMessage?.includes("Unauthorized") && (
+            <a
+              href="http://localhost:3000/auth/sync"
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
+            >
+              Connect Account
+            </a>
+          )}
+        </div>
       )}
     </div>
   );
