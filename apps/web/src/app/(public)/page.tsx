@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LoginButton } from "@/features/auth";
 
 export const metadata: Metadata = {
   title: "Pickle Note",
@@ -26,9 +25,6 @@ export default function Home() {
           >
             대시보드로 이동
           </Link>
-          <div className="flex h-12 items-center">
-            <LoginButton />
-          </div>
         </div>
       </main>
 

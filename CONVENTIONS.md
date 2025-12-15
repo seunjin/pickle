@@ -122,3 +122,21 @@ export const ExampleComponent = ({ title }: Props) => {
 2. 내부 라이브러리/유틸리티 (`@/shared/*`, `@/features/*`)
 3. 상대 경로 컴포넌트 (`./Button`)
 4. 스타일 (`./style.css`)
+
+### 4.6 Import Strategy (Deep Import)
+- **Barrel File 지양**: `index.ts`를 통해 모든 것을 모아서 내보내는 방식(Barrel File)을 지양합니다.
+- **Deep Import 권장**: 필요한 모듈이 위치한 파일 경로를 직접 명시하여 가져옵니다.
+  - ✅ Good: `import { getUser } from '@/features/auth/api/getUser'`
+  - ❌ Bad: `import { getUser } from '@/features/auth'`
+- **이유**:
+  1. **순환 참조 방지**: 모듈 간 의존 관계를 명확히 하여 순환 참조 오류를 예방합니다.
+  2. **Tree Shaking 최적화**: 사용하지 않는 코드가 번들에 포함되는 것을 방지합니다.
+  3. **명확한 출처**: 코드를 읽을 때 해당 함수/컴포넌트의 정확한 위치를 파악하기 쉽습니다.
+
+### 4.7 Separation of Concerns (API vs Model)
+- **API (Service) 분리**: DB 연결, `fetch` 호출 등 실제 데이터 접근 로직은 반드시 `features/<feature>/api` 폴더 내에 별도 함수로 분리합니다.
+  - ❌ Hook 내부나 컴포넌트에 직접 작성 금지.
+- **Model (Hook) 역할**: `React Query`나 `Zustand` 등을 사용하여 상태를 관리하고, `api` 폴더의 함수를 호출하는 역할만 수행합니다.
+- **예시**:
+  - `api/getNotes.ts`: `supabase.from('notes').select(...)` (순수 데이터 로직)
+  - `model/useNote.ts`: `useQuery({ queryFn: getNotes })` (상태 관리 로직)
