@@ -14,17 +14,17 @@
 4. **익스텐션 (`background/index.ts`)**:
    - API 호출 시 `chrome.storage.local`에서 `access_token`을 꺼내 인증 헤더에 추가합니다.
 
-## 2. 네트워크 요청 (Background Proxy)
-HTTPS 사이트에서 Localhost(HTTP)로 요청을 보낼 때 발생하는 **Mixed Content** 차단 문제를 해결하고, CORS를 엄격하게 관리하기 위해 모든 쓰기(Write) API 요청은 Background Service Worker를 통해 대리 수행(Proxy)합니다.
+## 2. 데이터 접근 (Direct DB Access via Background)
+웹과 동일하게 **Supabase DB에 직접 접근**합니다. 단, 보안과 세션 관리를 위해 모든 쓰기(Write) 작업은 **Background Service Worker**에서 수행합니다.
 
 ### 동작 흐름
 1. **UI (`OverlayApp.tsx`)**: 
-   - 직접 `fetch`하지 않고 메시지를 전송합니다: `chrome.runtime.sendMessage({ action: "SAVE_NOTE", note })`.
+   - 사용자가 저장 버튼을 누르면 메시지를 전송합니다: `chrome.runtime.sendMessage({ action: "SAVE_NOTE", note })`.
 2. **Background (`background/index.ts`)**:
    - `SAVE_NOTE` 메시지를 수신합니다.
-   - 스토리지에서 `access_token`을 조회합니다.
-   - `fetch`를 사용하여 `http://localhost:3000/api/internal/notes`로 실제 요청을 보냅니다.
-   - 결과를 UI로 반환합니다.
+   - `chrome.storage.local`에서 동기화된 `access_token`을 조회합니다.
+   - `supabase-js` 클라이언트를 초기화하여 직접 `insert` 쿼리를 실행합니다.
+   - **RLS (Row Level Security)** 정책에 의해 데이터 접근 권한이 제어됩니다.
 
-> **이유**: Manifest V3 익스텐션의 Service Worker는 페이지의 콘텐츠 보안 정책(CSP)이나 Mixed Content 제약에서 비교적 자유롭기 때문에, 사용자가 `https://google.com`에 있어도 `http://localhost` 서버와 통신할 수 있습니다.
+> **이유**: `api/internal` 같은 중간 레이어를 제거하여 아키텍처를 단순화하고, `supabase-js`의 이점(타입, DX)을 그대로 활용합니다.
 

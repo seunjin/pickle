@@ -24,40 +24,49 @@
 | **함수 (Functions)** | `camelCase` | `getUserData`, `handleClick` | 동사로 시작 권장 |
 | **타입/인터페이스** | `PascalCase` | `User`, `ApiResponse` | `I` 접두어 사용 지양 (Interface) |
 
-## 2. Git 컨벤션 (Git Conventions)
+## 3. Git 컨벤션 (Git Conventions)
 
-### 커밋 메시지 구조
+### 3.1 워크플로우 (Trunk-based Development)
+우리는 **Trunk-based Development** 전략을 따릅니다.
+
+*   **Main Branch**: 언제나 라이브에 배포 가능한 상태(Production-ready)여야 합니다. (Source of Truth)
+*   **Workflow**:
+    1.  `main` 브랜치에서 분기하여 기능 브랜치 생성
+    2.  개발 완료 후 PR(Pull Request) 생성
+    3.  CI 테스트 통과 후 `main`에 Squash Merge
+*   **Feature Branch**: 수명이 짧아야 합니다(Short-lived). 작업 단위는 작게 유지하세요. (PR 300~400줄 권장)
+
+### 3.2 커밋 메시지 (Conventional Commits)
+[Conventional Commits](https://www.conventionalcommits.org/) 규칙을 따릅니다.
+
+#### 구조
 ```text
-type(scope): Subject (첫 글자 대문자 허용/권장)
+<type>(<scope>?): <subject>
 
-body (optional)
+<body?>
 
-footer (optional)
+<footer?>
 ```
 
-### Type (태그 종류)
+#### Types
 | 태그 | 설명 |
 | :--- | :--- |
 | `feat` | 새로운 기능 추가 |
 | `fix` | 버그 수정 |
-| `ui` | UI/CSS 스타일 변경 (로직 변경 없음) |
-| `style` | 코드 포맷팅, 세미콜론 누락 등 (코드 변경 없음) |
-| `refactor` | 코드 리팩토링 (기능 변경 없음, 변수명 변경 등) |
+| `ui` | UI 스타일 변경 (로직 없음) |
+| `refactor` | 코드 리팩토링 (기능 변경 없음) |
 | `perf` | 성능 개선 |
-| `docs` | 문서 수정 (README, .rules 등) |
-| `test` | 테스트 코드 추가/수정 |
-| `chore` | 빌드 업무, 패키지 매니저 설정 등 |
+| `docs` | 문서 수정 |
+| `chore` | 빌드, 패키지 설정 등 |
 
-### 커밋 메시지 예시
-- `feat(Auth): 로그인 페이지 UI 구현` (대문자 사용 예시)
-- `fix(API): 사용자 정보 조회 실패 오류 수정`
-- `ui(Home): 메인 배너 간격 조정` (단순 스타일 수정)
-- `refactor(Common): Button 컴포넌트 Props 구조 개선`
+#### Examples
+- `feat(auth): 구글 로그인 연동 기능 추가`
+- `fix(contracts): User 타입 정의 오류 수정`
+- `refactor(web/chat): 메시지 리스트 컴포넌트 분리`
 
-### 브랜치 전략
-- **Main Branch**: `main` (항상 배포 가능한 상태 유지)
-- **Feature Branch**: `feat/기능명` (예: `feat/login-page`)
-- **Bugfix Branch**: `fix/버그명` (예: `fix/header-layout`)
+### 3.3 브랜치 네이밍
+- `feat/feature-name` (예: `feat/login-page`)
+- `fix/bug-name` (예: `fix/header-layout`)
 
 ## 4. 코드 작성 원칙 (Coding Principles)
 

@@ -24,7 +24,7 @@ Next.js의 App Router가 위치하는 곳입니다.
 *   **역할**: URL 라우팅, 페이지 레이아웃, 그리고 기능(Feature)들의 조립(Composition).
 *   **규칙**:
     *   **비즈니스 로직 금지**: 페이지 컴포넌트는 최대한 얇게 유지하며, 로직은 `features`로 위임합니다.
-    *   **Direct DB 접근 금지**: Supabase 등을 직접 호출하지 않습니다.
+    *   **Direct DB 접근 금지 (UI Layer)**: UI 컴포넌트나 페이지에서 Supabase를 직접 호출하지 않습니다.
     *   **Import**: `features/**`의 Public API(`index.ts`)를 통해서만 컴포넌트를 가져옵니다.
 
 ### 🟩 Features Layer (`src/features`)
