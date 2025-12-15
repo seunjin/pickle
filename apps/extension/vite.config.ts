@@ -20,4 +20,11 @@ export default defineConfig({
       "@content": path.resolve(__dirname, "./src/content"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        overlay: path.resolve(__dirname, "src/overlay/index.html"),
+      },
+    },
+  },
 });

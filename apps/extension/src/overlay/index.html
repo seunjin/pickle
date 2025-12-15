@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pickle Note Overlay</title>
+    <!-- 
+      Iframe Isolation Strategy:
+      - This HTML runs inside an iframe, isolated from the host page.
+      - We can freely use Tailwind global reset and REM units here.
+      - Background is transparent to show the host page behind.
+    -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        overflow: hidden; /* Overlay itself shouldn't scroll unless intended */
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Let clicks pass through empty areas */
+      }
+      /* But children of root (the actual UI) must be clickable */
+      #root > * {
+        pointer-events: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>

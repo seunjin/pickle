@@ -25,6 +25,12 @@
       "js": ["src/content/index.ts", "src/content/ui/mount.tsx"]
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/overlay/index.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "commands": {
     "_execute_action": {
       "suggested_key": {

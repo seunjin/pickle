@@ -1,6 +1,3 @@
-import { useEffect, useEffectEvent, useState } from "react";
-import "../../index.css"; // Ensure Tailwind is processed
-
 import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
@@ -9,6 +6,7 @@ import type { CreateNoteInput } from "@pickle/contracts/src/note";
 import { saveNote } from "@shared/api/note";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
+import { useEffect, useEffectEvent, useState } from "react";
 
 /**
  * OverlayApp Component
@@ -150,7 +148,7 @@ export default function OverlayApp({
   };
 
   return (
-    <div className="fade-in slide-in-from-right-4 fixed top-4 right-4 z-50 h-[600px] w-[360px] animate-in overflow-hidden rounded-2xl border border-gray-200 bg-white font-sans text-gray-900 shadow-2xl duration-300">
+    <div className="fade-in slide-in-from-right-4 h-full w-full animate-in overflow-hidden rounded-2xl border border-gray-200 bg-white font-sans text-gray-900 duration-300">
       {view === "text" && (
         <TextEditor
           note={note}

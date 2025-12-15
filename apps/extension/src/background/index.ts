@@ -120,6 +120,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               captureData: captureData,
               mode: "capture", // 뷰 모드를 캡쳐로 변경
             });
+
+            // 🚨 핵심 수정: 캡쳐 완료 후 오버레이를 열도록 명시적 요청
+            await sendMessageToContentScript(tabId, {
+              action: "OPEN_OVERLAY",
+              mode: "capture",
+              tabId: tabId,
+            });
           },
         );
       });

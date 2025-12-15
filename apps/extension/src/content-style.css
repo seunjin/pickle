@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "@pickle/ui/src/theme.css";
+
+/* Shadow DOM Host Reset */
+:host {
+  all: initial; /* 1. 호스트 페이지의 모든 상속 스타일(font, color 등) 차단 */
+  display: block;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif; /* 2. 기본 폰트 재설정 */
+  font-size: 16px; /* 3. 기본 폰트 사이즈 복구 (네이버 등 10px 설정 대응) */
+  line-height: 1.5;
+  z-index: 2147483647; /* Max Z-Index */
+}
+
+/* Tailwind REM unit compensation (Optional) 
+   If the host page has font-size: 10px (62.5%), Tailwind's 1rem (16px intent) becomes 10px.
+   Shadow DOM cannot isolate REM units from the HTML root.
+   If this persists, we might need to adjust the zoom level of the container.
+*/
+#pickle-note-overlay-root {
+  /* Internal container reset if needed */
+  width: 100%;
+  height: 100%;
+}
