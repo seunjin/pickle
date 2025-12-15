@@ -5,6 +5,7 @@ import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
+import type { CreateNoteInput } from "@pickle/contracts/src/note";
 import { saveNote } from "@shared/api/note";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
@@ -130,7 +131,7 @@ export default function OverlayApp({
         content: note.memo, // Assuming editor saves user memo here? Or maybe we need to wire it up.
         // Looking at Editor components, they usually have local state.
         // OverlayApp needs to receive 'onUpdate' correctly.
-        data: data as any,
+        data: data as CreateNoteInput["data"],
         tags: [],
       };
 
