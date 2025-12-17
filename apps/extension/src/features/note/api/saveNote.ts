@@ -81,19 +81,82 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       };
     }
 
-    // 5. DB InsertPayload 준비
-    // Database 타입 정의에 맞춰 데이터를 매핑합니다.
+    // 5. 이미지/캡처 업로드 처리
+    let assetId: string | null = null;
+    let storedData: Record<string, unknown> = { ...note.data };
+
+    // Discriminated Union 덕분에 note.type 체크 시 note.data가 자동으로 Narrowing 됨
+    if (note.type === "image" || note.type === "capture") {
+      // 이제 note.type이 image/capture일 때 data에 image_url이 있음이 보장됨 (CreateNoteInput 정의 덕분)
+      const imageUrl = note.data.image_url;
+
+      if (imageUrl?.startsWith("data:image")) {
+        // 5-1. Storage 업로드
+        const res = await fetch(imageUrl);
+        const blob = await res.blob();
+        const fileSize = blob.size;
+        const fileName = `${crypto.randomUUID()}.png`;
+        const filePath = `${userId}/${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("bitmaps")
+          .upload(filePath, blob, {
+            contentType: "image/png",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+        }
+
+        // 5-2. Assets 테이블 Insert
+        const { data: assetData, error: assetError } = await supabase
+          .from("assets")
+          .insert({
+            workspace_id: workspaceMember.workspace_id,
+            owner_id: userId,
+            type: note.type,
+            full_path: uploadData.path,
+            full_size_bytes: fileSize,
+          })
+          .select()
+          .single();
+
+        if (assetError) {
+          throw new Error(`에셋 메타데이터 저장 실패: ${assetError.message}`);
+        }
+
+        assetId = assetData.id;
+
+        // 5-3. DB 저장용 Clean Data 생성 (Transform)
+        // Casting 없이 안전하게 접근 가능
+        if (note.type === "image") {
+          storedData = {
+            alt_text: note.data.alt_text,
+          };
+        } else {
+          // capture type
+          storedData = {
+            width: note.data.width,
+            height: note.data.height,
+          };
+        }
+      }
+    }
+
+    // 6. DB InsertPayload 준비 (Clean Object)
     const insertPayload = {
       workspace_id: workspaceMember.workspace_id,
       user_id: userId,
+      asset_id: assetId,
       type: note.type,
       url: note.url,
       content: note.content ?? null,
-      data: note.data,
+      data: storedData, // Data URL이 제거된 Clean Data
       tags: note.tags ?? [],
     };
 
-    // 6. 실제 Insert 쿼리 실행
+    // 7. Insert 실행
     const { data, error } = await supabase
       .from("notes")
       .insert(insertPayload)

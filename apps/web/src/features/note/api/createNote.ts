@@ -40,5 +40,5 @@ export const createNote = async (newNote: CreateNoteInput): Promise<Note> => {
     throw new Error(error.message);
   }
 
-  return data;
+  return data as unknown as Note;
 };

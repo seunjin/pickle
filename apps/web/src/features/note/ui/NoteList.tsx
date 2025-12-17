@@ -1,18 +1,7 @@
-import type { Note } from "@pickle/contracts/src/note";
 import Image from "next/image";
-import { useNote } from "../model/useNote";
 
-// Helper type for note data to avoid excessive 'any' casting
-interface NoteDataShape {
-  text?: string;
-  url?: string;
-  title?: string;
-  description?: string;
-  favicon?: string;
-  image_url?: string;
-  screenshot_url?: string;
-  [key: string]: unknown;
-}
+import { useNote } from "../model/useNote";
+import { AssetImage } from "./AssetImage";
 
 export const NoteList = () => {
   const { notes, isLoading, isError } = useNote();
@@ -51,8 +40,10 @@ export const NoteList = () => {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {notes.map((note: Note) => {
-        const data = note.data as NoteDataShape;
+      {notes.map((note) => {
+        // note is NoteWithAsset (Discriminated Union)
+        // No casting needed! TS knows exactly what note.data is based on note.type
+        const asset = note.assets;
 
         return (
           <div
@@ -75,11 +66,24 @@ export const NoteList = () => {
                 </p>
               )}
 
-              {/* Type Specific Rendering */}
+              {/* Type Specific Rendering - Fully Type Safe */}
               {note.type === "text" && (
                 <div className="rounded bg-gray-100 p-2 font-mono text-gray-600 text-xs">
-                  {data.text}
+                  {note.data.text}
                 </div>
+              )}
+
+              {/* Image / Capture with Asset */}
+              {(note.type === "image" || note.type === "capture") && asset && (
+                <AssetImage
+                  path={asset.full_path}
+                  alt={
+                    note.type === "image"
+                      ? note.data.alt_text || "Image"
+                      : "Capture"
+                  }
+                  className="mt-2"
+                />
               )}
 
               {note.type === "bookmark" && (
@@ -90,10 +94,10 @@ export const NoteList = () => {
                   className="mt-2 block"
                 >
                   <div className="flex items-center gap-2 rounded bg-blue-50 p-2 text-blue-700 transition-colors hover:bg-blue-100">
-                    {data.favicon && (
+                    {note.data.favicon && (
                       <div className="relative h-4 w-4 shrink-0">
                         <Image
-                          src={data.favicon}
+                          src={note.data.favicon}
                           alt=""
                           fill
                           className="object-contain"
@@ -101,7 +105,7 @@ export const NoteList = () => {
                       </div>
                     )}
                     <span className="truncate font-medium text-sm">
-                      {data.title || note.url}
+                      {note.data.title || note.url}
                     </span>
                   </div>
                 </a>

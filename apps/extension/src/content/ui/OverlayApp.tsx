@@ -84,54 +84,60 @@ export default function OverlayApp({
       // Validating required fields minimally here, zod will check on server
       if (!note.url) throw new Error("URL is missing");
 
-      // Map Overlay NoteData to Contract's CreateNoteInput
-      // We need to determine 'type' and 'data' based on 'mode'
-      // This mapping logic should ideally be robust.
+      // Common fields
+      const common = {
+        url: note.url,
+        content: note.memo,
+        tags: [],
+      };
 
-      let type: "text" | "image" | "capture" | "bookmark" = "text";
-      let data: Record<string, unknown> = {};
+      let input: CreateNoteInput;
 
       switch (view) {
         case "text":
-          type = "text";
-          data = { text: note.text || "" };
+          input = {
+            ...common,
+            type: "text",
+            data: { text: note.text || "" },
+          };
           break;
         case "image":
-          type = "image";
-          data = {
-            image_url: note.srcUrl || "",
-            alt_text: note.altText,
+          input = {
+            ...common,
+            type: "image",
+            data: {
+              image_url: note.srcUrl || "",
+              alt_text: note.altText,
+            },
           };
           break;
         case "capture":
-          type = "capture";
-          data = {
-            screenshot_url: note.captureData?.image || "",
-            width: note.captureData?.area?.width || 0,
-            height: note.captureData?.area?.height || 0,
+          input = {
+            ...common,
+            type: "capture",
+            data: {
+              image_url: note.captureData?.image || "", // map screenshot_url -> image_url
+              width: note.captureData?.area?.width || 0,
+              height: note.captureData?.area?.height || 0,
+            },
           };
           break;
         case "bookmark":
-          type = "bookmark";
-          data = {
-            title: note.title || "",
-            description: note.description,
-            image: note.previewImage,
-            favicon: note.favicon,
-            site_name: note.siteName,
+          input = {
+            ...common,
+            type: "bookmark",
+            data: {
+              title: note.title || "",
+              description: note.description,
+              image: note.previewImage,
+              favicon: note.favicon,
+              site_name: note.siteName,
+            },
           };
           break;
+        default:
+          throw new Error(`Unsupported mode: ${view}`);
       }
-
-      const input = {
-        type,
-        url: note.url,
-        content: note.memo, // Assuming editor saves user memo here? Or maybe we need to wire it up.
-        // Looking at Editor components, they usually have local state.
-        // OverlayApp needs to receive 'onUpdate' correctly.
-        data: data as CreateNoteInput["data"],
-        tags: [],
-      };
 
       await saveNote(input);
 

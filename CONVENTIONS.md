@@ -111,6 +111,16 @@ export const ExampleComponent = ({ title }: Props) => {
   
   export type Tab = (typeof TABS)[keyof typeof TABS]; // 'home' | 'profile'
   ```
+- **Discriminated Unions (구별된 유니온)**: 타입에 따라 데이터 구조가 달라지는 경우(Polymorphism), 반드시 공통 판별자(`type`, `kind` 등)를 가진 Discriminated Union을 사용하여 타입 추론을 돕습니다. `as` 캐스팅이나 `any` 사용을 지양합니다.
+  ```typescript
+  // ✅ Good
+  type Shape = 
+    | { kind: "circle"; radius: number }
+    | { kind: "square"; side: number };
+    
+  // ❌ Bad
+  type Shape = { kind: "circle" | "square"; radius?: number; side?: number };
+  ```
 - **Custom Utility Types**: 복잡한 타입 추론이 필요한 경우 유틸리티 타입을 적극 활용하여 중복을 줄입니다.
 
 ### 4.3 Component & Logic

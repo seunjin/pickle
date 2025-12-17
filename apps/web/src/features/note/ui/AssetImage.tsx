@@ -1,0 +1,64 @@
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { createClient } from "@/shared/lib/supabase/client";
+
+interface AssetImageProps {
+  path: string;
+  alt: string;
+  className?: string;
+}
+
+export const AssetImage = ({ path, alt, className }: AssetImageProps) => {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchSignedUrl = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase.storage
+        .from("bitmaps")
+        .createSignedUrl(path, 60 * 60); // 1 hour validity
+
+      if (error) {
+        console.error("Failed to sign URL:", error);
+        if (isMounted) setError(true);
+        return;
+      }
+
+      if (isMounted) setSignedUrl(data.signedUrl);
+    };
+
+    if (path) {
+      fetchSignedUrl();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [path]);
+
+  if (error) {
+    return (
+      <div className="flex h-32 w-full items-center justify-center rounded bg-gray-100 text-gray-400 text-xs">
+        Failed to load image
+      </div>
+    );
+  }
+
+  if (!signedUrl) {
+    return <div className="h-32 w-full animate-pulse rounded bg-gray-200" />;
+  }
+
+  return (
+    <div
+      className={`relative h-48 w-full overflow-hidden rounded ${className}`}
+    >
+      {/* Next/Image usage with external URL requires domain config. 
+            For Supabase standard setup, the domain is often known.
+            If not configured in next.config.mjs, it will crash.
+            Safe fallback: normal img tag. */}
+      <Image src={signedUrl} alt={alt} className="h-full w-full object-cover" />
+    </div>
+  );
+};

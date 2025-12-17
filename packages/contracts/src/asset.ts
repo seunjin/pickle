@@ -3,6 +3,13 @@ import { z } from "zod";
 export const ASSET_TYPES = ["image", "capture"] as const;
 export type AssetType = (typeof ASSET_TYPES)[number];
 
+/**
+ * Asset Schema
+ *
+ * Supabase Storage에 업로드된 파일의 메타데이터를 저장하는 테이블 스키마입니다.
+ * `notes` 테이블과 1:1 또는 1:N 관계를 가질 수 있으며,
+ * `full_path`를 통해 실제 스토리지 파일에 접근합니다.
+ */
 export const assetSchema = z.object({
   id: z.string().uuid(),
   workspace_id: z.string().uuid(),
@@ -19,7 +26,11 @@ export const assetSchema = z.object({
 
 export type Asset = z.infer<typeof assetSchema>;
 
-// For creating new assets
+/**
+ * Asset Creation Input
+ *
+ * 이미지 업로드 직후, DB에 메타데이터를 저장할 때 사용합니다.
+ */
 export const createAssetSchema = assetSchema.omit({
   id: true,
   created_at: true,

@@ -12,7 +12,9 @@ export type UserState = (typeof USER_STATES)[number];
 
 /**
  * User Profile Schema
- * Supabase 'profiles' table mapping
+ *
+ * Supabase Auth의 `users` 테이블과 별개로 애플리케이션 레벨의 사용자 정보를 관리하는 `profiles` 테이블 스키마입니다.
+ * `id`는 Supabase Auth의 `user.id`와 FK로 연결됩니다.
  */
 export const profileSchema = z.object({
   id: z.string().uuid(),
@@ -28,6 +30,8 @@ export type Profile = z.infer<typeof profileSchema>;
 
 /**
  * Update Profile Schema
+ *
+ * 사용자가 변경 가능한 프로필 필드(이름, 아바타)만 허용합니다.
  */
 export const updateProfileSchema = profileSchema
   .pick({

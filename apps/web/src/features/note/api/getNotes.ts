@@ -1,7 +1,10 @@
+import type { Asset } from "@pickle/contracts/src/asset";
 import type { Note } from "@pickle/contracts/src/note";
 import { createClient } from "@/shared/lib/supabase/client";
 
-export const getNotes = async (): Promise<Note[]> => {
+export type NoteWithAsset = Note & { assets: Asset | null };
+
+export const getNotes = async (): Promise<NoteWithAsset[]> => {
   const supabase = createClient();
   const {
     data: { user },
@@ -20,10 +23,10 @@ export const getNotes = async (): Promise<Note[]> => {
 
   if (!workspace) return [];
 
-  // 2. Fetch Notes for that Workspace
+  // 2. Fetch Notes with Assets
   const { data, error } = await supabase
     .from("notes")
-    .select("*")
+    .select("*, assets(*)")
     .eq("workspace_id", workspace.workspace_id)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -32,5 +35,6 @@ export const getNotes = async (): Promise<Note[]> => {
     throw new Error(error.message);
   }
 
-  return data as Note[];
+  // Type assertion for joined data
+  return data as unknown as NoteWithAsset[];
 };
