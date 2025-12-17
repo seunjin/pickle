@@ -44,6 +44,7 @@ export const noteSchema = z.object({
   id: z.string().uuid(),
   workspace_id: z.string().uuid(),
   user_id: z.string().uuid(),
+  asset_id: z.string().uuid().nullable().optional(), // Linked Asset
   type: z.enum(NOTE_TYPES),
   url: z.string().url(),
   content: z.string().nullable(), // User memo

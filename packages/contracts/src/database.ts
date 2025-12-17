@@ -1,3 +1,4 @@
+import type { Asset } from "./asset";
 import type { Note } from "./note";
 import type { Profile } from "./user";
 import type { Workspace, WorkspaceMember } from "./workspace";
@@ -17,10 +18,37 @@ export type Database = {
         Update: Partial<
           Omit<
             Note,
-            "id" | "workspace_id" | "user_id" | "created_at" | "updated_at"
+            | "id"
+            | "workspace_id"
+            | "user_id"
+            | "asset_id"
+            | "created_at"
+            | "updated_at"
           >
         >;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "notes_asset_id_fkey";
+            columns: ["asset_id"];
+            isOneToOne: false;
+            referencedRelation: "assets";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      assets: {
+        Row: Asset;
+        Insert: Omit<Asset, "id" | "created_at">;
+        Update: Partial<Omit<Asset, "id" | "created_at">>;
+        Relationships: [
+          {
+            foreignKeyName: "assets_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       workspaces: {
         Row: Workspace;
