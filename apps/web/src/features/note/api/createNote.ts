@@ -10,7 +10,18 @@ export const createNote = async (newNote: CreateNoteInput): Promise<Note> => {
 
   if (!user) throw new Error("Unauthorized");
 
+  // 1. Get User's Workspace
+  const { data: workspace } = await supabase
+    .from("workspace_members")
+    .select("workspace_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .single();
+
+  if (!workspace) throw new Error("No Workspace Found");
+
   const insertPayload: Database["public"]["Tables"]["notes"]["Insert"] = {
+    workspace_id: workspace.workspace_id,
     user_id: user.id,
     type: newNote.type,
     url: newNote.url,

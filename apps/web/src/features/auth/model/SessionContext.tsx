@@ -1,14 +1,16 @@
 "use client";
 
-import type { Profile } from "@pickle/contracts";
+import type { Profile, Workspace } from "@pickle/contracts";
 import type { User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { getUserProfile } from "../api/getUserProfile";
+import { getUserWorkspaces } from "../api/getUserWorkspaces";
 
 interface SessionContextType {
   user: User | null;
   profile: Profile | null;
+  workspace: Workspace | null;
   isLoading: boolean;
   refreshProfile: () => Promise<void>;
 }
@@ -22,6 +24,7 @@ export const SessionProvider = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [supabase] = useState(() => createClient());
@@ -54,12 +57,26 @@ export const SessionProvider = ({
 
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      setIsLoading(false); // Event fired, so we are not loading anymore
+      setIsLoading(false);
 
       if (currentUser) {
-        getProfile(currentUser);
+        // Fetch Profile & Workspaces in parallel
+        Promise.all([
+          getProfile(currentUser),
+          getUserWorkspaces(supabase, currentUser.id).then((workspaces) => {
+            if (mounted && workspaces.length > 0) {
+              console.log(
+                "[SessionContext] Workspaces fetched:",
+                workspaces.length,
+              );
+              // Default to the first workspace for now (Logic can be improved later to store 'last_used')
+              setWorkspace(workspaces[0]);
+            }
+          }),
+        ]);
       } else {
         setProfile(null);
+        setWorkspace(null);
       }
     });
 
@@ -77,7 +94,7 @@ export const SessionProvider = ({
 
   return (
     <SessionContext.Provider
-      value={{ user, profile, isLoading, refreshProfile }}
+      value={{ user, profile, workspace, isLoading, refreshProfile }}
     >
       {children}
     </SessionContext.Provider>

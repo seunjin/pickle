@@ -66,9 +66,25 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       userId = user.id;
     }
 
+    // 4-1. Workspace 조회
+    const { data: workspaceMember, error: wsError } = await supabase
+      .from("workspace_members")
+      .select("workspace_id")
+      .eq("user_id", userId)
+      .limit(1)
+      .single();
+
+    if (wsError || !workspaceMember) {
+      return {
+        success: false,
+        error: "No Workspace: 워크스페이스를 찾을 수 없습니다.",
+      };
+    }
+
     // 5. DB InsertPayload 준비
     // Database 타입 정의에 맞춰 데이터를 매핑합니다.
     const insertPayload = {
+      workspace_id: workspaceMember.workspace_id,
       user_id: userId,
       type: note.type,
       url: note.url,

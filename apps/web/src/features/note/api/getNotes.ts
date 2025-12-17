@@ -9,10 +9,22 @@ export const getNotes = async (): Promise<Note[]> => {
 
   if (!user) throw new Error("Unauthorized");
 
+  // 1. Get User's Workspace
+  // TODO: Support multiple workspaces (currently fetches the first one)
+  const { data: workspace } = await supabase
+    .from("workspace_members")
+    .select("workspace_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .single();
+
+  if (!workspace) return [];
+
+  // 2. Fetch Notes for that Workspace
   const { data, error } = await supabase
     .from("notes")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("workspace_id", workspace.workspace_id)
     .order("created_at", { ascending: false })
     .limit(20);
 

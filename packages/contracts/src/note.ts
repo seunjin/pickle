@@ -42,6 +42,7 @@ export const noteDataSchema = z.union([
 
 export const noteSchema = z.object({
   id: z.string().uuid(),
+  workspace_id: z.string().uuid(),
   user_id: z.string().uuid(),
   type: z.enum(NOTE_TYPES),
   url: z.string().url(),

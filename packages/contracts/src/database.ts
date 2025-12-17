@@ -1,5 +1,6 @@
 import type { Note } from "./note";
 import type { Profile } from "./user";
+import type { Workspace, WorkspaceMember } from "./workspace";
 
 export type Database = {
   public: {
@@ -14,9 +15,34 @@ export type Database = {
         Row: Note;
         Insert: Omit<Note, "id" | "created_at" | "updated_at">;
         Update: Partial<
-          Omit<Note, "id" | "user_id" | "created_at" | "updated_at">
+          Omit<
+            Note,
+            "id" | "workspace_id" | "user_id" | "created_at" | "updated_at"
+          >
         >;
         Relationships: [];
+      };
+      workspaces: {
+        Row: Workspace;
+        Insert: Omit<Workspace, "id" | "created_at" | "updated_at">;
+        Update: Partial<Omit<Workspace, "id" | "created_at" | "updated_at">>;
+        Relationships: [];
+      };
+      workspace_members: {
+        Row: WorkspaceMember;
+        Insert: Omit<WorkspaceMember, "joined_at">;
+        Update: Partial<
+          Omit<WorkspaceMember, "workspace_id" | "user_id" | "joined_at">
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {

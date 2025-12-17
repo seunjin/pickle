@@ -1,3 +1,5 @@
+import { Sidebar } from "@/features/layout/Sidebar";
+
 export default function ClientLayout({
   children,
 }: {
@@ -5,9 +7,8 @@ export default function ClientLayout({
 }) {
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar component will go here */}
       <aside className="w-64 border-r bg-gray-50 p-4">
-        <nav>Client Sidebar</nav>
+        <Sidebar />
       </aside>
       <main className="flex-1 p-8">{children}</main>
     </div>
