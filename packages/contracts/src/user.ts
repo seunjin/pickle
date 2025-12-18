@@ -1,43 +1,65 @@
 import { z } from "zod";
+import type { Database } from "./database";
+
+// DB Row Type (renamed from profiles -> users)
+type UserRow = Database["public"]["Tables"]["users"]["Row"];
 
 // --- Enums / Constants ---
 
-export const PLATFORM_AUTHORITIES = ["super_admin", "admin"] as const;
+export const PLATFORM_AUTHORITIES = ["super_admin", "admin", "member"] as const;
 export type PlatformAuthority = (typeof PLATFORM_AUTHORITIES)[number];
 
-export const USER_STATES = ["guest", "member", "suspended", "deleted"] as const;
-export type UserState = (typeof USER_STATES)[number];
+export const USER_STATUSES = [
+  "pending",
+  "active",
+  "suspended",
+  "deleted",
+] as const;
+export type UserStatus = (typeof USER_STATUSES)[number];
 
 // --- Schemas ---
 
 /**
- * User Profile Schema
+ * App Level User Schema (formerly Profile)
  *
- * Supabase Auth의 `users` 테이블과 별개로 애플리케이션 레벨의 사용자 정보를 관리하는 `profiles` 테이블 스키마입니다.
- * `id`는 Supabase Auth의 `user.id`와 FK로 연결됩니다.
+ * Supabase Auth의 `users` 테이블과 별개로 애플리케이션 레벨의 사용자 정보를 관리하는 `users` 테이블 스키마입니다.
  */
-export const profileSchema = z.object({
+export const appUserSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   full_name: z.string(),
-  avatar_url: z.string().url().optional().or(z.literal("")),
+  avatar_url: z.string().url().nullable().optional(), // DB allows null
   authority: z.enum(PLATFORM_AUTHORITIES).nullable(),
-  state: z.enum(USER_STATES),
-  created_at: z.string(), // DbDate
+  status: z.enum(USER_STATUSES),
+  is_terms_agreed: z.boolean(),
+  is_privacy_agreed: z.boolean(),
+  is_marketing_agreed: z.boolean(),
+  created_at: z.string(),
 });
 
-export type Profile = z.infer<typeof profileSchema>;
+export type AppUser = z.infer<typeof appUserSchema>;
 
 /**
- * Update Profile Schema
- *
- * 사용자가 변경 가능한 프로필 필드(이름, 아바타)만 허용합니다.
+ * Update User Schema
+ * 사용자가 변경 가능한 필드만 허용
  */
-export const updateProfileSchema = profileSchema
+export const updateUserSchema = appUserSchema
   .pick({
     full_name: true,
     avatar_url: true,
+    is_marketing_agreed: true,
   })
   .partial();
 
-export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+
+// --- Type Verification ---
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkUserSchema = (x: AppUser): UserRow => {
+  // Manual check for null compatibility if needed, or simple assignment
+  return {
+    ...x,
+    avatar_url: x.avatar_url ?? null, // Convert optional/undefined to null for DB Row check if strict
+    authority: x.authority ?? null,
+  };
+};

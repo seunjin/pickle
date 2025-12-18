@@ -4,7 +4,7 @@ import { useSessionContext } from "../auth/model/SessionContext";
 import { SignOutButton } from "../auth/ui/SignOutButton";
 
 export const Sidebar = () => {
-  const { workspace, profile, isLoading } = useSessionContext();
+  const { workspace, appUser, isLoading } = useSessionContext();
 
   if (isLoading) {
     return (
@@ -49,13 +49,13 @@ export const Sidebar = () => {
       <div className="border-t pt-4">
         <div className="mb-4 flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-indigo-100 text-center font-bold text-indigo-600 leading-8">
-            {profile?.full_name?.[0] ?? "U"}
+            {appUser?.full_name?.[0] ?? "U"}
           </div>
           <div className="flex-1 overflow-hidden">
             <p className="truncate font-medium text-gray-900 text-sm">
-              {profile?.full_name}
+              {appUser?.full_name}
             </p>
-            <p className="truncate text-gray-500 text-xs">{profile?.email}</p>
+            <p className="truncate text-gray-500 text-xs">{appUser?.email}</p>
           </div>
         </div>
         <SignOutButton />

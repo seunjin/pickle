@@ -1,18 +1,18 @@
 "use client";
 
-import type { Profile, Workspace } from "@pickle/contracts";
+import type { AppUser, Workspace } from "@pickle/contracts";
 import type { User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
-import { getUserProfile } from "../api/getUserProfile";
+import { getUser } from "../api/getUser";
 import { getUserWorkspaces } from "../api/getUserWorkspaces";
 
 interface SessionContextType {
   user: User | null;
-  profile: Profile | null;
+  appUser: AppUser | null;
   workspace: Workspace | null;
   isLoading: boolean;
-  refreshProfile: () => Promise<void>;
+  refreshAppUser: () => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -23,7 +23,7 @@ export const SessionProvider = ({
   children: React.ReactNode;
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,13 +32,13 @@ export const SessionProvider = ({
   useEffect(() => {
     let mounted = true;
 
-    async function getProfile(currentUser: User) {
+    async function fetchAppUser(currentUser: User) {
       if (!mounted) return;
-      console.log("[SessionContext] Fetching profile...");
-      const data = await getUserProfile(supabase, currentUser.id);
+      console.log("[SessionContext] Fetching app user...");
+      const data = await getUser(supabase, currentUser.id);
       if (mounted) {
-        console.log("[SessionContext] Profile fetched.");
-        setProfile(data);
+        console.log("[SessionContext] App user fetched.");
+        setAppUser(data);
       }
     }
 
@@ -60,9 +60,9 @@ export const SessionProvider = ({
       setIsLoading(false);
 
       if (currentUser) {
-        // Fetch Profile & Workspaces in parallel
+        // Fetch App User & Workspaces in parallel
         Promise.all([
-          getProfile(currentUser),
+          fetchAppUser(currentUser),
           getUserWorkspaces(supabase, currentUser.id).then((workspaces) => {
             if (mounted && workspaces.length > 0) {
               console.log(
@@ -75,7 +75,7 @@ export const SessionProvider = ({
           }),
         ]);
       } else {
-        setProfile(null);
+        setAppUser(null);
         setWorkspace(null);
       }
     });
@@ -86,15 +86,15 @@ export const SessionProvider = ({
     };
   }, [supabase]);
 
-  const refreshProfile = async () => {
+  const refreshAppUser = async () => {
     if (user) {
-      await getUserProfile(supabase, user.id).then(setProfile);
+      await getUser(supabase, user.id).then(setAppUser);
     }
   };
 
   return (
     <SessionContext.Provider
-      value={{ user, profile, workspace, isLoading, refreshProfile }}
+      value={{ user, appUser, workspace, isLoading, refreshAppUser }}
     >
       {children}
     </SessionContext.Provider>

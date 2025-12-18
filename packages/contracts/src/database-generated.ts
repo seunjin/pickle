@@ -141,7 +141,7 @@ export type Database = {
           },
         ];
       };
-      profiles: {
+      users: {
         Row: {
           authority: string | null;
           avatar_url: string | null;
@@ -149,7 +149,10 @@ export type Database = {
           email: string | null;
           full_name: string | null;
           id: string;
-          state: string | null;
+          is_marketing_agreed: boolean;
+          is_privacy_agreed: boolean;
+          is_terms_agreed: boolean;
+          status: Database["public"]["Enums"]["user_status"];
         };
         Insert: {
           authority?: string | null;
@@ -158,7 +161,10 @@ export type Database = {
           email?: string | null;
           full_name?: string | null;
           id: string;
-          state?: string | null;
+          is_marketing_agreed?: boolean;
+          is_privacy_agreed?: boolean;
+          is_terms_agreed?: boolean;
+          status?: Database["public"]["Enums"]["user_status"];
         };
         Update: {
           authority?: string | null;
@@ -167,7 +173,10 @@ export type Database = {
           email?: string | null;
           full_name?: string | null;
           id?: string;
-          state?: string | null;
+          is_marketing_agreed?: boolean;
+          is_privacy_agreed?: boolean;
+          is_terms_agreed?: boolean;
+          status?: Database["public"]["Enums"]["user_status"];
         };
         Relationships: [];
       };
@@ -226,9 +235,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      complete_signup: { Args: { marketing_agreed?: boolean }; Returns: Json };
     };
     Enums: {
+      user_status: "pending" | "active" | "suspended" | "deleted";
       workspace_role: "owner" | "member";
     };
     CompositeTypes: {
@@ -363,6 +373,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      user_status: ["pending", "active", "suspended", "deleted"],
       workspace_role: ["owner", "member"],
     },
   },

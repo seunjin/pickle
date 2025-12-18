@@ -1,14 +1,14 @@
 import { useSessionContext } from "./SessionContext";
 
 export const useUser = () => {
-  const { user, profile, isLoading, refreshProfile } = useSessionContext();
+  const { user, appUser, isLoading, refreshAppUser } = useSessionContext();
 
   return {
     user,
-    profile,
+    appUser,
     isLoading,
     isGuest: !user,
     isAuthenticated: !!user,
-    refreshProfile,
+    refreshAppUser,
   };
 };
