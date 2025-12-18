@@ -1,89 +1,19 @@
-import type { Asset } from "./asset";
-import type { Note } from "./note";
-import type { Profile } from "./user";
-import type { Workspace, WorkspaceMember } from "./workspace";
+/**
+ * Database Definition (Schema-First)
+ *
+ * 이 파일은 Supabase CLI로 자동 생성된 `database-generated.ts`에서
+ * 타입을 가져와서 애플리케이션 전반에 내보내는 역할을 합니다.
+ *
+ * 수동으로 타입을 정의하지 마세요!
+ * DB 변경 시: `pnpm types:local` 또는 `pnpm types:remote` 실행
+ */
 
-export type Database = {
-  public: {
-    Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: Profile;
-        Update: Partial<Omit<Profile, "id" | "email">>;
-        Relationships: [];
-      };
-      notes: {
-        Row: Note;
-        Insert: Omit<Note, "id" | "created_at" | "updated_at">;
-        Update: Partial<
-          Omit<
-            Note,
-            | "id"
-            | "workspace_id"
-            | "user_id"
-            | "asset_id"
-            | "created_at"
-            | "updated_at"
-          >
-        >;
-        Relationships: [
-          {
-            foreignKeyName: "notes_asset_id_fkey";
-            columns: ["asset_id"];
-            isOneToOne: false;
-            referencedRelation: "assets";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      assets: {
-        Row: Asset;
-        Insert: Omit<Asset, "id" | "created_at">;
-        Update: Partial<Omit<Asset, "id" | "created_at">>;
-        Relationships: [
-          {
-            foreignKeyName: "assets_workspace_id_fkey";
-            columns: ["workspace_id"];
-            isOneToOne: false;
-            referencedRelation: "workspaces";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      workspaces: {
-        Row: Workspace;
-        Insert: Omit<Workspace, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<Workspace, "id" | "created_at" | "updated_at">>;
-        Relationships: [];
-      };
-      workspace_members: {
-        Row: WorkspaceMember;
-        Insert: Omit<WorkspaceMember, "joined_at">;
-        Update: Partial<
-          Omit<WorkspaceMember, "workspace_id" | "user_id" | "joined_at">
-        >;
-        Relationships: [
-          {
-            foreignKeyName: "workspace_members_workspace_id_fkey";
-            columns: ["workspace_id"];
-            isOneToOne: false;
-            referencedRelation: "workspaces";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+export type { Database } from "./database-generated";
+
+// 자주 사용하는 Helper 타입 (Row, Insert, Update)
+import type { Database } from "./database-generated";
+
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+export type Enums<T extends keyof Database["public"]["Enums"]> =
+  Database["public"]["Enums"][T];

@@ -1,4 +1,8 @@
 import { z } from "zod";
+import type { Database } from "./database"; // Schema-First Type
+
+// 1. Get Real DB Type
+type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 
 // --- Enums ---
 
@@ -38,15 +42,17 @@ export const createBookmarkDataSchema = storedBookmarkDataSchema;
 // --- Common Fields ---
 const commonNoteFields = z.object({
   url: z.string().url(),
-  content: z.string().optional().nullable(),
-  tags: z.array(z.string()).default([]).optional(),
+  content: z.string().nullable().optional(),
+  tags: z.array(z.string()).nullable().optional(),
 });
 
 const commonDbFields = z.object({
   id: z.string().uuid(),
   workspace_id: z.string().uuid(),
   user_id: z.string().uuid(),
-  asset_id: z.string().uuid().nullable().optional(),
+  asset_id: z.string().uuid().nullable(),
+  content: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -140,3 +146,11 @@ export const updateNoteSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
+
+// --- 4. Type Verification (Schema-First) ---
+/**
+ * DB 스키마와 애플리케이션 스키마의 일치 여부를 검증합니다.
+ * 만약 DB 컬럼이 변경되었는데 위 Zod 스키마를 수정하지 않으면 여기서 에러가 발생합니다.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkNoteSchema = (x: Note): NoteRow => x;

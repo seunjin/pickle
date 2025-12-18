@@ -1,4 +1,7 @@
 import { z } from "zod";
+import type { Database } from "./database";
+
+type AssetRow = Database["public"]["Tables"]["assets"]["Row"];
 
 export const ASSET_TYPES = ["image", "capture"] as const;
 export type AssetType = (typeof ASSET_TYPES)[number];
@@ -16,11 +19,11 @@ export const assetSchema = z.object({
   owner_id: z.string().uuid(),
   type: z.enum(ASSET_TYPES), // image, capture etc.
   full_path: z.string(), // storage path "bitmaps/user_id/uuid.png"
-  thumb_path: z.string().nullable().optional(), // optional thumbnail
+  thumb_path: z.string().nullable(),
   full_size_bytes: z.number().int(),
-  thumb_size_bytes: z.number().int().optional(),
-  width: z.number().int().optional(),
-  height: z.number().int().optional(),
+  thumb_size_bytes: z.number().int().nullable(),
+  width: z.number().int().nullable(),
+  height: z.number().int().nullable(),
   created_at: z.string(), // DbDate
 });
 
@@ -37,3 +40,7 @@ export const createAssetSchema = assetSchema.omit({
 });
 
 export type CreateAssetInput = z.infer<typeof createAssetSchema>;
+
+// --- Type Verification ---
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkAssetSchema = (x: Asset): AssetRow => x;
