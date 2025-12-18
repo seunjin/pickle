@@ -123,6 +123,19 @@ export const ExampleComponent = ({ title }: Props) => {
   ```
 - **Custom Utility Types**: 복잡한 타입 추론이 필요한 경우 유틸리티 타입을 적극 활용하여 중복을 줄입니다.
 
+### 4.2.1 Safe Data Structures (Schema-First)
+- **Schema Centralization**: DB 타입과 애플리케이션 타입(Schema)은 모두 `@pickle/contracts` 패키지에서 정의하고 관리합니다. 프론트엔드나 백엔드 로직에서 임의로 타입을 정의하지 않습니다.
+- **Runtime Validation**: API 응답이나 외부 데이터 사용 시, `as unknown as Type` 같은 **타입 단언(Type Assertion)을 금지**합니다. 대신 **Zod Schema**의 `safeParse`를 사용하여 런타임 무결성을 검증합니다.
+  ```typescript
+  // ❌ Bad: 컴파일러를 속이는 행위
+  const user = data as unknown as AppUser;
+
+  // ✅ Good: 실제 데이터를 검증하고 안전하게 변환
+  const parsed = appUserSchema.safeParse(data);
+  if (!parsed.success) return null;
+  const user = parsed.data; 
+  ```
+
 ### 4.3 Component & Logic
 - **SOLID 원칙**: 단일 책임 원칙(SRP)을 준수하고, 함수는 한 가지 일만 하도록 작게 만듭니다.
 - **Named Exports**: 컴포넌트와 함수는 디버깅과 일관성을 위해 `default export` 대신 `named export`를 권장합니다.
