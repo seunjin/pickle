@@ -24,8 +24,46 @@ export async function GET(request: Request) {
 
     if (!error) {
       console.log("Auth callback success: Session created");
-      // 세션 생성 성공 시 사용자를 목적지로 이동
-      return NextResponse.redirect(`${origin}${next}`);
+
+      // Check user status (pending vs active)
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      if (currentUser) {
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("status")
+          .eq("id", currentUser.id)
+          .single();
+
+        // If profile is missing (e.g. manual deletion or trigger failure), try to recover
+        if (!userProfile) {
+          console.warn("User profile missing, attempting recovery...");
+          const { error: insertError } = await supabase.from("users").insert({
+            id: currentUser.id,
+            email: currentUser.email,
+            full_name: currentUser.user_metadata.full_name,
+            avatar_url: currentUser.user_metadata.avatar_url,
+            status: "pending",
+          });
+
+          if (insertError) {
+            console.error("Failed to recover user profile:", insertError);
+            return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+          }
+          return NextResponse.redirect(`${origin}/signup`);
+        }
+
+        if (userProfile.status === "pending") {
+          return NextResponse.redirect(`${origin}/signup`);
+        }
+      }
+
+      // 세션 생성 성공 및 active 유저 시 목적지로 이동
+      // 만약 next가 기본값('/')이면 대시보드로 이동
+      const destination = next === "/" ? "/dashboard" : next;
+      return NextResponse.redirect(`${origin}${destination}`);
     } else {
       console.error("Auth callback error:", error);
     }

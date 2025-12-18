@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { LandingButtons } from "./LandingButtons";
 
 export const metadata: Metadata = {
   title: "Pickle Note",
@@ -19,12 +19,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <Link
-            href="/dashboard"
-            className="flex h-12 items-center justify-center rounded-full bg-black px-8 font-medium text-white transition-colors hover:bg-gray-800"
-          >
-            대시보드로 이동
-          </Link>
+          <LandingButtons />
         </div>
       </main>
 
