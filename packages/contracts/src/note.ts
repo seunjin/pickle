@@ -153,4 +153,14 @@ export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
  * 만약 DB 컬럼이 변경되었는데 위 Zod 스키마를 수정하지 않으면 여기서 에러가 발생합니다.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+// --- 5. Joined Schemas (API Responses) ---
+import { assetSchema } from "./asset";
+
+export const noteWithAssetSchema = noteSchema.and(
+  z.object({ assets: assetSchema.nullable() }),
+);
+
+export type NoteWithAsset = z.infer<typeof noteWithAssetSchema>;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _checkNoteSchema = (x: Note): NoteRow => x;

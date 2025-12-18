@@ -1,8 +1,8 @@
-import type { Asset } from "@pickle/contracts/src/asset";
-import type { Note } from "@pickle/contracts/src/note";
+import {
+  type NoteWithAsset,
+  noteWithAssetSchema,
+} from "@pickle/contracts/src/note";
 import { createClient } from "@/shared/lib/supabase/client";
-
-export type NoteWithAsset = Note & { assets: Asset | null };
 
 export const getNotes = async (): Promise<NoteWithAsset[]> => {
   const supabase = createClient();
@@ -12,8 +12,8 @@ export const getNotes = async (): Promise<NoteWithAsset[]> => {
 
   if (!user) throw new Error("Unauthorized");
 
-  // 1. Get User's Workspace
-  // TODO: Support multiple workspaces (currently fetches the first one)
+  // 1. 사용자의 워크스페이스 정보 조회
+  // TODO: 다중 워크스페이스 지원 필요 (현재는 첫 번째 워크스페이스만 가져옴)
   const { data: workspace } = await supabase
     .from("workspace_members")
     .select("workspace_id")
@@ -23,7 +23,7 @@ export const getNotes = async (): Promise<NoteWithAsset[]> => {
 
   if (!workspace) return [];
 
-  // 2. Fetch Notes with Assets
+  // 2. 노트와 연결된 에셋 정보 함께 조회
   const { data, error } = await supabase
     .from("notes")
     .select("*, assets(*)")
@@ -35,6 +35,16 @@ export const getNotes = async (): Promise<NoteWithAsset[]> => {
     throw new Error(error.message);
   }
 
-  // Type assertion for joined data
-  return data as unknown as NoteWithAsset[];
+  // Zod 스키마를 확장하여 Note + Assets 구조를 정의합니다.
+  // DB 조인 쿼리 결과(Note & { assets: Asset | null })를 안전하게 검증합니다.
+  const parsed = noteWithAssetSchema.array().safeParse(data);
+
+  if (!parsed.success) {
+    console.error("Notes fetch validation failed:", parsed.error);
+    // 검증 실패 시 빈 배열을 반환하거나, 에러를 던질 수 있습니다.
+    // 여기서는 안전하게 실패 로그를 남기고 빈 배열을 반환하는 정책을 따릅니다.
+    return [];
+  }
+
+  return parsed.data;
 };

@@ -1,4 +1,4 @@
-import type { AppUser, Database } from "@pickle/contracts";
+import { type AppUser, appUserSchema, type Database } from "@pickle/contracts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const getUser = async (
@@ -9,16 +9,24 @@ export const getUser = async (
     .from("users")
     .select("*")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     if (error.code !== "PGRST116") {
-      // PGRST116 is JSON object requested, multiple (or no) rows returned
+      // PGRST116: JSON 객체 반환을 요청했으나 결과가 없거나 여러 개일 때 발생하는 에러
       console.error("Error fetching user:", error);
     }
     return null;
   }
 
-  // Cast or validte if needed, but AppUser aligns with DB now (with satisfies check)
-  return data as unknown as AppUser;
+  // Zod 스키마를 사용하여 런타임 검증을 수행합니다.
+  // DB의 text 타입과 AppUser의 Enum 타입 간 불일치를 안전하게 변환합니다.
+  const result = appUserSchema.safeParse(data);
+
+  if (!result.success) {
+    console.warn("User data validation failed:", result.error);
+    return null;
+  }
+
+  return result.data;
 };
