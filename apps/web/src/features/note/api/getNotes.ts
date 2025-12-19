@@ -1,11 +1,15 @@
+import type { Database } from "@pickle/contracts";
 import {
   type NoteWithAsset,
   noteWithAssetSchema,
 } from "@pickle/contracts/src/note";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/shared/lib/supabase/client";
 
-export const getNotes = async (): Promise<NoteWithAsset[]> => {
-  const supabase = createClient();
+export const getNotes = async (
+  client?: SupabaseClient<Database>,
+): Promise<NoteWithAsset[]> => {
+  const supabase = client ?? createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

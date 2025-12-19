@@ -48,12 +48,22 @@ export const Sidebar = () => {
       {/* User Profile / Footer */}
       <div className="border-t pt-4">
         <div className="mb-4 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-indigo-100 text-center font-bold text-indigo-600 leading-8">
-            {appUser?.full_name?.[0] ?? "U"}
-          </div>
+          {appUser?.avatar_url ? (
+            <div className="relative h-8 w-8 overflow-hidden rounded-full border">
+              <img
+                src={appUser.avatar_url}
+                alt="Avatar"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-indigo-100 text-center font-bold text-indigo-600 leading-8">
+              {appUser?.full_name?.[0] ?? "U"}
+            </div>
+          )}
           <div className="flex-1 overflow-hidden">
             <p className="truncate font-medium text-gray-900 text-sm">
-              {appUser?.full_name}
+              {appUser?.full_name || "User"}
             </p>
             <p className="truncate text-gray-500 text-xs">{appUser?.email}</p>
           </div>
