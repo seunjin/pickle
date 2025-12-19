@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useUser } from "@/features/auth/model/useUser";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -8,14 +9,24 @@ import { createClient } from "@/shared/lib/supabase/client";
 export const LandingButtons = () => {
   const { user, appUser, isLoading } = useUser();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const supabase = createClient();
 
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
+    const redirectTo = new URL(
+      "/api/internal/auth/callback",
+      window.location.origin,
+    );
+    if (next) {
+      redirectTo.searchParams.set("next", next);
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/api/internal/auth/callback`,
+        redirectTo: redirectTo.toString(),
       },
     });
   };
@@ -42,7 +53,7 @@ export const LandingButtons = () => {
   if (appUser?.status === "pending") {
     return (
       <Link
-        href="/signup"
+        href={next ? `/signup?next=${next}` : "/signup"}
         className="flex h-12 items-center justify-center rounded-full bg-indigo-600 px-8 font-medium text-white transition-colors hover:bg-indigo-700"
       >
         회원가입 완료하기
@@ -50,13 +61,13 @@ export const LandingButtons = () => {
     );
   }
 
-  // 3. Active -> Dashboard
+  // 3. Active -> Dashboard (or Next)
   return (
     <Link
-      href="/dashboard"
+      href={next || "/dashboard"}
       className="flex h-12 items-center justify-center rounded-full bg-black px-8 font-medium text-white transition-colors hover:bg-gray-800"
     >
-      대시보드로 이동
+      {next ? "계속하기" : "대시보드로 이동"}
     </Link>
   );
 };

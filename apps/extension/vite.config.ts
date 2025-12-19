@@ -8,7 +8,7 @@ import manifest from "./manifest.json";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), crx({ manifest }), tailwindcss()],
-  envDir: "../../", // Load .env from monorepo root
+
   envPrefix: "NEXT_PUBLIC_", // Expose NEXT_PUBLIC_ variables
   resolve: {
     alias: {

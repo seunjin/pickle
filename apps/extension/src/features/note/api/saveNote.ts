@@ -1,5 +1,8 @@
 import type { Database } from "@pickle/contracts";
-import type { CreateNoteInput } from "@pickle/contracts/src/note";
+import type {
+  CreateNoteInput,
+  StoredNoteData,
+} from "@pickle/contracts/src/note";
 import { createClient, type Session } from "@supabase/supabase-js";
 
 /**
@@ -74,16 +77,41 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       .limit(1)
       .single();
 
-    if (wsError || !workspaceMember) {
+    if (wsError) {
+      console.error("Workspace Fetch Error:", wsError);
+
+      // 🚨 Auto-Recovery: 토큰 만료 시 세션 삭제 (재로그인 유도)
+      if (
+        wsError.code === "PGRST301" ||
+        wsError.message.includes("JWT expired")
+      ) {
+        await chrome.storage.local.remove("supabaseSession");
+        return {
+          success: false,
+          error: "세션이 만료되었습니다. 다시 로그인해주세요.",
+        };
+      }
+
       return {
         success: false,
-        error: "No Workspace: 워크스페이스를 찾을 수 없습니다.",
+        error: `Workspace Access Error: ${wsError.message}`,
+      };
+    }
+
+    if (!workspaceMember) {
+      console.error("No Workspace Found for User:", userId);
+      return {
+        success: false,
+        error:
+          "No Workspace: 연결된 워크스페이스가 없습니다. (회원가입 미완료 가능성)",
       };
     }
 
     // 5. 이미지/캡처 업로드 처리
     let assetId: string | null = null;
-    let storedData: Record<string, unknown> = { ...note.data };
+    let storedData: StoredNoteData = {
+      ...note.data,
+    };
 
     // Discriminated Union 덕분에 note.type 체크 시 note.data가 자동으로 Narrowing 됨
     if (note.type === "image" || note.type === "capture") {
@@ -135,7 +163,6 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
             alt_text: note.data.alt_text,
           };
         } else {
-          // capture type
           storedData = {
             width: note.data.width,
             height: note.data.height,

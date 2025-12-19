@@ -61,9 +61,28 @@ export default function OverlayApp({
       }
     });
 
+    // 2. Storage Sync (Note Data + Session Recovery)
     // useEffectEvent로 생성된 핸들러는 안정적이므로 listener 등록에 안전하게 사용 가능
     chrome.storage.onChanged.addListener(handleStorageChange);
-    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
+
+    // 🚀 Auto-Recovery Listener: Session restored via Auth Sync
+    const handleSessionRecovery = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string,
+    ) => {
+      if (areaName === "local" && changes.supabaseSession?.newValue) {
+        console.log("Session recovered! Clearing error...");
+        setErrorMessage(null);
+        // Optional: Auto-retry save if it failed due to auth?
+        // For now, just clearing error is enough to let user click "Save" again.
+      }
+    };
+    chrome.storage.onChanged.addListener(handleSessionRecovery);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+      chrome.storage.onChanged.removeListener(handleSessionRecovery);
+    };
   }, [STORAGE_KEY]); // handleStorageChange is stable thanks to useEffectEvent
 
   const handleUpdateNote = (data: Partial<NoteData>) => {
@@ -199,26 +218,32 @@ export default function OverlayApp({
       )}
 
       {errorMessage && (
-        <div className="slide-in-from-bottom-2 fade-in absolute right-4 bottom-4 left-4 z-50 flex animate-in items-center justify-between rounded-lg border border-red-100 bg-red-50 p-3 text-red-600 text-sm shadow-lg">
-          <span>{errorMessage}</span>
-          <button
-            type="button"
-            onClick={() => setErrorMessage(null)}
-            className="ml-2 font-bold text-red-400 hover:text-red-700"
-          >
-            ✕
-          </button>
-
-          {/* Show Connect Button if Unauthorized (basic string assumption for now) */}
-          {errorMessage?.includes("Unauthorized") && (
-            <a
-              href="http://localhost:3000/auth/sync"
-              target="_blank"
-              rel="noreferrer"
-              className="-translate-x-1/2 absolute bottom-16 left-1/2 whitespace-nowrap rounded-full bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow hover:bg-blue-700"
+        <div className="slide-in-from-bottom-2 fade-in absolute right-4 bottom-4 left-4 z-50 flex flex-col gap-2 rounded-lg border border-red-100 bg-red-50 p-3 text-sm shadow-lg">
+          <div className="flex items-center justify-between text-red-600">
+            <span>{errorMessage}</span>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="ml-2 px-2 font-bold text-red-400 hover:text-red-700"
             >
-              Connect Account
-            </a>
+              ✕
+            </button>
+          </div>
+
+          {/* Show Connect Button for Auth/Session/Workspace Errors */}
+          {(errorMessage.includes("Unauthorized") ||
+            errorMessage.includes("만료") ||
+            errorMessage.includes("No Workspace")) && (
+            <button
+              type="button"
+              onClick={() => {
+                // Open new tab for auth sync
+                window.open("http://localhost:3000/auth/sync", "_blank");
+              }}
+              className="mt-1 w-full rounded bg-red-600 py-1.5 font-medium text-white text-xs transition-colors hover:bg-red-700"
+            >
+              계정 연결하기 (로그인)
+            </button>
           )}
         </div>
       )}

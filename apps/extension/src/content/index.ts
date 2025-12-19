@@ -1,19 +1,19 @@
 console.log("Pickle Note Content Script Loaded");
 
 // Auth Sync Listener
+// Auth Sync Listener
 window.addEventListener("message", (event) => {
-  // Security check: Only accept messages from same window (or valid origins if iframe)
-  // Since we are Content Script injected into the page, window === event.source usually.
+  // Security check: Only accept messages from same window
   if (event.source !== window) return;
 
   if (event.data?.type === "PICKLE_SYNC_SESSION" && event.data?.session) {
     console.log(
-      "[Content Script] Received session sync:",
+      "[Pickle Note] Session synced for:",
       event.data.session.user.email,
     );
+
     chrome.storage.local.set({ supabaseSession: event.data.session }, () => {
-      console.log("[Content Script] Session saved to extension storage.");
-      // Optional: Send ACK back to page if needed
+      // Send ACK back to page
       window.postMessage({ type: "PICKLE_SYNC_ACK" }, "*");
     });
   }

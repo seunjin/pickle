@@ -163,4 +163,4 @@ export const noteWithAssetSchema = noteSchema.and(
 export type NoteWithAsset = z.infer<typeof noteWithAssetSchema>;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _checkNoteSchema = (x: Note): NoteRow => x;
+export const _checkNoteSchema = (x: Note): NoteRow => x;

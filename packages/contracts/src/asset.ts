@@ -43,4 +43,4 @@ export type CreateAssetInput = z.infer<typeof createAssetSchema>;
 
 // --- Type Verification ---
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _checkAssetSchema = (x: Asset): AssetRow => x;
+export const _checkAssetSchema = (x: Asset): AssetRow => x;

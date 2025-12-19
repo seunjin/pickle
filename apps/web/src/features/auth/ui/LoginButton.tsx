@@ -1,14 +1,18 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/shared/lib/supabase/client";
 
 export function LoginButton() {
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/dashboard";
+
   const handleLogin = async () => {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/api/internal/auth/callback?next=/dashboard`,
+        redirectTo: `${location.origin}/api/internal/auth/callback?next=${next}`,
       },
     });
   };

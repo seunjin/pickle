@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+import { LoginScreen } from "@features/auth/components/LoginScreen";
+import { useExtensionAuth } from "@features/auth/hooks/useExtensionAuth";
 import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
@@ -9,6 +11,7 @@ import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
 
 function App() {
+  const { session, loading: authLoading } = useExtensionAuth();
   const [view, setView] = useState<ViewType>("text");
   const [note, setNote] = useState<NoteData>({});
   const [tabId, setTabId] = useState<number | null>(null);
@@ -68,11 +71,20 @@ function App() {
   const handleSave = () => {
     console.log("Saving note:", note);
     // TODO: Implement actual save logic (API call)
-    // For now, assume it's saved and close the popup
     window.close();
   };
 
-  if (!tabId) return null; // or loading spinner
+  if (!tabId || authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LoginScreen />;
+  }
 
   return (
     <div className="h-screen w-full bg-white text-gray-900">

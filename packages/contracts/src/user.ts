@@ -55,7 +55,7 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
 // --- Type Verification ---
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _checkUserSchema = (x: AppUser): UserRow => {
+export const _checkUserSchema = (x: AppUser): UserRow => {
   // Manual check for null compatibility if needed, or simple assignment
   return {
     ...x,

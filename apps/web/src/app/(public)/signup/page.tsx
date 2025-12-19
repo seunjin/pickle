@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/features/auth/model/useUser";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -8,6 +8,9 @@ import { createClient } from "@/shared/lib/supabase/client";
 export default function SignupPage() {
   const { user, appUser, isLoading, refreshAppUser } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/dashboard";
+
   const supabase = createClient();
   const [agreements, setAgreements] = useState({
     terms: false,
@@ -22,10 +25,10 @@ export default function SignupPage() {
       if (!user) {
         router.replace("/");
       } else if (appUser?.status === "active") {
-        router.replace("/dashboard");
+        router.replace(next);
       }
     }
-  }, [user, appUser, isLoading, router]);
+  }, [user, appUser, isLoading, router, next]);
 
   const handleSignup = async () => {
     if (!agreements.terms || !agreements.privacy) return;
@@ -40,7 +43,7 @@ export default function SignupPage() {
 
       // Refresh app user to update status locally
       await refreshAppUser();
-      router.replace("/dashboard");
+      router.replace(next);
     } catch (error) {
       console.error("Signup failed:", error);
       alert("회원가입 처리 중 오류가 발생했습니다.");
