@@ -39,6 +39,11 @@ export function BookmarkEditor({
                 src={note.bookmarkData.image}
                 alt="OG Img"
                 className="h-32 w-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  console.error("Image load failed:", note.bookmarkData?.image);
+                  e.currentTarget.style.display = "none";
+                }}
               />
             )}
             <div className="flex flex-col gap-2 p-3">
@@ -92,7 +97,8 @@ export function BookmarkEditor({
               id="bookmark-note"
               className="h-full w-full resize-none rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
               placeholder="이 페이지에 대한 생각을 남겨보세요..."
-              onChange={(e) => onUpdate({ text: e.target.value })}
+              value={note.memo || ""}
+              onChange={(e) => onUpdate({ memo: e.target.value })}
             />
           </div>
         </div>

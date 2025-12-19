@@ -53,7 +53,7 @@ erDiagram
         uuid user_id FK
         enum type "text|image|capture|bookmark"
         jsonb data "Type-specific Data"
-        string content "Searchable Text"
+        string content "User Memo (Optional)"
         string[] tags
         timestamp created_at
     }

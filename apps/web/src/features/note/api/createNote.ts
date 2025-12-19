@@ -29,7 +29,7 @@ export const createNote = async (newNote: CreateNoteInput): Promise<Note> => {
     user_id: user.id,
     type: newNote.type,
     url: newNote.url,
-    content: newNote.content ?? null,
+    content: newNote.memo ?? null,
     data: newNote.data,
     tags: newNote.tags ?? [],
   };

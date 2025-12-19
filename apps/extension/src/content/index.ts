@@ -38,11 +38,26 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 });
 
 function extractMetadata() {
-  const getMeta = (property: string) =>
-    document
-      .querySelector(`meta[property="${property}"]`)
-      ?.getAttribute("content") ||
-    document.querySelector(`meta[name="${property}"]`)?.getAttribute("content");
+  const resolveUrl = (url: string | null | undefined) => {
+    if (!url) return "";
+    try {
+      return new URL(url, document.baseURI).href;
+    } catch {
+      return url;
+    }
+  };
+
+  const getMeta = (property: string) => {
+    const value =
+      document
+        .querySelector(`meta[property="${property}"]`)
+        ?.getAttribute("content") ||
+      document
+        .querySelector(`meta[name="${property}"]`)
+        ?.getAttribute("content");
+
+    return resolveUrl(value);
+  };
 
   const getFavicon = () => {
     // 1. Try different link selectors

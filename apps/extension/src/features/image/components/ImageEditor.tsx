@@ -51,7 +51,8 @@ export function ImageEditor({
           id="image-note"
           className="h-20 w-full resize-none rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           placeholder="이미지에 대한 메모를 남겨보세요..."
-          onChange={(e) => onUpdate({ text: e.target.value })}
+          value={note.memo || ""}
+          onChange={(e) => onUpdate({ memo: e.target.value })}
         />
       </div>
 

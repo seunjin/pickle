@@ -42,7 +42,7 @@ export const createBookmarkDataSchema = storedBookmarkDataSchema;
 // --- Common Fields ---
 const commonNoteFields = z.object({
   url: z.string().url(),
-  content: z.string().nullable().optional(),
+  memo: z.string().nullable().optional(), // Was content
   tags: z.array(z.string()).nullable().optional(),
 });
 

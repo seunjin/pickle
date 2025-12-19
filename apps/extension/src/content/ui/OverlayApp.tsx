@@ -106,7 +106,7 @@ export default function OverlayApp({
       // Common fields
       const common = {
         url: note.url,
-        content: note.memo,
+        memo: note.memo,
         tags: [],
       };
 
@@ -146,11 +146,11 @@ export default function OverlayApp({
             ...common,
             type: "bookmark",
             data: {
-              title: note.title || "",
-              description: note.description,
-              image: note.previewImage,
-              favicon: note.favicon,
-              site_name: note.siteName,
+              title: note.bookmarkData?.title || "",
+              description: note.bookmarkData?.description,
+              image: note.bookmarkData?.image,
+              favicon: note.bookmarkData?.favicon,
+              site_name: note.bookmarkData?.site_name,
             },
           };
           break;

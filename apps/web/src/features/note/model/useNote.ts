@@ -1,6 +1,7 @@
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../api/createNote";
+import { deleteNote } from "../api/deleteNote";
 import { getNotes } from "../api/getNotes";
 
 export function useNote() {
@@ -25,11 +26,21 @@ export function useNote() {
     },
   });
 
+  // 3. Delete Note (DELETE)
+  const { mutate: performDeleteNote, isPending: isDeleting } = useMutation({
+    mutationFn: (noteId: string) => deleteNote(noteId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
   return {
     notes: notes ?? [],
     isLoading,
     isError: error,
     createNote: performCreateNote,
     isCreating,
+    deleteNote: performDeleteNote,
+    isDeleting,
   };
 }

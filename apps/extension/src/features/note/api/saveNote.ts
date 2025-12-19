@@ -182,7 +182,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       asset_id: assetId,
       type: note.type,
       url: note.url,
-      content: note.content ?? null,
+      content: note.memo ?? null,
       data: storedData, // Data URL이 제거된 Clean Data
       tags: note.tags ?? [],
     };
