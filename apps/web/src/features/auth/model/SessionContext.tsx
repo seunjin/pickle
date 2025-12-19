@@ -57,7 +57,6 @@ export const SessionProvider = ({
 
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      setIsLoading(false);
 
       if (currentUser) {
         // Fetch App User & Workspaces in parallel
@@ -73,10 +72,13 @@ export const SessionProvider = ({
               setWorkspace(workspaces[0]);
             }
           }),
-        ]);
+        ]).finally(() => {
+          if (mounted) setIsLoading(false);
+        });
       } else {
         setAppUser(null);
         setWorkspace(null);
+        setIsLoading(false);
       }
     });
 

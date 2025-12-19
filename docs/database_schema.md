@@ -102,9 +102,22 @@ erDiagram
 - **user_id**: 작성자
 
 ### 3.5 `assets`
-이미지 등 업로드된 파일의 메타데이터입니다.
+이미지 등 업로드된 파일의 메타데이터를 관리합니다.
 
-- **full_path**: Supabase Storage 경로
+- **id**: UUID
+- **workspace_id**: 소속 워크스페이스
+- **owner_id**: 업로더 (User ID)
+- **type**: `image` | `capture`
+- **full_path**: 원본 이미지 경로 (Supabase Storage `bitmaps/{uid}/{uuid}.png`)
+- **thumb_path**: 썸네일 이미지 경로 (Nullable)
+- **full_size_bytes**: 원본 파일 크기
+- **thumb_size_bytes**: 썸네일 파일 크기
+
+> **Storage Strategy**:
+> - **Bucket**: `bitmaps`
+> - **Structure**: `{workspace_id}/{user_id}/{uuid}.png`
+>   - 워크스페이스 단위 격리 + 업로더 구분
+> - **Optimization**: Supabase Image Transformation (Resize) 활용, 썸네일 별도 저장 안 함.
 
 ## 4. 데이터 무결성 및 자동화 (Triggers & Functions)
 

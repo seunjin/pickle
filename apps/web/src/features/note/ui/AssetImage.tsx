@@ -58,7 +58,18 @@ export const AssetImage = ({ path, alt, className }: AssetImageProps) => {
             For Supabase standard setup, the domain is often known.
             If not configured in next.config.mjs, it will crash.
             Safe fallback: normal img tag. */}
-      <Image src={signedUrl} alt={alt} className="h-full w-full object-cover" />
+      <Image
+        src={signedUrl}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className="object-cover"
+        // 127.0.0.1 is blocked by Next.js Image Optimization for security (SSRF prevention).
+        // We disable optimization for local development URLs.
+        unoptimized={
+          signedUrl?.includes("127.0.0.1") || signedUrl?.includes("localhost")
+        }
+      />
     </div>
   );
 };

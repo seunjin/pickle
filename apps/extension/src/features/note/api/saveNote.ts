@@ -109,6 +109,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
 
     // 5. 이미지/캡처 업로드 처리
     let assetId: string | null = null;
+    let filePath: string | undefined; // Debugging용 변수
     let storedData: StoredNoteData = {
       ...note.data,
     };
@@ -118,13 +119,16 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       // 이제 note.type이 image/capture일 때 data에 image_url이 있음이 보장됨 (CreateNoteInput 정의 덕분)
       const imageUrl = note.data.image_url;
 
-      if (imageUrl?.startsWith("data:image")) {
-        // 5-1. Storage 업로드
+      if (imageUrl) {
+        // 5-1. Fetch Image (Data URL handles local, HTTP handles remote)
+        // 리모트 이미지도 내 스토리지에 저장하여 "박제"합니다.
         const res = await fetch(imageUrl);
         const blob = await res.blob();
         const fileSize = blob.size;
         const fileName = `${crypto.randomUUID()}.png`;
-        const filePath = `${userId}/${fileName}`;
+
+        // Folder Structure: {workspace_id}/{user_id}/{filename}
+        filePath = `${workspaceMember.workspace_id}/${userId}/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("bitmaps")
@@ -195,7 +199,11 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: data };
+    return {
+      success: true,
+      data: data,
+      debug: { filePath, workspaceId: workspaceMember.workspace_id },
+    };
   } catch (error) {
     console.error("Background Save Error:", error);
     return { success: false, error: (error as Error).message };
