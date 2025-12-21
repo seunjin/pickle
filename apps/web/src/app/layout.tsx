@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import { getServerAuth } from "@/features/auth/api/getServerAuth";
 import { ClientProviders } from "./ClientProviders";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Pickle Note",
   description: "Capture and Organize your thoughts",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user, appUser } = await getServerAuth();
+
   return (
     <html lang="ko">
       <body className="antialiased">
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders initialUser={user} initialAppUser={appUser}>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

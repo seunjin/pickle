@@ -19,13 +19,17 @@ const SessionContext = createContext<SessionContextType | null>(null);
 
 export const SessionProvider = ({
   children,
+  initialUser = null,
+  initialAppUser = null,
 }: {
   children: React.ReactNode;
+  initialUser?: User | null;
+  initialAppUser?: AppUser | null;
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [appUser, setAppUser] = useState<AppUser | null>(null);
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [appUser, setAppUser] = useState<AppUser | null>(initialAppUser);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [supabase] = useState(() => createClient());
 
