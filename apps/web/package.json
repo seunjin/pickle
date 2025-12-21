@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@pickle/contracts": "workspace:^",
+    "@pickle/lib": "workspace:^",
     "@pickle/ui": "workspace:^",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",

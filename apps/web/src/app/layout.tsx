@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { SessionProvider } from "@/features/auth";
 import "./globals.css";
-import QueryProvider from "@/shared/providers/QueryProvider";
+import { ClientProviders } from "./ClientProviders";
 
 export const metadata: Metadata = {
   title: "Pickle Note",
@@ -16,9 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased">
-        <QueryProvider>
-          <SessionProvider>{children}</SessionProvider>
-        </QueryProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

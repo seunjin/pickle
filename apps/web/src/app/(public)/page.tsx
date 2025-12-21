@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LandingButtons } from "./LandingButtons";
 
 export const metadata: Metadata = {
@@ -19,7 +20,13 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <LandingButtons />
+          <Suspense
+            fallback={
+              <div className="h-12 w-40 animate-pulse rounded-full bg-gray-200" />
+            }
+          >
+            <LandingButtons />
+          </Suspense>
         </div>
       </main>
 

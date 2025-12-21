@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@pickle/ui"],
+  transpilePackages: ["@pickle/ui", "@pickle/lib", "react-layered-dialog"],
   images: {
     remotePatterns: [
       {
