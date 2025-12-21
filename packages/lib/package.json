@@ -17,7 +17,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "react-layered-dialog": "0.6.0"
+    "react-layered-dialog": "0.6.1"
   },
   "peerDependencies": {
     "react": ">=18",

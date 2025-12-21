@@ -165,8 +165,8 @@ importers:
         specifier: '>=18'
         version: 19.2.3(react@19.2.3)
       react-layered-dialog:
-        specifier: 0.6.0
-        version: 0.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 0.6.1
+        version: 0.6.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
     devDependencies:
       '@pickle/tsconfig':
         specifier: workspace:*
@@ -1932,8 +1932,8 @@ packages:
     peerDependencies:
       react: ^19.2.3
 
-  react-layered-dialog@0.6.0:
-    resolution: {integrity: sha512-ibSkqY0d1LrfIfS3mrBEnmsHDl+8kqabtfk3kFU391vIqM6PlG2w2YltiyCvHV9HiCIeRBSd53Tgv+Y+LpzLMw==}
+  react-layered-dialog@0.6.1:
+    resolution: {integrity: sha512-xx8qOFshH1fPtJUN0OdTAsBp67BP9iPCosgHDmufU5XSDIltIU2WBgDWCokpD00JXigjCDjUkI4QDZbG/bVwPg==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
@@ -3791,7 +3791,7 @@ snapshots:
       react: 19.2.3
       scheduler: 0.27.0
 
-  react-layered-dialog@0.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  react-layered-dialog@0.6.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
