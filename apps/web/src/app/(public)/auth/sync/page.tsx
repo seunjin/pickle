@@ -117,7 +117,7 @@ export default function AuthSyncPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
         <h1 className="mb-4 font-bold text-gray-900 text-xl">
-          Connecting to Pickle Note...
+          Connecting to Pickle...
         </h1>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
       </div>

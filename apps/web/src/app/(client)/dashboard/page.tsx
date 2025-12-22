@@ -8,7 +8,7 @@ import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Dashboard | Pickle Note",
+  title: "Dashboard | Pickle",
 };
 
 export default async function DashboardPage() {
