@@ -1,4 +1,4 @@
-# Pickle Note 프로젝트 구조 (Monorepo Structure)
+# Pickle 프로젝트 구조 (Monorepo Structure)
 
 이 프로젝트는 `pnpm workspaces`를 사용한 모노레포 구조로 되어 있습니다.
 

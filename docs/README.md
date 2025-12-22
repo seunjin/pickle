@@ -1,7 +1,7 @@
 
 # 📚 Project Documentation Index
 
-이 디렉토리는 Pickle Note 프로젝트의 실제 코드와 동기화되는 설계 문서를 담고 있습니다.
+이 디렉토리는 Pickle 프로젝트의 실제 코드와 동기화되는 설계 문서를 담고 있습니다.
 모든 문서는 “이론 설명”이 아니라 **구현·리팩토링·확장 시 기준점(Source of Truth)** 으로 사용됩니다.
 
 ---
@@ -109,4 +109,4 @@
 ## 6. 한 줄 요약
 
 > 이 문서들은 “설명서”가 아니라  
-> **Pickle Note 프로젝트의 헌법(Constitution)** 입니다.
+> **Pickle 프로젝트의 헌법(Constitution)** 입니다.

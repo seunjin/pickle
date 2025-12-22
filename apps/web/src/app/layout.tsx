@@ -4,7 +4,7 @@ import { ClientProviders } from "./ClientProviders";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pickle Note",
+  title: "Pickle",
   description: "Capture and Organize your thoughts",
 };
 

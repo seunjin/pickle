@@ -10,7 +10,7 @@ export function setupContextMenus() {
     // 1. Root Menu (최상위 메뉴: Pickle Note)
     chrome.contextMenus.create({
       id: MENU_ROOT_ID,
-      title: "Pickle Note",
+      title: "Pickle",
       contexts: ["all"], // 모든 상황(텍스트, 이미지, 빈 공간 등)에서 표시
     });
 
@@ -60,7 +60,7 @@ export function setupContextMenus() {
     chrome.contextMenus.create({
       parentId: MENU_ROOT_ID,
       id: "open-app",
-      title: "🚀 Pickle Note 열기",
+      title: "🚀 Pickle 열기",
       contexts: ["all"],
     });
   });

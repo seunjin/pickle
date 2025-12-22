@@ -16,7 +16,7 @@ export const LoginScreen = () => {
           xmlns="http://www.w3.org/2000/svg"
           className="text-indigo-600"
         >
-          <title>Pickle Note</title>
+          <title>Pickle</title>
           <path
             d="M12 2L2 7L12 12L22 7L12 2Z"
             stroke="currentColor"
@@ -42,7 +42,7 @@ export const LoginScreen = () => {
       </div>
 
       <h1 className="mb-2 font-bold text-gray-900 text-xl">
-        Welcome to Pickle Note
+        Welcome to Pickle
       </h1>
       <p className="mb-8 text-gray-500 text-sm">
         Connect your account to start saving notes and captures.

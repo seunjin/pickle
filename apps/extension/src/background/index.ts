@@ -6,7 +6,7 @@ import type { CaptureData, ViewType } from "@shared/types";
 import { setupContextMenus } from "./contextMenus";
 import { sendMessageToContentScript } from "./messaging";
 
-console.log("Pickle Note Background Service Worker Running");
+console.log("Pickle Background Service Worker Running");
 
 /**
  * 1. Setup Context Menus
