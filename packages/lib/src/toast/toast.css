@@ -1,0 +1,123 @@
+.pickle-toaster-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column-reverse;
+  gap: 6px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* Sonner가 주입하는 최상위 클래스들을 우리 디자인에 맞게 최적화 */
+.pickle-toast-card {
+  width: fit-content;
+  pointer-events: auto;
+  min-width: 320px;
+  max-width: 420px;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 1) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 20px 40px -12px rgba(0, 0, 0, 0.15) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+
+  /* GPU 가속을 위해 시각적 모션은 transform/opacity에 집중 */
+  /* will-change: transform, opacity; */
+}
+
+/* Sonner의 기본 스타일 무력화 및 우리 디자인 입히기 */
+[data-sonner-toast] {
+  font-family: inherit !important;
+}
+
+.pickle-toast-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  line-height: 1.4;
+}
+
+.pickle-toast-description {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #666 !important;
+  line-height: 1.4;
+}
+
+.pickle-toast-action-btn {
+  background: #1a1a1a !important;
+  color: white !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s !important;
+}
+
+.pickle-toast-action-btn:hover {
+  opacity: 0.8 !important;
+}
+
+.pickle-toast-close-btn {
+  background-color: transparent !important;
+  border: none !important;
+  color: #999 !important;
+  cursor: pointer;
+  padding: 4px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s !important;
+}
+
+.pickle-toast-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #333 !important;
+}
+
+/* Kinds */
+.pickle-toast-success {
+  border-left: 4px solid #10b981 !important;
+}
+
+.pickle-toast-error {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.pickle-toast-info {
+  border-left: 4px solid #3b82f6 !important;
+}
+
+/* Spinner for loading state */
+[data-loading="true"] .pickle-toast-title::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border: 2px solid #6366f1;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: pickle-spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes pickle-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

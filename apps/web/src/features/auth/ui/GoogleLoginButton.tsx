@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "@pickle/lib";
 import { useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 
@@ -15,7 +16,7 @@ export const GoogleLoginButton = ({ next }: GoogleLoginButtonProps) => {
     if (isLoggingIn) return;
     setIsLoggingIn(true);
 
-    try {
+    const loginPromise = (async () => {
       const callbackUrl = new URL(
         "/api/internal/auth/callback",
         window.location.origin,
@@ -32,6 +33,16 @@ export const GoogleLoginButton = ({ next }: GoogleLoginButtonProps) => {
       });
 
       if (error) throw error;
+    })();
+
+    toast.promise(loginPromise, {
+      loading: "Google로 로그인하는 중...",
+      success: "로그인 페이지로 이동합니다.",
+      error: "로그인에 실패했습니다. 다시 시도해 주세요.",
+    });
+
+    try {
+      await loginPromise;
     } catch (error) {
       console.error("Login failed:", error);
       setIsLoggingIn(false);

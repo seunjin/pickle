@@ -1,7 +1,7 @@
 "use client";
 
 import type { AppUser } from "@pickle/contracts";
-import { DialogProvider } from "@pickle/lib";
+import { DialogProvider, Toaster } from "@pickle/lib";
 /**
  * 클라이언트 사이드 Provider들을 통합 관리합니다.
  * 계층 구조: Query -> Session -> Dialog
@@ -29,7 +29,10 @@ export function ClientProviders({
         initialUser={initialUser}
         initialAppUser={initialAppUser}
       >
-        <DialogProvider>{children}</DialogProvider>
+        <DialogProvider>
+          {children}
+          <Toaster />
+        </DialogProvider>
       </SessionProvider>
     </QueryProvider>
   );
