@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "개인정보처리방침 | Pickle",
-  description: "Pickle 서비스의 개인정보처리방침 안내입니다.",
+  title: "이용약관 | Pickle",
+  description: "Pickle 서비스 이용약관 안내입니다.",
 };
 
 export default function TermsPage() {
@@ -10,7 +10,7 @@ export default function TermsPage() {
     <div className="mx-auto max-w-3xl px-6 py-20">
       <header className="mb-12 border-b pb-8">
         <h1 className="mb-2 font-bold text-4xl text-gray-900 tracking-tight">
-          개인정보처리방침
+          이용약관
         </h1>
         <p className="text-gray-500">시행일: 2025년 12월 22일</p>
       </header>
