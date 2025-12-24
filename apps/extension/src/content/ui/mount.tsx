@@ -1,6 +1,6 @@
 import { OVERLAY_DIMENSIONS } from "@shared/layout";
 
-const MOUNT_ID = "pickle-note-overlay-root";
+const MOUNT_ID = "pickle-overlay-root";
 
 export function mountOverlay(tabId: number) {
   const existing = document.getElementById(MOUNT_ID);

@@ -24,7 +24,7 @@ export function Menu({ onNavigate, onClose, openWebApp }: MenuProps) {
       >
         ✕
       </button>
-      <h1 className="mb-2 text-center font-bold text-xl">Pickle Note</h1>
+      <h1 className="mb-2 text-center font-bold text-xl">Pickle</h1>
       <div className="grid flex-1 grid-cols-2 gap-3 overflow-y-auto">
         <MenuButton
           label="이미지 저장"
@@ -55,7 +55,7 @@ export function Menu({ onNavigate, onClose, openWebApp }: MenuProps) {
           onClick={openWebApp}
           className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-gray-100 p-4 font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-200"
         >
-          🚀 Pickle Note 가기
+          🚀 Pickle 가기
         </button>
       </div>
     </div>

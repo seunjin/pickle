@@ -1,4 +1,4 @@
-console.log("Pickle Note Content Script Loaded");
+console.log("Pickle Content Script Loaded");
 
 // Auth Sync Listener
 // Auth Sync Listener
@@ -7,10 +7,7 @@ window.addEventListener("message", (event) => {
   if (event.source !== window) return;
 
   if (event.data?.type === "PICKLE_SYNC_SESSION" && event.data?.session) {
-    console.log(
-      "[Pickle Note] Session synced for:",
-      event.data.session.user.email,
-    );
+    console.log("[Pickle] Session synced for:", event.data.session.user.email);
 
     chrome.storage.local.set({ supabaseSession: event.data.session }, () => {
       // Send ACK back to page

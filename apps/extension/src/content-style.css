@@ -18,7 +18,7 @@
    Shadow DOM cannot isolate REM units from the HTML root.
    If this persists, we might need to adjust the zoom level of the container.
 */
-#pickle-note-overlay-root {
+#pickle-overlay-root {
   /* Internal container reset if needed */
   width: 100%;
   height: 100%;
