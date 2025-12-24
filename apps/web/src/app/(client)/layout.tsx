@@ -8,11 +8,14 @@ export default function ClientLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="flex min-h-screen">
-        <aside className="w-64 border-r bg-gray-50 p-4">
+      <div className="flex min-h-screen bg-base-background text-base-foreground">
+        {/* Sidebar */}
+        <aside className="w-85 shrink-0 border-base-border border-r bg-base-background">
           <Sidebar />
         </aside>
-        <main className="flex-1 p-8">{children}</main>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </AuthGuard>
   );

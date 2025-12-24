@@ -2,14 +2,8 @@
 @import "tailwindcss";
 @import "@pickle/ui/src/theme.css";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Override dark mode variables if needed, but they are already in theme.css .dark class */
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-base-background);
+  color: var(--color-base-foreground);
   font-family: var(--font-sans);
 }

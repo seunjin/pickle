@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSessionContext } from "../auth/model/SessionContext";
 import { SignOutButton } from "../auth/ui/SignOutButton";
 
@@ -8,48 +9,84 @@ export const Sidebar = () => {
 
   if (isLoading) {
     return (
-      <nav className="flex h-full flex-col gap-4">
-        <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
-        <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+      <nav className="flex h-full flex-col gap-4 p-4">
+        <div className="h-8 w-3/4 animate-pulse rounded bg-neutral-800" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-neutral-800" />
       </nav>
     );
   }
 
   return (
-    <nav className="flex h-full flex-col justify-between">
-      <div className="flex flex-col gap-6">
-        {/* Workspace Header */}
-        <div>
-          <h2 className="font-bold text-gray-900 text-lg">
-            {workspace?.name ?? "No Workspace"}
-          </h2>
-          <p className="text-gray-500 text-sm">Free Plan</p>
+    <nav className="flex h-full flex-col">
+      {/* 상단: 로고 영역 */}
+      <div className="border-base-border border-b p-4">
+        <div className="flex items-center gap-2">
+          {/* 로고 placeholder */}
+          <div className="h-6 w-6 rounded bg-base-primary" />
+          <span className="font-semibold text-base-foreground text-lg">
+            pickle
+          </span>
         </div>
-
-        {/* Navigation Links (Placeholder) */}
-        <ul className="flex flex-col gap-2">
-          <li>
-            <a
-              href="/dashboard"
-              className="block rounded px-2 py-1 text-gray-700 hover:bg-gray-100"
-            >
-              All Notes
-            </a>
-          </li>
-          <li>
-            <span className="block px-2 py-1 text-gray-400">Favorites</span>
-          </li>
-          <li>
-            <span className="block px-2 py-1 text-gray-400">Archived</span>
-          </li>
-        </ul>
       </div>
 
-      {/* User Profile / Footer */}
-      <div className="border-t pt-4">
-        <div className="mb-4 flex items-center gap-3">
+      {/* 메뉴 섹션 */}
+      <div className="flex-1 overflow-y-auto p-3">
+        {/* 주요 메뉴 */}
+        <ul className="flex flex-col gap-1">
+          <MenuItem
+            href="/dashboard"
+            icon="📥"
+            label="Inbox"
+            badge={3}
+            active
+          />
+          <MenuItem href="/favorites" icon="⭐" label="즐겨찾기" />
+          <MenuItem href="/tags" icon="🏷️" label="모든 태그" />
+        </ul>
+
+        {/* NOTES 섹션 */}
+        <div className="mt-6">
+          <div className="mb-2 flex items-center justify-between px-2">
+            <span className="font-medium text-base-muted text-xs uppercase tracking-wider">
+              Notes
+            </span>
+            {/* 추가 버튼 placeholder */}
+            <button
+              type="button"
+              className="flex h-5 w-5 items-center justify-center rounded text-base-muted hover:bg-base-foreground-background hover:text-base-foreground"
+            >
+              +
+            </button>
+          </div>
+
+          <ul className="flex flex-col gap-1">
+            <MenuItem
+              href="/dashboard"
+              icon="📁"
+              label={workspace?.name ?? "Workspace"}
+            />
+          </ul>
+        </div>
+
+        {/* 새 노트 버튼 */}
+        <button
+          type="button"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-base-border border-dashed py-2 text-base-muted text-sm transition-colors hover:border-base-primary hover:text-base-primary"
+        >
+          <span>+</span>
+          <span>새 노트 생성하기</span>
+        </button>
+      </div>
+
+      {/* 하단: 휴지통 + 프로필 */}
+      <div className="border-base-border border-t p-3">
+        {/* 휴지통 */}
+        <MenuItem href="/trash" icon="🗑️" label="휴지통" />
+
+        {/* 사용자 프로필 */}
+        <div className="mt-3 flex items-center gap-3 rounded-lg p-2 hover:bg-base-foreground-background">
           {appUser?.avatar_url ? (
-            <div className="relative h-8 w-8 overflow-hidden rounded-full border">
+            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-base-border">
               <img
                 src={appUser.avatar_url}
                 alt="Avatar"
@@ -57,19 +94,56 @@ export const Sidebar = () => {
               />
             </div>
           ) : (
-            <div className="h-8 w-8 rounded-full bg-indigo-100 text-center font-bold text-indigo-600 leading-8">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-base-primary text-center font-bold text-neutral-900">
               {appUser?.full_name?.[0] ?? "U"}
             </div>
           )}
-          <div className="flex-1 overflow-hidden">
-            <p className="truncate font-medium text-gray-900 text-sm">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-base-foreground text-sm">
               {appUser?.full_name || "User"}
             </p>
-            <p className="truncate text-gray-500 text-xs">{appUser?.email}</p>
+            <p className="truncate text-base-muted text-xs">{appUser?.email}</p>
           </div>
         </div>
-        <SignOutButton />
+
+        {/* 로그아웃 */}
+        <div className="mt-2">
+          <SignOutButton />
+        </div>
       </div>
     </nav>
+  );
+};
+
+// 메뉴 아이템 컴포넌트
+interface MenuItemProps {
+  href: string;
+  icon: string;
+  label: string;
+  badge?: number;
+  active?: boolean;
+}
+
+const MenuItem = ({ href, icon, label, badge, active }: MenuItemProps) => {
+  return (
+    <li>
+      <Link
+        href={href}
+        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+          active
+            ? "bg-base-primary-active-background text-base-primary"
+            : "text-base-muted-foreground hover:bg-base-foreground-background hover:text-base-foreground"
+        }`}
+      >
+        {/* 아이콘 placeholder */}
+        <span className="text-base">{icon}</span>
+        <span className="flex-1">{label}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-base-primary px-1.5 font-medium text-neutral-900 text-xs">
+            {badge}
+          </span>
+        )}
+      </Link>
+    </li>
   );
 };

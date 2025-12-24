@@ -10,15 +10,26 @@ interface NoteCardProps {
 export function NoteCard({ note, onDelete }: NoteCardProps) {
   const asset = note.assets;
 
+  // 노트 타입별 라벨
+  const typeLabels: Record<string, string> = {
+    text: "TEXT",
+    image: "IMG",
+    capture: "IMG",
+    bookmark: "URL",
+  };
+
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <div className="overflow-hidden rounded-xl border border-card-border bg-card-background transition-all hover:border-base-primary/50">
       {/* Header / Meta */}
-      <div className="flex justify-between border-b bg-gray-50 px-4 py-2 text-gray-500 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-700 capitalize">
-            {note.type}
+      <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-3">
+          {/* 타입 칩 */}
+          <span className="rounded bg-base-foreground-background px-2 py-0.5 font-medium text-base-muted text-xs">
+            {typeLabels[note.type] || note.type.toUpperCase()}
           </span>
-          <span>{new Date(note.created_at).toLocaleDateString()}</span>
+          <span className="text-base-muted text-xs">
+            {new Date(note.created_at).toLocaleDateString("ko-KR")}
+          </span>
         </div>
         <button
           type="button"
@@ -28,7 +39,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
               onDelete(note.id);
             }
           }}
-          className="text-gray-400 hover:text-red-500"
+          className="rounded p-1 text-base-muted transition-colors hover:bg-red-900/20 hover:text-red-400"
           title="Delete Note"
         >
           <svg
@@ -47,17 +58,17 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
         </button>
       </div>
 
-      {/* Body Content based on type */}
-      <div className="p-4">
+      {/* Body Content */}
+      <div className="px-4 pb-4">
         {note.content && (
-          <p className="mb-2 line-clamp-3 text-gray-800 text-sm">
+          <p className="mb-3 line-clamp-3 text-base-foreground text-sm leading-relaxed">
             {note.content}
           </p>
         )}
 
-        {/* Type Specific Rendering - Fully Type Safe */}
+        {/* Type Specific Rendering */}
         {note.type === "text" && (
-          <div className="rounded bg-gray-100 p-2 font-mono text-gray-600 text-xs">
+          <div className="rounded-lg bg-base-foreground-background p-3 font-mono text-base-muted text-xs">
             {note.data.text}
           </div>
         )}
@@ -69,7 +80,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
             alt={
               note.type === "image" ? note.data.alt_text || "Image" : "Capture"
             }
-            className="mt-2"
+            className="mt-2 rounded-lg"
           />
         )}
 
@@ -80,9 +91,9 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
             rel="noreferrer"
             className="mt-2 block"
           >
-            <div className="flex flex-col gap-2 rounded bg-blue-50 p-2 text-blue-700 transition-colors hover:bg-blue-100">
+            <div className="flex flex-col gap-2 rounded-lg bg-base-foreground-background p-3 transition-colors hover:bg-neutral-800">
               {note.data.image && (
-                <div className="aspect-video w-full overflow-hidden rounded-md bg-gray-200">
+                <div className="aspect-video w-full overflow-hidden rounded-md bg-neutral-800">
                   <img
                     src={note.data.image}
                     alt=""
@@ -101,7 +112,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
                     />
                   </div>
                 )}
-                <span className="truncate font-medium text-sm">
+                <span className="truncate font-medium text-base-foreground text-sm">
                   {note.data.title || note.url}
                 </span>
               </div>
@@ -109,17 +120,20 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
           </a>
         )}
 
-        {/* Fallback for url if no specific view */}
-        {note.type !== "bookmark" && (
+        {/* URL Fallback */}
+        {note.type !== "bookmark" && note.url && (
           <a
             href={note.url}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 block truncate text-gray-400 text-xs hover:text-gray-600"
+            className="mt-3 block truncate text-base-muted text-xs hover:text-base-primary"
           >
             {note.url}
           </a>
         )}
+
+        {/* 태그 영역 (placeholder - DB에 태그가 있으면 표시) */}
+        {/* TODO: note.tags 데이터 연결 */}
       </div>
     </div>
   );
