@@ -1,0 +1,127 @@
+import { execSync } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 패키지 루트 기준 경로 설정
+const PACKAGE_ROOT = path.resolve(__dirname, "..");
+const SVG_DIR = path.resolve(PACKAGE_ROOT, "src/svg");
+const REACT_DIR = path.resolve(PACKAGE_ROOT, "src/react");
+const ICONS_PATH = path.resolve(PACKAGE_ROOT, "src/icons.ts");
+
+async function generate() {
+  await fs.mkdir(REACT_DIR, { recursive: true });
+  const files = await fs.readdir(SVG_DIR);
+  const svgFiles = files.filter((f) => f.endsWith(".svg"));
+
+  console.log(
+    `🚀 Found ${svgFiles.length} SVG files in ${SVG_DIR}. Starting transformation via CLI...`,
+  );
+
+  try {
+    // --filename-case pascal: 파일명을 PascalCase로 (예: Search20.tsx)
+    // --expand-props end: props 전달 가능하게
+    // --icon: width/height를 1em으로 설정
+    // --jsx-runtime automatic: React 17+ 의 자동 JSX 트랜스폼 사용 (명시적 React 임포트 제거)
+    execSync(
+      `npx @svgr/cli --out-dir ${REACT_DIR} --typescript --icon --expand-props end --jsx-runtime automatic --filename-case pascal --replace-attr-values "#898989=currentColor,#000=currentColor,black=currentColor" ${SVG_DIR}`,
+      { stdio: "inherit" },
+    );
+
+    // 1. 생성된 파일들 리네임 및 불필요한 인덱스 제거
+    const generatedRawFiles = await fs.readdir(REACT_DIR);
+    for (const file of generatedRawFiles) {
+      if (file === "index.ts" || file === "index.tsx") {
+        await fs.unlink(path.join(REACT_DIR, file));
+        continue;
+      }
+
+      if (file.endsWith(".tsx")) {
+        let finalFileName = file;
+        if (!file.startsWith("Icon")) {
+          finalFileName = `Icon${file}`;
+          await fs.rename(
+            path.join(REACT_DIR, file),
+            path.join(REACT_DIR, finalFileName),
+          );
+        }
+
+        // 2. 고정 Title 삽입 로직 (Biome 린트 에러 해결 및 접근성)
+        const filePath = path.join(REACT_DIR, finalFileName);
+        const componentName = path.basename(finalFileName, ".tsx");
+        let content = await fs.readFile(filePath, "utf-8");
+
+        // <svg ... > 태그를 찾아 그 바로 뒤에 <title>삽입
+        content = content.replace(
+          /(<svg[^>]*>)/,
+          `$1\n    <title>${componentName}</title>`,
+        );
+        await fs.writeFile(filePath, content);
+      }
+    }
+  } catch (error) {
+    console.error("❌ SVGR CLI failed or post-processing failed:", error);
+    process.exit(1);
+  }
+
+  const processedFiles = await fs.readdir(REACT_DIR);
+  const imports = [];
+  const componentExports = [];
+  const palette = {};
+
+  for (const file of processedFiles) {
+    if (!file.endsWith(".tsx")) continue;
+    const componentName = path.basename(file, ".tsx"); // 이제 이미 IconLayout20 형태임
+
+    imports.push(`import ${componentName} from "./react/${componentName}";`);
+    componentExports.push(componentName);
+
+    // IconLayout20 -> layout, 20 추출
+    const match = componentName.match(/^Icon([A-Za-z]+)(\d+)$/);
+    if (match) {
+      const [, name, size] = match;
+      const lowerName = name.toLowerCase();
+      if (!palette[lowerName]) palette[lowerName] = {};
+      palette[lowerName][size] = componentName;
+    }
+  }
+
+  // Generate Palette String
+  const paletteEntries = Object.entries(palette)
+    .map(([name, sizes]) => {
+      const sizeEntries = Object.entries(sizes)
+        .map(([size, comp]) => `    ${size}: ${comp}`)
+        .join(",\n");
+      return `  ${name}: {\n${sizeEntries}\n  }`;
+    })
+    .join(",\n");
+
+  const iconsContent = `
+import type { SVGProps } from "react";
+${imports.join("\n")}
+
+export interface IconProps extends SVGProps<SVGSVGElement> {
+  size?: number;
+  title?: string;
+}
+
+export {
+  ${componentExports.join(",\n  ")}
+};
+
+export const ICON_PALETTE = {
+${paletteEntries}
+} as const;
+
+export type IconName = keyof typeof ICON_PALETTE;
+`;
+
+  await fs.writeFile(ICONS_PATH, `${iconsContent.trim()}\n`);
+
+  console.log(`✨ All icons generated and ${ICONS_PATH} updated!`);
+}
+
+generate().catch(console.error);

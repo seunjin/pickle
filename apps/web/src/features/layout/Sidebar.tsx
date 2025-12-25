@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@pickle/ui";
 import Link from "next/link";
 import { useSessionContext } from "../auth/model/SessionContext";
 import { SignOutButton } from "../auth/ui/SignOutButton";
@@ -105,6 +106,8 @@ export const Sidebar = () => {
             <p className="truncate text-base-muted text-xs">{appUser?.email}</p>
           </div>
         </div>
+
+        <Icon name="layout" size={20} />
 
         {/* 로그아웃 */}
         <div className="mt-2">

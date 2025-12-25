@@ -14,6 +14,7 @@
     "dev:extension": "pnpm --filter extension dev",
     "build:web": "pnpm --filter web build",
     "build:extension": "pnpm --filter extension build",
+    "icon": "node packages/icons/scripts/generate-icons.mjs",
     "token": "node packages/ui/scripts/generate-tokens.js",
     "types:local": "npx -y supabase gen types typescript --local > packages/contracts/src/database-generated.ts",
     "types:remote": "npx -y supabase gen types typescript --project-id \"<PROJECT_ID>\" --schema public > packages/contracts/src/database-generated.ts"
