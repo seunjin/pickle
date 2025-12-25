@@ -55,6 +55,25 @@ import { IconLayout20 } from "@pickle/icons";
    ```
 3. **완료**: `src/react/`에 컴포넌트가 생성되고 `src/icons.ts`의 팔레트가 자동 갱신됩니다. 이제 바로 코드에서 사용할 수 있습니다.
 
+### 🔄 아이콘 자동 생성 프로세스 상세 (Workflow)
+
+`pnpm icon` 명령어 실행 시 내부적으로 수행되는 정규화 과정입니다.
+
+```mermaid
+graph TD
+    A[src/svg/*.svg] -->|1. SVGR 변환| B[src/react/*.tsx 생성]
+    B -->|2. 네이밍 정규화| C[Icon접두사 부여 및 리네임]
+    C -->|3. 접근성 강화| D[title 태그 자동 삽입]
+    D -->|4. 인덱스 갱신| E[src/icons.ts 자동 생성]
+    E -->|5. 팔레트 등록| F[ICON_PALETTE 및 타입 추론 갱신]
+```
+
+1.  **SVGR 변환**: SVG 소스를 React TSX 컴포넌트로 변환합니다. 이때 `currentColor` 치환 및 TypeScript 설정이 적용됩니다.
+2.  **네이밍 정규화**: SVGR이 생성한 기본 파일명에 `Icon` 접두사를 붙여 리네임합니다. (예: `Layout20.tsx` → `IconLayout20.tsx`)
+3.  **접근성(A11y) 강화**: 바이옴(Biome) 린트 준수 및 스크린 리더 지원을 위해 컴포넌트 내부에 고정된 `<title>` 태그를 주입합니다.
+4.  **팔레트 및 타입 동기화**: 리네임된 모든 파일을 스캔하여 `src/icons.ts`를 다시 씁니다. 이때 아이콘 이름과 사이즈를 분석하여 `ICON_PALETTE`를 구성하고, 자동 완성을 위한 `IconName` 타입을 갱신합니다.
+5.  **Clean-up**: 변환 과정에서 생기는 불필요한 인덱스 파일 등을 삭제하여 패키지 구조를 항상 깨끗하게 유지합니다.
+
 ## ⚙️ 기술 스택
 
 - **SVGR**: SVG to React 변환 핵심 엔진
