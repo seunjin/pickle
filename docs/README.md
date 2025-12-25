@@ -52,6 +52,8 @@
     → React 19 기준 권장 패턴 및 사용 제한
 13. [CONVENTIONS.md](./CONVENTIONS.md)  
     → 네이밍, 폴더 구조, 코드 스타일, 협업 규칙
+14. [아이콘 시스템 가이드](../packages/icons/README.md)  
+    → SVG 아이콘 자동 생성, 사용법, 타입 안전성 가이드
 
 ---
 
@@ -65,6 +67,7 @@
 | **데이터 fetch / mutation** | [data_access_layer.md](./data_access_layer.md) |
 | **Extension UI 추가** | [extension_architecture.md](./extension_architecture.md), [ui_isolation_guide.md](./ui_isolation_guide.md) |
 | **공통 UI 컴포넌트** | [design_system_tokens.md](./design_system_tokens.md), [CONVENTIONS.md](./CONVENTIONS.md) |
+| **아이콘 추가 / 변경** | [아이콘 시스템 가이드](../packages/icons/README.md) |
 
 ---
 
