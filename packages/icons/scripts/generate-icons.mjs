@@ -21,7 +21,37 @@ async function generate() {
     `🚀 Found ${svgFiles.length} SVG files in ${SVG_DIR}. Starting transformation via CLI...`,
   );
 
+  const svgMetadata = [];
+
   try {
+    // 1. SVG 파일 분석 및 메타데이터 생성
+    for (const file of svgFiles) {
+      const baseName = path.basename(file, ".svg"); // 예: note_full-20
+      const dashIndex = baseName.lastIndexOf("-");
+
+      if (dashIndex === -1) {
+        console.warn(
+          `⚠️  파일 형식이 올바르지 않습니다 (예: name-20.svg): ${file}`,
+        );
+        continue;
+      }
+
+      const namePart = baseName.slice(0, dashIndex); // note_full
+      const sizePart = baseName.slice(dashIndex + 1); // 20
+      const componentName = `Icon${path
+        .basename(file, ".svg")
+        .split(/[-_]/)
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join("")}`;
+
+      svgMetadata.push({
+        file,
+        name: namePart,
+        size: sizePart,
+        componentName,
+      });
+    }
+
     // --filename-case pascal: 파일명을 PascalCase로 (예: Search20.tsx)
     // --expand-props end: props 전달 가능하게
     // --icon: width/height를 1em으로 설정
@@ -31,7 +61,7 @@ async function generate() {
       { stdio: "inherit" },
     );
 
-    // 1. 생성된 파일들 리네임 및 불필요한 인덱스 제거
+    // 2. 생성된 파일들 리네임 및 불필요한 인덱스 제거
     const generatedRawFiles = await fs.readdir(REACT_DIR);
     for (const file of generatedRawFiles) {
       if (file === "index.ts" || file === "index.tsx") {
@@ -39,19 +69,23 @@ async function generate() {
         continue;
       }
 
-      if (file.endsWith(".tsx")) {
-        let finalFileName = file;
-        if (!file.startsWith("Icon")) {
-          finalFileName = `Icon${file}`;
-          await fs.rename(
-            path.join(REACT_DIR, file),
-            path.join(REACT_DIR, finalFileName),
-          );
-        }
+      const baseName = path.basename(file, ".tsx"); // 예: NoteFull20
+      if (file.endsWith(".tsx") && !file.startsWith("Icon")) {
+        const metadata = svgMetadata.find(
+          (m) => m.componentName === `Icon${baseName}`,
+        );
+        const finalName = metadata
+          ? `${metadata.componentName}.tsx`
+          : `Icon${file}`;
 
-        // 2. 고정 Title 삽입 로직 (Biome 린트 에러 해결 및 접근성)
-        const filePath = path.join(REACT_DIR, finalFileName);
-        const componentName = path.basename(finalFileName, ".tsx");
+        await fs.rename(
+          path.join(REACT_DIR, file),
+          path.join(REACT_DIR, finalName),
+        );
+
+        // 3. 고정 Title 삽입 로직 (Biome 린트 에러 해결 및 접근성)
+        const filePath = path.join(REACT_DIR, finalName);
+        const componentName = path.basename(finalName, ".tsx");
         let content = await fs.readFile(filePath, "utf-8");
 
         // <svg ... > 태그를 찾아 그 바로 뒤에 <title>삽입
@@ -72,20 +106,21 @@ async function generate() {
   const componentExports = [];
   const palette = {};
 
-  for (const file of processedFiles) {
-    if (!file.endsWith(".tsx")) continue;
-    const componentName = path.basename(file, ".tsx"); // 이제 이미 IconLayout20 형태임
+  for (const meta of svgMetadata) {
+    const { name, size, componentName } = meta;
 
-    imports.push(`import ${componentName} from "./react/${componentName}";`);
-    componentExports.push(componentName);
+    // 파일이 실제로 존재하는지 확인 (리네임 단계에서 생성됨)
+    const filePath = path.join(REACT_DIR, `${componentName}.tsx`);
+    try {
+      await fs.access(filePath);
 
-    // IconLayout20 -> layout, 20 추출
-    const match = componentName.match(/^Icon([A-Za-z]+)(\d+)$/);
-    if (match) {
-      const [, name, size] = match;
-      const lowerName = name.toLowerCase();
-      if (!palette[lowerName]) palette[lowerName] = {};
-      palette[lowerName][size] = componentName;
+      imports.push(`import ${componentName} from "./react/${componentName}";`);
+      componentExports.push(componentName);
+
+      if (!palette[name]) palette[name] = {};
+      palette[name][size] = componentName;
+    } catch (e) {
+      console.warn(`⚠️  컴포넌트 파일을 찾을 수 없습니다: ${filePath}`);
     }
   }
 
