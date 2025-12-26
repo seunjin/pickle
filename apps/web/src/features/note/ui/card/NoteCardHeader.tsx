@@ -1,5 +1,5 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
-import { Icon } from "@pickle/ui";
+import { Icon } from "@pickle/icons";
 
 interface NoteCardHeaderProps {
   type: NoteWithAsset["type"];

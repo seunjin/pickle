@@ -1,13 +1,13 @@
 "use client";
+import { Icon, type IconName } from "@pickle/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  Icon,
-  type IconName,
 } from "@pickle/ui";
+
 import { cn } from "@pickle/ui/lib/utils";
 import Link from "next/link";
 import { useSessionContext } from "../auth/model/SessionContext";
@@ -52,6 +52,13 @@ export const Sidebar = () => {
               icon="archive"
               label="Inbox"
               badge={3}
+              active
+            />
+            <MenuItem
+              href="/dashboard"
+              icon="archive"
+              label="Inbox"
+              badge={3}
             />
             <MenuItem href="/favorites" icon="bookmark" label="즐겨찾기" />
             <MenuItem href="/tags" icon="tag" label="모든 태그" />
@@ -75,7 +82,7 @@ export const Sidebar = () => {
               <li className="px-3 py-2">
                 <button
                   type="button"
-                  className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground active:text-base-primary"
+                  className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-muted-foreground active:text-base-primary"
                 >
                   <Icon name="plus" size={20} />
                   <span>새 노트 생성하기</span>
@@ -145,17 +152,36 @@ const MenuItemContainer = ({
   rightSection,
 }: MenuItemContainerProps) => {
   return (
-    <li className="group flex items-center rounded-lg transition-[background-color] hover:bg-base-foreground-background">
+    <li
+      className={cn(
+        "group flex items-center rounded-lg transition-[background-color] hover:bg-neutral-850",
+        active &&
+          "bg-base-primary-active-background hover:bg-base-primary-active-background",
+      )}
+    >
       <Link
         href={href}
         className={cn(
           "flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm transition-colors",
-          active && "bg-base-primary-active-background text-base-primary",
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2 text-neutral-600 transition-colors group-hover:text-base-foreground">
-          <Icon name={icon} size={20} className="w-5 shrink-0" />
-          <span className="truncate text-[15px] leading-[15px]">{label}</span>
+        <div className={cn("flex min-w-0 flex-1 items-center gap-2")}>
+          <Icon
+            name={icon}
+            size={20}
+            className={cn(
+              "w-5 shrink-0 text-base-muted",
+              active && "text-base-primary group-hover:text-base-primary",
+            )}
+          />
+          <span
+            className={cn(
+              "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-muted-foreground",
+              active && "text-base-primary group-hover:text-base-primary",
+            )}
+          >
+            {label}
+          </span>
         </div>
       </Link>
 

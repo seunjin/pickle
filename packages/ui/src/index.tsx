@@ -1,4 +1,3 @@
-export * from "@pickle/icons";
 export * from "./button";
 export * from "./dropdown-menu";
 export * from "./input";
