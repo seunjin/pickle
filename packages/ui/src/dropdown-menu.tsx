@@ -72,7 +72,7 @@ const DropdownMenuItem = React.forwardRef<
     data-variant={variant}
     className={cn(
       /* --- [기본 레이아웃 및 스타일] --- */
-      "relative flex select-none items-center gap-2 rounded-sm px-1.5 py-1 text-[13px] outline-hidden",
+      "relative flex select-none items-center gap-1 rounded-sm px-1.5 py-1 text-[13px] outline-hidden",
       "cursor-pointer",
 
       /* --- [비활성화 상태] --- */
@@ -82,7 +82,7 @@ const DropdownMenuItem = React.forwardRef<
       "data-[inset]:pl-8",
 
       /* --- [아이콘(SVG) 공통 스타일] --- */
-      "[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+      "[&_svg:not([class*='size-'])]:size-3.5 [&_svg]:pointer-events-none [&_svg]:shrink-0",
       "[&_svg:not([class*='text-'])]:transition",
 
       /* --- [Destructive 변형 - 빨간색 메뉴] --- */

@@ -25,7 +25,7 @@ export const Sidebar = () => {
   }
 
   return (
-    <nav className="flex h-full flex-col px-6 py-[30px]">
+    <nav className="flex h-full flex-col px-6 py-[30px] bg-neutral-900">
       {/* 상단: 로고 영역 */}
       <div className="flex items-center justify-between pb-10">
         {/* 로고 placeholder */}
@@ -36,7 +36,7 @@ export const Sidebar = () => {
         {/* 사이드바 토글 버튼 */}
         <button
           type="button"
-          className="cursor-pointer text-base-muted transition-colors hover:text-neutral-300 active:text-base-primary"
+          className="text-base-muted transition-colors hover:text-neutral-300"
         >
           <Icon name="layout" size={20} />
         </button>
@@ -145,7 +145,7 @@ const MenuItemContainer = ({
   rightSection,
 }: MenuItemContainerProps) => {
   return (
-    <li className="group flex items-center rounded-lg transition-colors hover:bg-base-foreground-background">
+    <li className="group flex items-center rounded-lg transition-[background-color] hover:bg-base-foreground-background">
       <Link
         href={href}
         className={cn(
@@ -153,10 +153,8 @@ const MenuItemContainer = ({
           active && "bg-base-primary-active-background text-base-primary",
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <div className="w-5 shrink-0">
-            <Icon name={icon} size={20} />
-          </div>
+        <div className="flex min-w-0 flex-1 items-center gap-2 text-neutral-600 transition-colors group-hover:text-base-foreground">
+          <Icon name={icon} size={20} className="w-5 shrink-0" />
           <span className="truncate text-[15px] leading-[15px]">{label}</span>
         </div>
       </Link>
@@ -183,6 +181,7 @@ const MenuItem = ({
       <span
         className={cn(
           "flex h-5 min-w-5 cursor-default items-center justify-center rounded-sm bg-green-100/16 px-1.5 font-medium text-xs",
+          // hover 스타일 추가
           props.active ? "text-base-primary" : "text-base-muted-foreground",
         )}
       >
@@ -225,6 +224,7 @@ const NoteMenuItem = (props: MenuItemContainerProps) => {
             >
               이름 변경
             </DropdownMenuItem>
+
             <DropdownMenuItem variant="destructive">
               <Icon name="trash" size={20} /> 삭제
             </DropdownMenuItem>
