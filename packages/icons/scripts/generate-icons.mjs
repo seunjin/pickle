@@ -101,7 +101,7 @@ async function generate() {
     process.exit(1);
   }
 
-  const processedFiles = await fs.readdir(REACT_DIR);
+  const _processedFiles = await fs.readdir(REACT_DIR);
   const imports = [];
   const componentExports = [];
   const palette = {};
@@ -119,7 +119,7 @@ async function generate() {
 
       if (!palette[name]) palette[name] = {};
       palette[name][size] = componentName;
-    } catch (e) {
+    } catch (_e) {
       console.warn(`⚠️  컴포넌트 파일을 찾을 수 없습니다: ${filePath}`);
     }
   }

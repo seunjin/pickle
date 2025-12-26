@@ -1,6 +1,8 @@
 import type { SVGProps } from "react";
 import IconArchive20 from "./react/IconArchive20";
 import IconBookmark20 from "./react/IconBookmark20";
+import IconEllipsis16 from "./react/IconEllipsis16";
+import IconEllipsis20 from "./react/IconEllipsis20";
 import IconLayout20 from "./react/IconLayout20";
 import IconNoteEmpty20 from "./react/IconNoteEmpty20";
 import IconNoteFull20 from "./react/IconNoteFull20";
@@ -18,6 +20,8 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
 export {
   IconArchive20,
   IconBookmark20,
+  IconEllipsis16,
+  IconEllipsis20,
   IconLayout20,
   IconNoteEmpty20,
   IconNoteFull20,
@@ -34,6 +38,10 @@ export const ICON_PALETTE = {
   },
   bookmark: {
     20: IconBookmark20,
+  },
+  ellipsis: {
+    16: IconEllipsis16,
+    20: IconEllipsis20,
   },
   layout: {
     20: IconLayout20,

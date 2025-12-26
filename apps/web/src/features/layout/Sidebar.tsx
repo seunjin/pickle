@@ -1,6 +1,13 @@
 "use client";
-
-import { Icon, type IconName } from "@pickle/ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  Icon,
+  type IconName,
+} from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import Link from "next/link";
 import { useSessionContext } from "../auth/model/SessionContext";
@@ -45,7 +52,6 @@ export const Sidebar = () => {
               icon="archive"
               label="Inbox"
               badge={3}
-              // active
             />
             <MenuItem href="/favorites" icon="bookmark" label="즐겨찾기" />
             <MenuItem href="/tags" icon="tag" label="모든 태그" />
@@ -60,7 +66,7 @@ export const Sidebar = () => {
             </div>
 
             <ul className="flex flex-col gap-1">
-              <MenuItem
+              <NoteMenuItem
                 href="/dashboard"
                 icon="note_empty"
                 label={workspace?.name ?? "Workspace"}
@@ -112,53 +118,119 @@ export const Sidebar = () => {
               </p>
             </div>
           </div>
-          {/* 로그아웃 */}
-          {/* <SignOutButton /> */}
         </div>
       </div>
     </nav>
   );
 };
 
-// 메뉴 아이템 컴포넌트
-interface MenuItemProps {
+// --- 하위 컴포넌트 (Composition) ---
+
+interface MenuItemContainerProps {
   href: string;
   icon: IconName;
   label: string;
-  badge?: number;
   active?: boolean;
+  rightSection?: React.ReactNode;
 }
 
-const MenuItem = ({ href, icon, label, badge, active }: MenuItemProps) => {
+/**
+ * 모든 메뉴 아이템의 공통 레이아웃을 담당합니다.
+ */
+const MenuItemContainer = ({
+  href,
+  icon,
+  label,
+  active,
+  rightSection,
+}: MenuItemContainerProps) => {
   return (
-    <li>
+    <li className="group flex items-center rounded-lg transition-colors hover:bg-base-foreground-background">
       <Link
         href={href}
-        className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-          active
-            ? "bg-base-primary-active-background text-base-primary"
-            : "text-base-muted-foreground hover:bg-base-foreground-background hover:text-base-foreground"
-        }`}
+        className={cn(
+          "flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm transition-colors",
+          active && "bg-base-primary-active-background text-base-primary",
+        )}
       >
-        {/* 아이콘 placeholder */}
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="w-5 shrink-0">
             <Icon name={icon} size={20} />
           </div>
-
           <span className="truncate text-[15px] leading-[15px]">{label}</span>
         </div>
-        {badge !== undefined && badge > 0 && (
-          <span
-            className={cn(
-              "flex h-5 min-w-5 items-center justify-center rounded-sm bg-green-100/16 px-1.5 font-medium text-xs",
-              active ? "text-base-primary" : "text-base-muted-foreground",
-            )}
-          >
-            {badge}
-          </span>
-        )}
       </Link>
+
+      {/* 우측 섹션 (드롭다운 등 대화형 요소) */}
+      {rightSection && (
+        <div className="flex shrink-0 items-center justify-center pr-2">
+          {rightSection}
+        </div>
+      )}
     </li>
+  );
+};
+
+/**
+ * 기본적인 일반 메뉴 아이템 (Inbox, 즐겨찾기 등)
+ */
+const MenuItem = ({
+  badge,
+  ...props
+}: MenuItemContainerProps & { badge?: number }) => {
+  const badgeElement =
+    badge !== undefined && badge > 0 ? (
+      <span
+        className={cn(
+          "flex h-5 min-w-5 cursor-default items-center justify-center rounded-sm bg-green-100/16 px-1.5 font-medium text-xs",
+          props.active ? "text-base-primary" : "text-base-muted-foreground",
+        )}
+      >
+        {badge}
+      </span>
+    ) : undefined;
+
+  return <MenuItemContainer {...props} rightSection={badgeElement} />;
+};
+
+/**
+ * NOTES 섹션 등을 위한 확장 기능(편집 등)이 포함된 메뉴 아이템
+ */
+const NoteMenuItem = (props: MenuItemContainerProps) => {
+  return (
+    <MenuItemContainer
+      {...props}
+      rightSection={
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="cursor-pointer items-center rounded-md p-0.5 text-base-muted opacity-0 transition-[background-color,color,opacity] hover:bg-green-100/16 hover:text-base-foreground group-focus-within:opacity-100 group-hover:flex group-hover:opacity-100"
+            >
+              <Icon name="ellipsis" size={16} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            side="right"
+            sideOffset={-20}
+            className="w-40"
+          >
+            <DropdownMenuLabel>NOTES</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => {
+                // TODO: 상위에서 주입받은이름 변경 모달 실행 로직
+                console.log("이름 변경 클릭");
+              }}
+            >
+              이름 변경
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">
+              <Icon name="trash" size={20} /> 삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      }
+    />
   );
 };
