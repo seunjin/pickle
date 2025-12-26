@@ -1,11 +1,13 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
+import { Icon } from "@pickle/icons";
 
 interface NoteCardFooterProps {
   url: string;
   meta: NoteWithAsset["meta"];
+  onDelete: () => void;
 }
 
-export function NoteCardFooter({ url, meta }: NoteCardFooterProps) {
+export function NoteCardFooter({ url, meta, onDelete }: NoteCardFooterProps) {
   return (
     <div className="mt-4 flex items-center justify-between border-neutral-800 border-t pt-3">
       <a
@@ -37,6 +39,17 @@ export function NoteCardFooter({ url, meta }: NoteCardFooterProps) {
           </span>
         </div>
       </a>
+      <button
+        type="button"
+        className="text-neutral-500 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
+        onClick={(e) => {
+          e.preventDefault(); // 부모 링크 클릭 방지 등
+          e.stopPropagation();
+          onDelete();
+        }}
+      >
+        <Icon name="trash" size={20} className="size-4" />
+      </button>
     </div>
   );
 }

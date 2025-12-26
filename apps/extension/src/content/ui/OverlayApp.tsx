@@ -108,7 +108,9 @@ export default function OverlayApp({
         url: note.url,
         favicon: note.bookmarkData?.favicon, // Optional
         site_name: note.bookmarkData?.site_name, // Optional
-        page_title: note.bookmarkData?.title, // Optional (or undefined)
+        title: note.bookmarkData?.title, // Optional (or undefined)
+        description: note.bookmarkData?.description,
+        image: note.bookmarkData?.image,
       };
 
       const common = {

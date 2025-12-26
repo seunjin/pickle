@@ -45,15 +45,14 @@ function extractMetadata() {
   };
 
   const getMeta = (property: string) => {
-    const value =
+    return (
       document
         .querySelector(`meta[property="${property}"]`)
         ?.getAttribute("content") ||
       document
         .querySelector(`meta[name="${property}"]`)
-        ?.getAttribute("content");
-
-    return resolveUrl(value);
+        ?.getAttribute("content")
+    );
   };
 
   const getFavicon = () => {
@@ -83,7 +82,7 @@ function extractMetadata() {
       getMeta("twitter:description") ||
       getMeta("description") ||
       "",
-    image: getMeta("og:image") || getMeta("twitter:image") || "",
+    image: resolveUrl(getMeta("og:image") || getMeta("twitter:image")),
     site_name: getMeta("og:site_name") || window.location.hostname,
     favicon: getFavicon(),
     url: window.location.href,

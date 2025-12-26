@@ -51,7 +51,7 @@ export const AssetImage = ({ path, alt, className }: AssetImageProps) => {
   }
 
   return (
-    <div className={`relative h-48 w-full overflow-hidden ${className}`}>
+    <div className={`relative h-[190px] w-full overflow-hidden ${className}`}>
       {/* Next/Image usage with external URL requires domain config. 
             For Supabase standard setup, the domain is often known.
             If not configured in next.config.mjs, it will crash.

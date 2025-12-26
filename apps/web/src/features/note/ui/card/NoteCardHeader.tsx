@@ -1,10 +1,9 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
-import { Icon } from "@pickle/icons";
+import type { HTMLAttributes } from "react";
 
 interface NoteCardHeaderProps {
   type: NoteWithAsset["type"];
   createdAt: string;
-  onDelete: () => void;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -14,33 +13,39 @@ const TYPE_LABELS: Record<string, string> = {
   bookmark: "URL",
 };
 
-export function NoteCardHeader({
-  type,
-  createdAt,
-  onDelete,
-}: NoteCardHeaderProps) {
+const type_per_class: Record<
+  NoteWithAsset["type"],
+  HTMLAttributes<"span">["className"]
+> = {
+  text: "font-medium text-sm text-blue-500 tracking-wider",
+  image: "font-medium text-sm text-green-500 tracking-wider",
+  capture: "font-medium text-sm text-green-500 tracking-wider",
+  bookmark: "font-medium text-sm text-yellow-500 tracking-wider",
+};
+
+const type_per_icon: Record<
+  NoteWithAsset["type"],
+  HTMLAttributes<"span">["className"]
+> = {
+  text: "size-6 rounded-sm bg-blue-500/10",
+  image: "size-6 rounded-sm bg-green-500/10",
+  capture: "size-6 rounded-sm bg-green-500/10",
+  bookmark: "size-6 rounded-sm bg-yellow-500/10",
+};
+export function NoteCardHeader({ type, createdAt }: NoteCardHeaderProps) {
   return (
-    <div className="mb-3 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <span className="rounded-full bg-neutral-800 px-2.5 py-0.5 font-semibold text-[10px] text-neutral-400 tracking-wider">
-          {TYPE_LABELS[type] || type.toUpperCase()}
-        </span>
-        <span className="text-[11px] text-neutral-500">
+    <div className="mb-3 flex w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className={type_per_icon[type]}></div>
+          <span className={type_per_class[type]}>
+            {TYPE_LABELS[type] || type.toUpperCase()}
+          </span>
+        </div>
+        <span className="text-[13px] text-neutral-600 leading-1">
           {new Date(createdAt).toLocaleDateString("ko-KR")}
         </span>
       </div>
-
-      <button
-        type="button"
-        className="text-neutral-500 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
-        onClick={(e) => {
-          e.preventDefault(); // 부모 링크 클릭 방지 등
-          e.stopPropagation();
-          onDelete();
-        }}
-      >
-        <Icon name="trash" size={20} className="size-4" />
-      </button>
     </div>
   );
 }

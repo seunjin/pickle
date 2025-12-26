@@ -7,11 +7,19 @@ type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 // --- 1. 공통 메타데이터 스키마 (순수 메타데이터) ---
 // DB의 'data.meta' 필드에 저장될 순수 메타데이터입니다.
 // A안 적용: URL도 Meta의 일부로 관리합니다.
+// Helper for optional URL that treats empty string as undefined
+const optionalUrl = z.preprocess(
+  (v) => (v === "" || v === null ? undefined : v),
+  z.string().url().optional(),
+);
+
 export const commonMetaDataSchema = z.object({
   url: z.string().url(), // 메인 URL
-  favicon: z.string().url().optional(),
+  favicon: optionalUrl,
   site_name: z.string().optional(),
-  page_title: z.string().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  image: optionalUrl,
 });
 
 // --- 2. 저장된 데이터 스키마 (순수 콘텐츠) ---
@@ -33,7 +41,7 @@ export const storedCaptureDataSchema = z.object({
 export const storedBookmarkDataSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
-  image: z.string().url().optional(),
+  image: optionalUrl,
 });
 
 // --- 3. 입력 데이터 스키마 (생성 페이로드) ---
@@ -72,9 +80,11 @@ const urlSchema = z
 // 생성 시 URL 변환 로직 등을 포함합니다.
 const createInputMetaSchema = z.object({
   url: urlSchema,
-  favicon: z.string().url().optional(),
+  favicon: optionalUrl,
   site_name: z.string().optional(),
-  page_title: z.string().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  image: optionalUrl,
 });
 
 // 4-1. 공통 입력 필드 (생성)
@@ -163,8 +173,10 @@ export const strictNoteSchema = z.discriminatedUnion("type", [
 // DB에서 꺼낸 데이터를 앱에서 사용하기 편하게 변환합니다.
 export const noteSchema = strictNoteSchema.transform((row) => {
   // 앱 레벨 메타데이터 구성 (Top-level Meta Column + URL Column)
+  const meta = row.meta || {};
   const appMeta = {
-    ...(row.meta || {}), // DB 'meta' jsonb column
+    ...meta,
+    title: (meta as { title?: string }).title,
     url: row.url, // Source of Truth
   };
 
@@ -214,9 +226,11 @@ export const updateNoteSchema = z.object({
   meta: z
     .object({
       url: z.string().url().optional(),
-      favicon: z.string().url().optional(),
+      favicon: optionalUrl,
       site_name: z.string().optional(),
-      page_title: z.string().optional(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      image: optionalUrl,
     })
     .optional(),
 });
@@ -229,8 +243,10 @@ export const noteWithAssetSchema = strictNoteSchema
   .and(z.object({ assets: assetSchema.nullable() }))
   .transform((row) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const meta = row.meta || {};
     const appMeta = {
-      ...(row.meta || {}),
+      ...meta,
+      title: (meta as { title?: string }).title,
       url: row.url,
     };
     return {
