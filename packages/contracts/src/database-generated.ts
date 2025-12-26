@@ -87,10 +87,11 @@ export type Database = {
       notes: {
         Row: {
           asset_id: string | null;
-          content: string | null;
           created_at: string;
           data: Json;
           id: string;
+          memo: string | null;
+          meta: Json | null;
           tags: string[] | null;
           type: string;
           updated_at: string;
@@ -100,10 +101,11 @@ export type Database = {
         };
         Insert: {
           asset_id?: string | null;
-          content?: string | null;
           created_at?: string;
           data?: Json;
           id?: string;
+          memo?: string | null;
+          meta?: Json | null;
           tags?: string[] | null;
           type: string;
           updated_at?: string;
@@ -113,10 +115,11 @@ export type Database = {
         };
         Update: {
           asset_id?: string | null;
-          content?: string | null;
           created_at?: string;
           data?: Json;
           id?: string;
+          memo?: string | null;
+          meta?: Json | null;
           tags?: string[] | null;
           type?: string;
           updated_at?: string;
@@ -200,6 +203,13 @@ export type Database = {
           workspace_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "workspace_members_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "workspace_members_workspace_id_fkey";
             columns: ["workspace_id"];

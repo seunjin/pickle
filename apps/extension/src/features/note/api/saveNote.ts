@@ -110,18 +110,19 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
     // 5. 이미지/캡처 업로드 처리
     let assetId: string | null = null;
     let filePath: string | undefined; // Debugging용 변수
-    let storedData: StoredNoteData = {
-      ...note.data,
-    };
+
+    // Meta 분리 로직 제거 -> Note.data 자체가 이미 Clean함 (CreateNoteInput 정의)
+    // 단, 이미지 처리를 위해 URL/Path 업데이트가 필요할 수 있음.
+
+    // 기본적으로 note.data를 그대로 쓰되, 업로드 된 이미지 정보만 덮어씌움
+    let storedData: StoredNoteData = note.data;
 
     // Discriminated Union 덕분에 note.type 체크 시 note.data가 자동으로 Narrowing 됨
     if (note.type === "image" || note.type === "capture") {
-      // 이제 note.type이 image/capture일 때 data에 image_url이 있음이 보장됨 (CreateNoteInput 정의 덕분)
       const imageUrl = note.data.image_url;
 
       if (imageUrl) {
-        // 5-1. Fetch Image (Data URL handles local, HTTP handles remote)
-        // 리모트 이미지도 내 스토리지에 저장하여 "박제"합니다.
+        // 5-1. Fetch Image
         const res = await fetch(imageUrl);
         const blob = await res.blob();
         const fileSize = blob.size;
@@ -160,8 +161,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
 
         assetId = assetData.id;
 
-        // 5-3. DB 저장용 Clean Data 생성 (Transform)
-        // Casting 없이 안전하게 접근 가능
+        // 5-3. storedData 업데이트 (Clean Data 유지)
         if (note.type === "image") {
           storedData = {
             alt_text: note.data.alt_text,
@@ -175,15 +175,17 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       }
     }
 
-    // 6. DB InsertPayload 준비 (Clean Object)
+    // 6. DB InsertPayload 준비
+    // 핵심 변경: meta를 별도 컬럼으로 저장 (Data에 중첩 X)
     const insertPayload = {
       workspace_id: workspaceMember.workspace_id,
       user_id: userId,
       asset_id: assetId,
       type: note.type,
-      url: note.url,
-      content: note.memo ?? null,
-      data: storedData, // Data URL이 제거된 Clean Data
+      url: note.meta.url,
+      meta: note.meta, // Save Meta to separate JSONB column
+      memo: note.memo ?? null,
+      data: storedData, // Pure content data
       tags: note.tags ?? [],
     };
 

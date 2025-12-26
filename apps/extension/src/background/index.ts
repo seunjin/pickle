@@ -2,7 +2,7 @@ import { startBookmarkFlow } from "@features/bookmark/background";
 import { startCaptureFlow } from "@features/capture/background";
 import { saveNoteToSupabase } from "@features/note/api/saveNote";
 import { clearNote, setNote, updateNote } from "@shared/storage";
-import type { CaptureData, ViewType } from "@shared/types";
+import type { BookmarkData, CaptureData, ViewType } from "@shared/types";
 import { setupContextMenus } from "./contextMenus";
 import { sendMessageToContentScript } from "./messaging";
 
@@ -63,6 +63,20 @@ chrome.contextMenus.onClicked.addListener(
         mode: mode,
         tabId: tab.id,
       });
+
+      // 3) [ADD] Text/Image 모드에서도 메타데이터(파비콘 등)를 가져와 저장합니다.
+      // 저장이 비동기로 이루어져도 오버레이 UI는 이미 열려있으므로 사용자 경험에 지연이 없습니다.
+      sendMessageToContentScript(tab.id, { action: "GET_METADATA" })
+        .then((metadata) => {
+          if (metadata && tab.id) {
+            console.log("Metadata fetched in background:", metadata);
+            // import type { BookmarkData } ... (위에서 추가 필요)
+            updateNote(tab.id, {
+              bookmarkData: metadata as BookmarkData,
+            });
+          }
+        })
+        .catch((err) => console.warn("Background metadata fetch failed:", err));
     }
   },
 );

@@ -1,6 +1,11 @@
 "use client";
+
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
-import { AssetImage } from "./AssetImage";
+import { BookmarkNoteContent } from "./card/BookmarkNoteContent";
+import { MediaNoteContent } from "./card/MediaNoteContent";
+import { NoteCardFooter } from "./card/NoteCardFooter";
+import { NoteCardHeader } from "./card/NoteCardHeader";
+import { TextNoteContent } from "./card/TextNoteContent";
 
 interface NoteCardProps {
   note: NoteWithAsset;
@@ -8,132 +13,66 @@ interface NoteCardProps {
 }
 
 export function NoteCard({ note, onDelete }: NoteCardProps) {
-  const asset = note.assets;
+  // 미디어 타입 (상단 전체 너비) 확인
+  const isMediaType = note.type === "image" || note.type === "capture";
 
-  // 노트 타입별 라벨
-  const typeLabels: Record<string, string> = {
-    text: "TEXT",
-    image: "IMG",
-    capture: "IMG",
-    bookmark: "URL",
+  const renderContent = () => {
+    switch (note.type) {
+      case "text":
+        return <TextNoteContent text={note.data.text} />;
+      case "bookmark":
+        return (
+          <BookmarkNoteContent
+            url={note.url}
+            data={note.data}
+            meta={note.meta}
+          />
+        );
+      case "image":
+      case "capture":
+        // 레이아웃상의 이유(전체 너비)로 미디어 콘텐츠는 별도로 처리합니다.
+        // 특정 대체 텍스트가 필요한 경우 메인 흐름 내에서 처리될 수도 있습니다.
+        // 하지만 원래 디자인에서는 에셋이 존재하는 경우 상단에 위치합니다.
+        // 대체 텍스트(예: 업로드 중 또는 오류)인 경우 콘텐츠 영역에 있을 수 있습니다.
+        if (!note.assets) {
+          return (
+            <MediaNoteContent
+              type={note.type}
+              data={note.data}
+              asset={note.assets}
+            />
+          );
+        }
+        return null;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-card-border bg-card-background transition-all hover:border-base-primary/50">
-      {/* Header / Meta */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-3">
-          {/* 타입 칩 */}
-          <span className="rounded bg-base-foreground-background px-2 py-0.5 font-medium text-base-muted text-xs">
-            {typeLabels[note.type] || note.type.toUpperCase()}
-          </span>
-          <span className="text-base-muted text-xs">
-            {new Date(note.created_at).toLocaleDateString("ko-KR")}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            if (confirm("정말 삭제하시겠습니까?")) {
-              onDelete(note.id);
-            }
-          }}
-          className="rounded p-1 text-base-muted transition-colors hover:bg-red-900/20 hover:text-red-400"
-          title="Delete Note"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="h-4 w-4"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
+    <div className="group flex flex-col overflow-hidden rounded-[20px] border border-base-border bg-neutral-900 transition-all hover:border-base-primary">
+      {/* 1. 전체 너비 미디어 섹션 */}
+      {isMediaType && note.assets && (
+        <MediaNoteContent
+          type={note.type}
+          data={note.data}
+          asset={note.assets}
+        />
+      )}
 
-      {/* Body Content */}
-      <div className="px-4 pb-4">
-        {note.content && (
-          <p className="mb-3 line-clamp-3 text-base-foreground text-sm leading-relaxed">
-            {note.content}
-          </p>
-        )}
+      <div className="flex flex-1 flex-col p-4">
+        {/* 2. 헤더 */}
+        <NoteCardHeader
+          type={note.type}
+          createdAt={note.created_at}
+          onDelete={() => onDelete(note.id)}
+        />
 
-        {/* Type Specific Rendering */}
-        {note.type === "text" && (
-          <div className="rounded-lg bg-base-foreground-background p-3 font-mono text-base-muted text-xs">
-            {note.data.text}
-          </div>
-        )}
+        {/* 3. 메인 콘텐츠 섹션 */}
+        <div className="flex-1">{renderContent()}</div>
 
-        {/* Image / Capture with Asset */}
-        {(note.type === "image" || note.type === "capture") && asset && (
-          <AssetImage
-            path={asset.full_path}
-            alt={
-              note.type === "image" ? note.data.alt_text || "Image" : "Capture"
-            }
-            className="mt-2 rounded-lg"
-          />
-        )}
-
-        {note.type === "bookmark" && (
-          <a
-            href={note.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 block"
-          >
-            <div className="flex flex-col gap-2 rounded-lg bg-base-foreground-background p-3 transition-colors hover:bg-neutral-800">
-              {note.data.image && (
-                <div className="aspect-video w-full overflow-hidden rounded-md bg-neutral-800">
-                  <img
-                    src={note.data.image}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                {note.data.favicon && (
-                  <div className="relative h-4 w-4 shrink-0">
-                    <img
-                      src={note.data.favicon}
-                      alt=""
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                )}
-                <span className="truncate font-medium text-base-foreground text-sm">
-                  {note.data.title || note.url}
-                </span>
-              </div>
-            </div>
-          </a>
-        )}
-
-        {/* URL Fallback */}
-        {note.type !== "bookmark" && note.url && (
-          <a
-            href={note.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 block truncate text-base-muted text-xs hover:text-base-primary"
-          >
-            {note.url}
-          </a>
-        )}
-
-        {/* 태그 영역 (placeholder - DB에 태그가 있으면 표시) */}
-        {/* TODO: note.tags 데이터 연결 */}
+        {/* 4. 푸터 */}
+        <NoteCardFooter url={note.url} meta={note.meta} />
       </div>
     </div>
   );

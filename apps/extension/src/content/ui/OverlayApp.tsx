@@ -104,8 +104,15 @@ export default function OverlayApp({
       if (!note.url) throw new Error("URL is missing");
 
       // Common fields
-      const common = {
+      const inputMeta = {
         url: note.url,
+        favicon: note.bookmarkData?.favicon, // Optional
+        site_name: note.bookmarkData?.site_name, // Optional
+        page_title: note.bookmarkData?.title, // Optional (or undefined)
+      };
+
+      const common = {
+        meta: inputMeta, // Moved to top-level meta
         memo: note.memo,
         tags: [],
       };
@@ -149,8 +156,6 @@ export default function OverlayApp({
               title: note.bookmarkData?.title || "",
               description: note.bookmarkData?.description,
               image: note.bookmarkData?.image,
-              favicon: note.bookmarkData?.favicon,
-              site_name: note.bookmarkData?.site_name,
             },
           };
           break;

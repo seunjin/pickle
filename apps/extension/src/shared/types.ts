@@ -30,6 +30,7 @@ export interface NoteData {
   previewImage?: string;
   favicon?: string;
   siteName?: string;
+  pageTitle?: string;
   memo?: string;
   altText?: string;
 }
