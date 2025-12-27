@@ -52,8 +52,11 @@ erDiagram
         uuid workspace_id FK
         uuid user_id FK
         enum type "text|image|capture|bookmark"
-        jsonb data "Type-specific Data"
-        string content "User Memo (Optional)"
+        string title "User Title (Nullable)"
+        string url "Source URL"
+        jsonb meta "Page Metadata (Favicon, OG Tags)"
+        jsonb data "Type-specific Data (Clean)"
+        string memo "User Memo (Nullable)"
         string[] tags
         timestamp created_at
     }
@@ -94,10 +97,15 @@ erDiagram
 - **role**: 워크스페이스 내 권한 (`owner`, `member`)
 
 ### 3.4 `notes`
-핵심 콘텐츠인 노트를 저장합니다.
+ 핵심 콘텐츠인 노트를 저장합니다.
 
 - **type**: 노트 유형 (`text`, `image`, `capture`, `bookmark`)
   - 유형에 따라 `data` 컬럼의 JSON 스키마가 달라집니다 (Discriminated Union).
+- **title**: 사용자가 지정한 제목 (Nullable). 없을 경우 `meta.title`을 UI에서 폴백으로 사용(하거나 UI 로직에 따름).
+- **url**: 원본 페이지 URL (필수)
+- **meta**: 페이지 메타데이터 (JSONB). `favicon`, `site_name`, `description`, `image` 등 포함.
+- **data**: 노트 타입별 고유 데이터 (JSONB). 예: `capture`의 `display_width` 등.
+- **memo**: 사용자가 작성한 메모 (기존 `content` 컬럼).
 - **workspace_id**: 소속 워크스페이스
 - **user_id**: 작성자
 

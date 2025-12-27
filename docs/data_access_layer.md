@@ -69,3 +69,14 @@ const createNote = async (note) => {
 | **Security** | API Route에서 검증 | **DB RLS에서 검증** |
 
 > **주의**: 복잡한 서버 사이드 로직(예: 결제 처리, 민감정보 가공)이 필요한 경우에만 제한적으로 `features/*/api` 내부의 Server Actions나 Supabase Edge Functions를 사용합니다.
+
+---
+
+## 5. 데이터 계약 (Contracts via Zod)
+
+DB 스키마와 클라이언트 코드 간의 일관성을 보장하기 위해 `packages/contracts` 패키지를 사용합니다.
+
+- **Schema Sharing**: DB 테이블 구조(`Database` 타입)와 애플리케이션 모델(`Note` 타입)을 공유합니다.
+- **Zero-Overhead Parsing**: `transform` 로직을 제거하여 DB에서 조회한 데이터를 그대로 UI에서 사용할 수 있도록 스키마를 설계했습니다.
+    - 예: `note.meta.favicon`에 직접 접근 (변환 레이어 없음)
+- **Validation**: `saveNote.ts` 등에서 데이터 저장 전 `zod` 스키마를 통해 유효성을 검증합니다.

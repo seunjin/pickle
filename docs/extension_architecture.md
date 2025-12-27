@@ -28,3 +28,12 @@
 
 > **이유**: `api/internal` 같은 중간 레이어를 제거하여 아키텍처를 단순화하고, `supabase-js`의 이점(타입, DX)을 그대로 활용합니다.
 
+## 3. 메타데이터 추출 (Metadata Extraction)
+캡처, 북마크 등 모든 모드에서 페이지 메타데이터(`PageMetadata`: 제목, 파비콘, OG 태그 등)를 수집하여 저장합니다.
+
+### 캡처 모드 흐름
+1. **캡처 수행**: `chrome.tabs.captureVisibleTab`으로 스크린샷 생성.
+2. **이미지 업로드**: Supabase Storage에 업로드하고 `Asset` 생성.
+3. **메타데이터 추출**: `GET_METADATA` 메시지를 Content Script로 전송하여 현재 페이지의 정보를 긁어옵니다. (기존에는 캡처 시 URL만 저장되는 문제가 있었으나 수정됨)
+4. **통합 저장**: 이미지 정보(`data`)와 페이지 정보(`pageMeta`)를 합쳐 `notes` 테이블에 저장합니다.
+
