@@ -93,6 +93,7 @@ export type Database = {
           memo: string | null;
           meta: Json | null;
           tags: string[] | null;
+          title: string | null;
           type: string;
           updated_at: string;
           url: string;
@@ -107,6 +108,7 @@ export type Database = {
           memo?: string | null;
           meta?: Json | null;
           tags?: string[] | null;
+          title?: string | null;
           type: string;
           updated_at?: string;
           url?: string;
@@ -121,6 +123,7 @@ export type Database = {
           memo?: string | null;
           meta?: Json | null;
           tags?: string[] | null;
+          title?: string | null;
           type?: string;
           updated_at?: string;
           url?: string;

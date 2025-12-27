@@ -164,12 +164,12 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         // 5-3. storedData 업데이트 (Clean Data 유지)
         if (note.type === "image") {
           storedData = {
-            alt_text: note.data.alt_text,
+            // [Refactor] Image data is empty
           };
-        } else {
+        } else if (note.type === "capture") {
           storedData = {
-            width: note.data.width,
-            height: note.data.height,
+            display_width: note.data.display_width,
+            display_height: note.data.display_height,
           };
         }
       }
@@ -177,15 +177,16 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
 
     // 6. DB InsertPayload 준비
     // 핵심 변경: meta를 별도 컬럼으로 저장 (Data에 중첩 X)
-    const insertPayload = {
+    const insertPayload: Database["public"]["Tables"]["notes"]["Insert"] = {
       workspace_id: workspaceMember.workspace_id,
       user_id: userId,
       asset_id: assetId,
       type: note.type,
+      title: note.title ?? null, // [Refactor] Add title mapping
       url: note.meta.url,
-      meta: note.meta, // Save Meta to separate JSONB column
+      meta: note.meta,
       memo: note.memo ?? null,
-      data: storedData, // Pure content data
+      data: storedData,
       tags: note.tags ?? [],
     };
 

@@ -19,7 +19,7 @@ export function NoteCardFooter({ url, meta, onDelete }: NoteCardFooterProps) {
       >
         {/* 파비콘 */}
         <div className="relative h-4 w-4 shrink-0 overflow-hidden rounded bg-white/10 p-px">
-          {meta.favicon ? (
+          {meta?.favicon ? (
             <img
               src={meta.favicon}
               alt=""
@@ -35,7 +35,7 @@ export function NoteCardFooter({ url, meta, onDelete }: NoteCardFooterProps) {
         {/* 사이트 이름 및 호스트네임 */}
         <div className="flex flex-col truncate">
           <span className="truncate font-medium text-[11px] text-neutral-300 transition-colors group-hover/source:text-base-primary">
-            {meta.site_name || new URL(url).hostname}
+            {meta?.site_name || new URL(url).hostname}
           </span>
         </div>
       </a>

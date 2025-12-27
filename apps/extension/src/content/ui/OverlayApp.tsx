@@ -114,6 +114,7 @@ export default function OverlayApp({
       };
 
       const common = {
+        title: note.bookmarkData?.title, // [NEW] Set top-level title from metadata
         meta: inputMeta, // Moved to top-level meta
         memo: note.memo,
         tags: [],
@@ -134,8 +135,9 @@ export default function OverlayApp({
             ...common,
             type: "image",
             data: {
+              // [Transient] DB 'data' 컬럼에 저장되지 않음.
+              // Background에서 이 URL을 다운로드하여 Storage에 업로드 후 'asset_id'로 변환됨.
               image_url: note.srcUrl || "",
-              alt_text: note.altText,
             },
           };
           break;
@@ -144,9 +146,10 @@ export default function OverlayApp({
             ...common,
             type: "capture",
             data: {
-              image_url: note.captureData?.image || "", // map screenshot_url -> image_url
-              width: note.captureData?.area?.width || 0,
-              height: note.captureData?.area?.height || 0,
+              // [Transient] DB 저장 X. Storage 업로드용 Base64 데이터.
+              image_url: note.captureData?.image || "", // Base64 (fixed property name)
+              display_width: note.captureData?.area?.width || 0,
+              display_height: note.captureData?.area?.height || 0,
             },
           };
           break;
@@ -154,11 +157,7 @@ export default function OverlayApp({
           input = {
             ...common,
             type: "bookmark",
-            data: {
-              title: note.bookmarkData?.title || "",
-              description: note.bookmarkData?.description,
-              image: note.bookmarkData?.image,
-            },
+            data: {}, // [Refactor] Data is now empty for bookmarks (uses meta & title)
           };
           break;
         default:

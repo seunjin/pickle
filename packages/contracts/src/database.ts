@@ -8,7 +8,7 @@
  * DB 변경 시: `pnpm types:local` 또는 `pnpm types:remote` 실행
  */
 
-export type { Database } from "./database-generated";
+export type { Database, Json } from "./database-generated";
 
 // 자주 사용하는 Helper 타입 (Row, Insert, Update)
 import type { Database } from "./database-generated";

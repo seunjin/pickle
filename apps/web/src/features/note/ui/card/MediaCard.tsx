@@ -33,7 +33,7 @@ export const MediaCard = ({ note }: NoteCardProps) => {
           <div className="flex items-center gap-2">
             {/* 파비콘 */}
             <div className="relative h-4 w-4 shrink-0 overflow-hidden rounded bg-white">
-              {note.meta.favicon && (
+              {note.meta?.favicon && (
                 <img
                   src={note.meta.favicon}
                   alt=""
@@ -42,13 +42,12 @@ export const MediaCard = ({ note }: NoteCardProps) => {
               )}
             </div>
             <div className="truncate font-semibold text-base text-neutral-100">
-              {/* {note.meta.site_name || new URL(note.meta.
-                                        url).hostname} */}
-              {note.meta.title}
+              {/* [Refactor] Use top-level title directly */}
+              {note.title || "Untitled"}
             </div>
           </div>
           <div className="truncate text-[13px] text-base-muted">
-            {note.meta.description}
+            {note.meta?.description}
           </div>
         </div>
         <div className="flex gap-1.5">

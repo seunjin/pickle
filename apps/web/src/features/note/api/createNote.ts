@@ -28,8 +28,8 @@ export const createNote = async (newNote: CreateNoteInput): Promise<Note> => {
     workspace_id: workspace.workspace_id,
     user_id: user.id,
     type: newNote.type,
-    url: newNote.url,
-    content: newNote.memo ?? null,
+    url: newNote.meta.url, // [Fix] URL is nested in meta for input
+    memo: newNote.memo ?? null, // [Fix] Column name is 'memo'
     data: newNote.data,
     tags: newNote.tags ?? [],
   };

@@ -18,6 +18,7 @@ export interface NoteData {
   text?: string;
   url?: string;
   srcUrl?: string; // For image save
+  altText?: string; // [NEW] Image Alt Text
   timestamp?: number;
   mode?: ViewType;
   captureData?: CaptureData;
@@ -31,5 +32,4 @@ export interface NoteData {
   favicon?: string;
   siteName?: string;
   memo?: string;
-  altText?: string;
 }

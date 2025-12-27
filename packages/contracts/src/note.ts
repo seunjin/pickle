@@ -25,23 +25,31 @@ export const commonMetaDataSchema = z.object({
 // --- 2. 저장된 데이터 스키마 (순수 콘텐츠) ---
 // 경고: User 요청에 따라 여기에 meta를 포함하지 않습니다.
 // 이것은 순수한 콘텐츠 데이터(Type-specific content)만 정의합니다.
+// [Refactor] 2024-12-27: data 스키마 정리
 export const storedTextDataSchema = z.object({
   text: z.string(),
 });
 
 export const storedImageDataSchema = z.object({
-  alt_text: z.string().optional(),
+  // [Refactor] Image data is now empty.
+  // Original meta -> 'meta' column
+  // Asset -> 'assets' table
 });
 
 export const storedCaptureDataSchema = z.object({
-  width: z.number(),
-  height: z.number(),
+  display_width: z.number(),
+  display_height: z.number(),
 });
 
+export type StoredImageData = z.infer<typeof storedImageDataSchema>;
+export type StoredCaptureData = z.infer<typeof storedCaptureDataSchema>;
+export type StoredBookmarkData = z.infer<typeof storedBookmarkDataSchema>;
+
 export const storedBookmarkDataSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  image: optionalUrl,
+  // [Refactor] Bookmark data is now empty.
+  // Original meta -> 'meta' column
+  // User memo -> 'memo' column
+  // User title -> 'title' column (top-level)
 });
 
 // --- 3. 입력 데이터 스키마 (생성 페이로드) ---
@@ -51,13 +59,12 @@ export const storedBookmarkDataSchema = z.object({
 // 3-1. 타입별 입력 데이터 (Clean - Meta 없음)
 export const createTextDataSchema = storedTextDataSchema;
 export const createImageDataSchema = z.object({
-  image_url: z.string(), // Base64 or URL
-  alt_text: z.string().optional(),
+  image_url: z.string(), // Base64 or URL (Transient)
 });
 export const createCaptureDataSchema = z.object({
   image_url: z.string(),
-  width: z.number(),
-  height: z.number(),
+  display_width: z.number(),
+  display_height: z.number(),
 });
 export const createBookmarkDataSchema = storedBookmarkDataSchema;
 
@@ -90,6 +97,7 @@ const createInputMetaSchema = z.object({
 // 4-1. 공통 입력 필드 (생성)
 // 여기서 meta는 최상위 레벨에 위치합니다.
 const commonInputFields = z.object({
+  title: z.string().optional(), // [Refactor] User Title
   meta: createInputMetaSchema,
   memo: z.string().optional(),
   tags: z.array(z.string()).optional(),
@@ -101,6 +109,7 @@ const commonDbFields = z.object({
   workspace_id: z.string().uuid(),
   user_id: z.string().uuid(),
   asset_id: z.string().uuid().nullable(),
+  title: z.string().nullable(), // [Refactor] Top-level Title
   memo: z.string().nullable(),
   url: z.string().url(), // DB 데이터 무결성 체크
   // 핵심 변경: Meta를 Data와 분리하여 별도 컬럼으로 정의 (DB Schema Change Required)
@@ -167,27 +176,9 @@ export const strictNoteSchema = z.discriminatedUnion("type", [
   strictBookmarkNoteSchema,
 ]);
 
-// 6-3. 앱 모델 스키마 (변환)
-// DB에서 꺼낸 데이터를 앱에서 사용하기 편하게 변환합니다.
-// 6-3. 앱 모델 스키마 (변환)
-// DB에서 꺼낸 데이터를 앱에서 사용하기 편하게 변환합니다.
-export const noteSchema = strictNoteSchema.transform((row) => {
-  // 앱 레벨 메타데이터 구성 (Top-level Meta Column + URL Column)
-  const meta = row.meta || {};
-  const appMeta = {
-    ...meta,
-    title: (meta as { title?: string }).title,
-    url: row.url, // Source of Truth
-  };
-
-  return {
-    ...row,
-    memo: row.memo ?? undefined,
-    tags: row.tags ?? [],
-    meta: appMeta, // Unified access
-    data: row.data, // Clean data directly
-  } as Note; // Explicit cast to ensure Discriminated Union
-});
+// 6-3. 앱 모델 스키마 (변환 없음 - Zero Overhead)
+// UI 컴포넌트는 최상위 'url', 'title'을 직접 참조해야 합니다. (note.url, note.title)
+export const noteSchema = strictNoteSchema;
 
 // API 응답/저장용 데이터 타입 (Clean Data Only)
 // DB data 컬럼에는 순수 Type-specific 데이터만 저장됩니다.
@@ -197,30 +188,12 @@ export type StoredNoteData =
   | z.infer<typeof storedCaptureDataSchema>
   | z.infer<typeof storedBookmarkDataSchema>;
 
-type TransformToApp<
-  T extends {
-    data: StoredNoteData;
-    url: string;
-    meta: z.infer<typeof commonMetaDataSchema> | null;
-    memo: string | null;
-    tags: string[] | null;
-  },
-> = Omit<T, "meta" | "memo" | "tags"> & {
-  memo: string | undefined;
-  tags: string[];
-  meta: { url: string } & (Exclude<T["meta"], null> | Record<string, never>); // Ensure meta is object with url
-  data: T["data"];
-};
-
 // Explicitly define Note as a Discriminated Union
-export type Note =
-  | TransformToApp<z.infer<typeof strictTextNoteSchema>>
-  | TransformToApp<z.infer<typeof strictImageNoteSchema>>
-  | TransformToApp<z.infer<typeof strictCaptureNoteSchema>>
-  | TransformToApp<z.infer<typeof strictBookmarkNoteSchema>>;
+export type Note = z.infer<typeof strictNoteSchema>;
 
 // --- API 래퍼 (업데이트) ---
 export const updateNoteSchema = z.object({
+  title: z.string().optional(),
   memo: z.string().optional(),
   tags: z.array(z.string()).optional(),
   meta: z
@@ -239,37 +212,14 @@ export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
 // --- 7. 타입 검증 (스키마 우선) ---
 import { assetSchema } from "./asset";
 
-export const noteWithAssetSchema = strictNoteSchema
-  .and(z.object({ assets: assetSchema.nullable() }))
-  .transform((row) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const meta = row.meta || {};
-    const appMeta = {
-      ...meta,
-      title: (meta as { title?: string }).title,
-      url: row.url,
-    };
-    return {
-      ...row,
-      memo: row.memo ?? undefined,
-      tags: row.tags ?? [],
-      meta: appMeta,
-      data: row.data,
-    } as NoteWithAsset; // Explicit cast
-  });
+export const noteWithAssetSchema = strictNoteSchema.and(
+  z.object({ assets: assetSchema.nullable() }),
+);
 
 // Explicitly define NoteWithAsset as Discriminated Union
-// Same as Note but with assets field
-type WithAssets<T> = T & { assets: z.infer<typeof assetSchema> | null };
-
-export type NoteWithAsset =
-  | WithAssets<TransformToApp<z.infer<typeof strictTextNoteSchema>>>
-  | WithAssets<TransformToApp<z.infer<typeof strictImageNoteSchema>>>
-  | WithAssets<TransformToApp<z.infer<typeof strictCaptureNoteSchema>>>
-  | WithAssets<TransformToApp<z.infer<typeof strictBookmarkNoteSchema>>>;
+export type NoteWithAsset = z.infer<typeof noteWithAssetSchema>;
 
 // DB 일관성 체크
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const _checkNoteSchema = (
   x: z.infer<typeof strictNoteSchema>,
 ): NoteRow => x;
