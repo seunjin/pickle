@@ -25,7 +25,7 @@ export const Sidebar = () => {
   }
 
   return (
-    <nav className="flex h-full flex-col bg-neutral-900 px-6 py-[30px]">
+    <nav className="flex h-full flex-col bg-neutral-900 px-3 py-[30px]">
       {/* 상단: 로고 영역 */}
       <div className="flex items-center justify-between pb-10">
         {/* 로고 placeholder */}
