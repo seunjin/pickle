@@ -106,15 +106,15 @@ export default function OverlayApp({
       // Common fields
       const inputMeta = {
         url: note.url,
-        favicon: note.bookmarkData?.favicon, // Optional
-        site_name: note.bookmarkData?.site_name, // Optional
-        title: note.bookmarkData?.title, // Optional (or undefined)
-        description: note.bookmarkData?.description,
-        image: note.bookmarkData?.image,
+        favicon: note.pageMeta?.favicon, // Optional
+        site_name: note.pageMeta?.site_name, // Optional
+        title: note.pageMeta?.title, // Optional (or undefined)
+        description: note.pageMeta?.description,
+        image: note.pageMeta?.image,
       };
 
       const common = {
-        title: note.bookmarkData?.title, // [NEW] Set top-level title from metadata
+        title: note.pageMeta?.title, // [NEW] Set top-level title from metadata
         meta: inputMeta, // Moved to top-level meta
         memo: note.memo,
         tags: [],

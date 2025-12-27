@@ -31,52 +31,48 @@ export function BookmarkEditor({
             페이지 분석 중...
           </p>
         </div>
-      ) : note.bookmarkData ? (
+      ) : note.pageMeta ? (
         <div className="flex flex-1 flex-col gap-3 overflow-y-auto">
           <div className="group overflow-hidden rounded-xl border bg-gray-50 shadow-sm transition-shadow hover:shadow-md">
-            {note.bookmarkData.image && (
+            {note.pageMeta.image && (
               <img
-                src={note.bookmarkData.image}
+                src={note.pageMeta.image}
                 alt="OG Img"
                 className="h-32 w-full object-cover"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  console.error("Image load failed:", note.bookmarkData?.image);
+                  console.error("Image load failed:", note.pageMeta?.image);
                   e.currentTarget.style.display = "none";
                 }}
               />
             )}
             <div className="flex flex-col gap-2 p-3">
               <div className="flex items-center gap-1.5 opacity-70">
-                {note.bookmarkData.favicon ? (
-                  <img
-                    src={note.bookmarkData.favicon}
-                    alt=""
-                    className="h-3 w-3"
-                  />
+                {note.pageMeta.favicon ? (
+                  <img src={note.pageMeta.favicon} alt="" className="h-3 w-3" />
                 ) : (
                   <span className="text-[10px]">🔗</span>
                 )}
                 <span className="font-semibold text-[10px] text-gray-500">
-                  {note.bookmarkData.site_name}
+                  {note.pageMeta.site_name}
                 </span>
               </div>
               <div>
                 <h3 className="mb-1 line-clamp-2 font-bold text-sm leading-tight">
-                  {note.bookmarkData.title}
+                  {note.pageMeta.title}
                 </h3>
                 <p className="line-clamp-2 text-gray-500 text-xs">
-                  {note.bookmarkData.description}
+                  {note.pageMeta.description}
                 </p>
               </div>
               <div className="mt-1 flex flex-col gap-0.5 border-gray-100 border-t pt-2">
                 <a
-                  href={note.bookmarkData.url}
+                  href={note.pageMeta.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="truncate text-[10px] text-blue-500 hover:underline"
                 >
-                  {note.bookmarkData.url}
+                  {note.pageMeta.url}
                 </a>
                 <span className="text-right text-[10px] text-gray-400">
                   {note.timestamp
@@ -109,7 +105,7 @@ export function BookmarkEditor({
       )}
       <button
         type="button"
-        disabled={!note.bookmarkData}
+        disabled={!note.pageMeta}
         onClick={onSave}
         className="w-full rounded-lg bg-yellow-500 py-3 font-bold text-white shadow-md transition-colors hover:bg-yellow-600"
       >

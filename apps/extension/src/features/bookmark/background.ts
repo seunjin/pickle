@@ -1,6 +1,6 @@
 import { sendMessageToContentScript } from "@background/messaging";
 import { setNote } from "@shared/storage";
-import type { BookmarkData } from "@shared/types";
+import type { PageMetadata } from "@shared/types";
 
 export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
   if (!tab.windowId || !tab.id) return;
@@ -25,7 +25,7 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
     // Content Script에 메타데이터 요청
     const metadata = (await sendMessageToContentScript(tab.id, {
       action: "GET_METADATA",
-    })) as BookmarkData;
+    })) as PageMetadata;
 
     // 결과 저장 및 로딩 해제
     await setNote(tab.id, {
@@ -34,7 +34,7 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
       timestamp: Date.now(),
       mode: "bookmark",
       isLoading: false,
-      bookmarkData: metadata,
+      pageMeta: metadata,
     });
   } catch (error) {
     console.warn("메타데이터 추출 실패 (Retry Failed):", error);
@@ -46,7 +46,7 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
       timestamp: Date.now(),
       mode: "bookmark",
       isLoading: false,
-      bookmarkData: {
+      pageMeta: {
         title: tab.title || "No Title",
         url: tab.url || "",
         description:

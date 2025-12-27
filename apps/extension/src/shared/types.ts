@@ -5,7 +5,8 @@ export interface CaptureData {
   area: { x: number; y: number; width: number; height: number };
 }
 
-export interface BookmarkData {
+// [Refactor] Renamed from BookmarkData to PageMetadata to reflect generic usage
+export interface PageMetadata {
   title: string;
   description: string;
   image: string;
@@ -22,7 +23,7 @@ export interface NoteData {
   timestamp?: number;
   mode?: ViewType;
   captureData?: CaptureData;
-  bookmarkData?: BookmarkData;
+  pageMeta?: PageMetadata; // [Refactor] Renamed from bookmarkData
   isLoading?: boolean;
 
   // Fields used in OverlayApp but previously missing from type

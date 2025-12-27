@@ -2,7 +2,7 @@ import { startBookmarkFlow } from "@features/bookmark/background";
 import { startCaptureFlow } from "@features/capture/background";
 import { saveNoteToSupabase } from "@features/note/api/saveNote";
 import { clearNote, setNote, updateNote } from "@shared/storage";
-import type { BookmarkData, CaptureData, ViewType } from "@shared/types";
+import type { CaptureData, PageMetadata, ViewType } from "@shared/types";
 import { setupContextMenus } from "./contextMenus";
 import { sendMessageToContentScript } from "./messaging";
 
@@ -67,12 +67,12 @@ chrome.contextMenus.onClicked.addListener(
       // 3) [ADD] Text/Image 모드에서도 메타데이터(파비콘 등)를 가져와 저장합니다.
       // 저장이 비동기로 이루어져도 오버레이 UI는 이미 열려있으므로 사용자 경험에 지연이 없습니다.
       sendMessageToContentScript(tab.id, { action: "GET_METADATA" })
-        .then((metadata) => {
+        .then((metadata: PageMetadata) => {
           if (metadata && tab.id) {
             console.log("Metadata fetched in background:", metadata);
             // import type { BookmarkData } ... (위에서 추가 필요)
             updateNote(tab.id, {
-              bookmarkData: metadata as BookmarkData,
+              pageMeta: metadata,
             });
           }
         })
@@ -135,7 +135,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               mode: "capture", // 뷰 모드를 캡쳐로 변경
             });
 
-            // 🚨 핵심 수정: 캡쳐 완료 후 오버레이를 열도록 명시적 요청
+            // 🚨 핵심 수정: 캡처 완료 후 메타데이터(Title, Favicon 등) 가져오기
+            sendMessageToContentScript(tabId, { action: "GET_METADATA" })
+              .then((metadata) => {
+                if (metadata) {
+                  console.log("Metadata fetched after capture:", metadata);
+                  updateNote(tabId, {
+                    pageMeta: metadata as PageMetadata,
+                  });
+                }
+              })
+              .catch((err) =>
+                console.warn("Capture metadata fetch failed:", err),
+              );
+
+            // 오버레이 열기 요청
             await sendMessageToContentScript(tabId, {
               action: "OPEN_OVERLAY",
               mode: "capture",
