@@ -192,6 +192,9 @@ importers:
       pascalcase:
         specifier: ^1.0.0
         version: 1.0.0
+      tailwindcss:
+        specifier: ^4.1.18
+        version: 4.1.18
       tsup:
         specifier: ^8.0.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)

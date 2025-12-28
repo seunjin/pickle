@@ -1,6 +1,7 @@
 import type * as React from "react";
 import type { SVGProps } from "react";
 import { ICON_PALETTE, type IconName } from "./icons";
+import { cn } from "./lib/utils";
 
 /**
  * 아이콘 이름(name)에 따라 가능한 사이즈(size)를 동적으로 추론하는 타입 정의
@@ -11,11 +12,13 @@ export interface UnifiedIconProps<T extends IconName>
   extends Omit<SVGProps<SVGSVGElement>, "size"> {
   name: T;
   size: IconSize<T>;
+  className?: string;
 }
 
 export const Icon = <T extends IconName>({
   name,
   size,
+  className,
   ...props
 }: UnifiedIconProps<T>) => {
   const iconSet = ICON_PALETTE[name];
@@ -37,7 +40,12 @@ export const Icon = <T extends IconName>({
   }
 
   return (
-    <SvgComponent width={size as number} height={size as number} {...props} />
+    <SvgComponent
+      width={size as number}
+      height={size as number}
+      className={cn("text-base-muted", className)}
+      {...props}
+    />
   );
 };
 

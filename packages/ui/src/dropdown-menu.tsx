@@ -82,14 +82,13 @@ const DropdownMenuItem = React.forwardRef<
       "data-[inset]:pl-8",
 
       /* --- [아이콘(SVG) 공통 스타일] --- */
-      "[&_svg:not([class*='size-'])]:size-3.5 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-      "[&_svg:not([class*='text-'])]:transition",
+      "[&_svg:not([class*='size-'])]:size-3.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:text-base-foreground",
 
       /* --- [Destructive 변형 - 빨간색 메뉴] --- */
-      "data-[variant=destructive]:hover:text-destructive",
-      "data-[variant=destructive]:focus:text-destructive",
-      "data-[variant=destructive]:hover:[&_svg]:text-destructive", // 아이콘도 항상 텍스트 색상(빨강)을 따르도록
-      "transition hover:bg-neutral-700/90",
+      "data-[variant=destructive]:hover:text-red-500",
+      "data-[variant=destructive]:focus:text-red-500",
+      "data-[variant=destructive]:hover:[&_svg]:text-red-500", // 아이콘도 항상 텍스트 색상(빨강)을 따르도록
+      "hover:bg-neutral-700/90",
       className,
     )}
     {...props}

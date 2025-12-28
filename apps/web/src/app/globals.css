@@ -5,6 +5,7 @@
 
 /* UI 패키지의 소스 파일들을 스캔 대상에 추가 */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../../packages/icons/src/**/*.{ts,tsx}";
 
 body {
   background: var(--color-base-background);

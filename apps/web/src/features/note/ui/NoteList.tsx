@@ -35,7 +35,7 @@ export function NoteList() {
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,366px)] gap-3">
+    <div className="grid grid-cols-[repeat(auto-fit,295px)] gap-4">
       {notes.map((note) => (
         <NoteCard key={note.id} note={note} onDelete={deleteNote} />
       ))}

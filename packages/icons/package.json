@@ -29,6 +29,7 @@
     "@types/node": "^20.10.0",
     "@types/react": "^19.0.1",
     "pascalcase": "^1.0.0",
+    "tailwindcss": "^4.1.18",
     "tsup": "^8.0.1",
     "typescript": "^5.7.2"
   },

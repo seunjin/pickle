@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useSessionContext } from "../auth/model/SessionContext";
 
 export const Sidebar = () => {
-  const { workspace, appUser, isLoading } = useSessionContext();
+  const { isLoading } = useSessionContext();
 
   if (isLoading) {
     return (
@@ -33,13 +33,6 @@ export const Sidebar = () => {
           <div className="h-6 w-6 rounded bg-base-primary" />
           <span className="font-bold text-lg text-neutral-200">pickle</span>
         </div>
-        {/* 사이드바 토글 버튼 */}
-        <button
-          type="button"
-          className="text-base-muted transition-colors hover:text-neutral-300"
-        >
-          <Icon name="layout" size={20} />
-        </button>
       </div>
 
       {/* 메뉴 섹션 */}
@@ -54,37 +47,35 @@ export const Sidebar = () => {
               badge={3}
               active
             />
-            <MenuItem
-              href="/dashboard"
-              icon="archive"
-              label="Inbox"
-              badge={3}
-            />
+
             <MenuItem href="/favorites" icon="bookmark" label="즐겨찾기" />
-            <MenuItem href="/tags" icon="tag" label="모든 태그" />
           </ul>
 
           {/* NOTES 섹션 */}
           <div className="pb-40">
             <div className="mb-2 flex items-center justify-between px-2">
-              <span className="font-semibold text-[13px] text-neutral-650 leading-[13px] tracking-wider">
-                NOTES
+              <span className="font-semibold text-[13px] text-neutral-650 leading-[1] tracking-wider">
+                FOLDERS
               </span>
             </div>
 
             <ul className="flex flex-col gap-1">
               <NoteMenuItem
                 href="/dashboard"
-                icon="note_empty"
-                label={workspace?.name ?? "Workspace"}
+                icon="folder"
+                label={"제목없음"}
               />
               {/* 새 노트 버튼 */}
               <li className="px-3 py-2">
                 <button
                   type="button"
-                  className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-muted-foreground active:text-base-primary"
+                  className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground active:text-base-primary"
                 >
-                  <Icon name="plus" size={20} />
+                  <Icon
+                    name="plus"
+                    size={20}
+                    className="text-color-[inherit]"
+                  />
                   <span>새 노트 생성하기</span>
                 </button>
               </li>
@@ -92,39 +83,11 @@ export const Sidebar = () => {
           </div>
         </div>
 
-        {/* 휴지통 */}
         <div className="mt-auto">
+          {/* 설정 */}
+          <MenuItem href="/trash" icon="setting" label="설정" />
+          {/* 휴지통 */}
           <MenuItem href="/trash" icon="trash" label="휴지통" />
-        </div>
-      </div>
-
-      {/* 하단: 프로필 */}
-      <div className="mt-[24px] border-base-border border-t">
-        {/* 사용자 프로필 */}
-        <div className="flex justify-between pt-[24px]">
-          <div className="flex items-center gap-3">
-            {appUser?.avatar_url ? (
-              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-base-border">
-                <img
-                  src={appUser.avatar_url}
-                  alt="Avatar"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-base-primary text-center font-bold text-neutral-900">
-                {appUser?.full_name?.[0] ?? "U"}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-base-foreground text-sm">
-                {appUser?.full_name || "User"}
-              </p>
-              <p className="truncate text-base-muted text-xs">
-                {appUser?.email}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </nav>
@@ -168,15 +131,17 @@ const MenuItemContainer = ({
         <div className={cn("flex min-w-0 flex-1 items-center gap-2")}>
           <Icon
             name={icon}
+            // @ts-expect-error: icon union type causes size inference to be never
             size={20}
             className={cn(
-              "w-5 shrink-0 text-base-muted",
+              "w-5 shrink-0 transition-colors",
               active && "text-base-primary group-hover:text-base-primary",
+              "group-hover:text-neutral-300",
             )}
           />
           <span
             className={cn(
-              "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-muted-foreground",
+              "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-foreground",
               active && "text-base-primary group-hover:text-base-primary",
             )}
           >
@@ -242,17 +207,23 @@ const NoteMenuItem = (props: MenuItemContainerProps) => {
             className="w-40"
           >
             <DropdownMenuLabel>NOTES</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => {
-                // TODO: 상위에서 주입받은이름 변경 모달 실행 로직
-                console.log("이름 변경 클릭");
-              }}
-            >
-              이름 변경
+            <DropdownMenuItem asChild>
+              <button
+                type="button"
+                className="w-full"
+                onClick={() => {
+                  // TODO: 상위에서 주입받은이름 변경 모달 실행 로직
+                  console.log("이름 변경 클릭");
+                }}
+              >
+                이름 변경
+              </button>
             </DropdownMenuItem>
 
-            <DropdownMenuItem variant="destructive">
-              <Icon name="trash" size={20} /> 삭제
+            <DropdownMenuItem variant="destructive" asChild>
+              <button type="button" className="w-full">
+                <Icon name="trash" size={20} className="" /> 삭제
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
