@@ -157,6 +157,19 @@ export type IconName = keyof typeof ICON_PALETTE;
   await fs.writeFile(ICONS_PATH, `${iconsContent.trim()}\n`);
 
   console.log(`✨ All icons generated and ${ICONS_PATH} updated!`);
+
+  // Biome 적용으로 불필요한 diff 방지
+  console.log("🎨 Running Biome format on generated files...");
+  try {
+    execSync(
+      `npx @biomejs/biome format --write "${REACT_DIR}" "${ICONS_PATH}"`,
+      {
+        stdio: "inherit",
+      },
+    );
+  } catch (_error) {
+    console.warn("⚠️  Biome execution failed, but icons were generated.");
+  }
 }
 
 generate().catch(console.error);

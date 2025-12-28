@@ -1,7 +1,12 @@
 import type { SVGProps } from "react";
 import IconArchive20 from "./react/IconArchive20";
+import IconArrowDown16 from "./react/IconArrowDown16";
+import IconArrowLeft16 from "./react/IconArrowLeft16";
+import IconArrowRight16 from "./react/IconArrowRight16";
+import IconArrowUp16 from "./react/IconArrowUp16";
 import IconBookmark16 from "./react/IconBookmark16";
 import IconBookmark20 from "./react/IconBookmark20";
+import IconCheck16 from "./react/IconCheck16";
 import IconDelete16 from "./react/IconDelete16";
 import IconEdit16 from "./react/IconEdit16";
 import IconEllipsis16 from "./react/IconEllipsis16";
@@ -29,8 +34,13 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
 
 export {
   IconArchive20,
+  IconArrowDown16,
+  IconArrowLeft16,
+  IconArrowRight16,
+  IconArrowUp16,
   IconBookmark16,
   IconBookmark20,
+  IconCheck16,
   IconDelete16,
   IconEdit16,
   IconEllipsis16,
@@ -56,9 +66,24 @@ export const ICON_PALETTE = {
   archive: {
     20: IconArchive20,
   },
+  arrow_down: {
+    16: IconArrowDown16,
+  },
+  arrow_left: {
+    16: IconArrowLeft16,
+  },
+  arrow_right: {
+    16: IconArrowRight16,
+  },
+  arrow_up: {
+    16: IconArrowUp16,
+  },
   bookmark: {
     16: IconBookmark16,
     20: IconBookmark20,
+  },
+  check: {
+    16: IconCheck16,
   },
   delete: {
     16: IconDelete16,
