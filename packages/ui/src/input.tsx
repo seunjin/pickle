@@ -12,7 +12,7 @@ const inputVariants = cva(
     "border border-form-input-border bg-form-input-background text-base-foreground outline-none",
 
     /* 3. 타이포그래피 */
-    "text-base placeholder:text-form-input-placeholder md:text-sm",
+    "text-base placeholder:text-form-input-placeholder",
 
     /* 4. 애니메이션 & 상태 전환 */
     "transition-[color,box-shadow]",
@@ -21,7 +21,7 @@ const inputVariants = cva(
     "focus-visible:ring-[1px] focus-visible:ring-base-primary",
 
     /* 6. 선택(Selection) 스타일 */
-    "selection:bg-base-muted selection:bg-primary",
+    "selection:bg-base-muted-foreground",
 
     /* 7. 파일 인풋(File Input) 전용 스타일 */
     "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm",

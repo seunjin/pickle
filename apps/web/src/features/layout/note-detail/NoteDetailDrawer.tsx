@@ -1,11 +1,12 @@
 import type { NoteWithAsset } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import { useDialogController } from "@pickle/lib";
-import { ScrollArea } from "@pickle/ui";
+import { ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
+import { TAG_VARIANTS } from "@/shared/constants/tag";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
@@ -42,6 +43,7 @@ const type_per_icon: Record<
 export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+  const [createTag, setCreateTag] = useState<boolean>(false);
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -89,7 +91,8 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                   note={note}
                   className="mb-5 h-[200px] overflow-clip rounded-xl"
                 />
-                <div className="flex items-center justify-between">
+                {/* 라벨 및 북마크 버튼 */}
+                <div className="flex items-center justify-between pb-3">
                   <div className="flex items-center gap-1.5">
                     <div className={type_per_icon[note.type]}>
                       {note.type === "bookmark" && (
@@ -123,13 +126,106 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                 </div>
 
                 {/* form */}
-                <div>{/* title */}</div>
-                <div className="h-[1000px]"></div>
+                <div className="mb-6 flex flex-col gap-2 border-base-border-light border-b pb-3">
+                  {/* TITLE */}
+                  <TextareaContainLabel label="TITLE" required />
+
+                  {/* CONTENT */}
+                  {note.type === "text" && (
+                    <TextareaContainLabel label="CONTENT" required />
+                  )}
+                  {/* URL */}
+                  <TextareaContainLabel label="URL" required />
+                  {/* MEMO */}
+                  <TextareaContainLabel label="MEMO" required />
+                </div>
+                <div className="mb-5 border-base-border-light border-b pb-3">
+                  <div className="flex h-9 items-center justify-between">
+                    <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
+                      TAGS
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCreateTag(!createTag)}
+                      className="flex items-center justify-between text-base-muted"
+                    >
+                      <Icon name={"plus"} className="text-inherit" size={16} />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      {
+                        id: 1,
+                        style: "purple",
+                        name: "design",
+                      },
+                      {
+                        id: 2,
+                        style: "rose",
+                        name: "dev",
+                      },
+                      {
+                        id: 3,
+                        style: "green",
+                        name: "ideation",
+                      },
+                      {
+                        id: 4,
+                        style: "orange",
+                        name: "planning",
+                      },
+                      {
+                        id: 5,
+                        style: "yellow",
+                        name: "inspiration",
+                      },
+                      {
+                        id: 6,
+                        style: "blue",
+                        name: "strategy",
+                      },
+                    ].map((tag) => {
+                      const style =
+                        TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
+                      return (
+                        <div
+                          key={tag.id}
+                          className={cn(
+                            "flex h-[26px] items-center gap-0.5 rounded-[4px] border px-1.5",
+                            style.textColor,
+                            style.backgroundColor,
+                            style.borderColor,
+                          )}
+                        >
+                          #{tag.name}
+                          <button type="button">
+                            <Icon
+                              name="delete"
+                              size={16}
+                              className={cn(style.buttonColor)}
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </ScrollArea>
             {/* drawer footer */}
-            <div className="px-5">
-              <button type="button">테스트</button>
+            <div className="flex gap-2 px-5">
+              <button
+                type="button"
+                className="flex size-[38px] items-center justify-center rounded-lg border border-base-border-light"
+              >
+                <Icon name="trash" size={20} />
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-lg bg-base-primary font-semibold text-neutral-900 text-sm disabled:bg-base-primary/50 disabled:text-base-disabled"
+              >
+                저장하기
+              </button>
             </div>
           </motion.div>
         </motion.div>
