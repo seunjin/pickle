@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@pickle/icons";
 import { useState } from "react";
-import { useSessionContext } from "../auth/model/SessionContext";
+import { useSessionContext } from "@/features/auth";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 

@@ -24,6 +24,9 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "a11y": {
+        "useSemanticElements": "off"
+      },
       "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off"

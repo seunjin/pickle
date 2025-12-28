@@ -1,5 +1,5 @@
 import { AuthGuard } from "@/features/auth/ui/AuthGuard";
-import { Sidebar } from "@/features/layout/Sidebar";
+import { Sidebar } from "@/features/layout/sidebar/Sidebar";
 
 export default function ClientLayout({
   children,
