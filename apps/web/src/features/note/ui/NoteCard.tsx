@@ -22,7 +22,7 @@ export function NoteCard({ note }: NoteCardProps) {
         <div className="min-w-0 pb-3">
           <NoteCardHeader type={note.type} />
 
-          <div className="ellipsis line-clamp-2 pb-2 font-semibold text-base text-neutral-100 leading-[1.3]">
+          <div className="ellipsis line-clamp-2 pb-2 font-semibold text-[15px] text-neutral-100 leading-[1.3]">
             {note.title || "Untitled"}
           </div>
           <a
