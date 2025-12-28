@@ -40,8 +40,8 @@ const DropdownMenuContent = React.forwardRef<
       data-slot="dropdown-menu-content"
       sideOffset={sideOffset}
       className={cn(
-        "border-neutral-700 bg-neutral-850",
-        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border p-1 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in",
+        "border-base-border bg-base-foreground-background",
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border p-[5px] shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in",
         className,
       )}
       {...props}
@@ -72,7 +72,7 @@ const DropdownMenuItem = React.forwardRef<
     data-variant={variant}
     className={cn(
       /* --- [기본 레이아웃 및 스타일] --- */
-      "relative flex select-none items-center gap-1 rounded-sm px-1.5 py-1 text-[13px] outline-hidden",
+      "relative flex select-none items-center gap-1 rounded-sm px-2 py-2 text-[13px] text-base-muted-foreground outline-hidden hover:text-base-foreground hover:[&_svg]:text-base-foreground",
       "cursor-pointer",
 
       /* --- [비활성화 상태] --- */
@@ -82,7 +82,7 @@ const DropdownMenuItem = React.forwardRef<
       "data-[inset]:pl-8",
 
       /* --- [아이콘(SVG) 공통 스타일] --- */
-      "[&_svg:not([class*='size-'])]:size-3.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:text-base-foreground",
+      "[&_svg:not([class*='size-'])]:size-3.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:text-base-muted-foreground",
 
       /* --- [Destructive 변형 - 빨간색 메뉴] --- */
       "data-[variant=destructive]:hover:text-red-500",
@@ -169,7 +169,7 @@ function DropdownMenuLabel({
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(
-        "px-1.5 py-1 font-medium text-[10px] text-muted-foreground data-[inset]:pl-8",
+        "px-2 py-2 font-medium text-[10px] text-muted-foreground data-[inset]:pl-8",
         className,
       )}
       {...props}
@@ -225,7 +225,7 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-default select-none items-center gap-2 rounded-sm px-1.5 py-1 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[inset]:pl-8 data-[state=open]:text-accent-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[inset]:pl-8 data-[state=open]:text-accent-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
       {...props}
