@@ -121,6 +121,7 @@
   );
   --color-base-foreground-background: var(--color-neutral-850);
   --color-base-disabled: var(--color-neutral-700);
+  --color-base-border-light: var(--color-neutral-700);
 
   /* tag */
   --color-tag-purple: oklch(0.70268 0.16432 286.95162);
@@ -150,7 +151,4 @@
   /* card */
   --color-card-background: var(--color-neutral-900);
   --color-card-border: var(--color-base-border);
-  --color-card-Color-3: oklch(1 0 0);
-  --color-card-Color-4: oklch(1 0 0);
-  --color-card-Color-5: oklch(1 0 0);
 }
