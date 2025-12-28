@@ -22,21 +22,20 @@ const type_per_class: Record<
   bookmark: "font-medium text-[13px] text-yellow-500 tracking-wider",
 };
 
-const type_per_icon: Record<
-  NoteWithAsset["type"],
-  HTMLAttributes<"span">["className"]
-> = {
-  text: "size-[14px] rounded-sm bg-blue-500/10",
-  image: "size-[14px] rounded-sm bg-green-500/10",
-  capture: "size-[14px] rounded-sm bg-green-500/10",
-  bookmark: "size-[14px] rounded-sm bg-yellow-500/10",
-};
 export function NoteCardHeader({ type }: NoteCardHeaderProps) {
   return (
     <div className="mb-1.5 flex w-full items-center">
       <div className="flex w-full items-center">
-        <div className="flex items-center gap-2">
-          <div className={type_per_icon[type]}></div>
+        <div className="flex items-center gap-1">
+          <div>
+            {type === "bookmark" && (
+              <img src="/type-01.svg" alt="bookmark type icon" />
+            )}
+            {(type === "image" || type === "capture") && (
+              <img src="/type-02.svg" alt="img type icon" />
+            )}
+            {type === "text" && <img src="/type-03.svg" alt="text type icon" />}
+          </div>
           <span className={type_per_class[type]}>
             {TYPE_LABELS[type] || type.toUpperCase()}
           </span>

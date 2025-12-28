@@ -40,20 +40,18 @@ export const AssetImage = ({ path, alt, className }: AssetImageProps) => {
 
   if (error) {
     return (
-      <div className="flex h-[140px] w-full select-none items-center justify-center bg-base-muted text-center font-semibold text-base text-neutral-600">
+      <div className="flex h-full w-full select-none items-center justify-center bg-base-muted text-center font-semibold text-base text-neutral-600">
         Failed to load image
       </div>
     );
   }
 
   if (!signedUrl) {
-    return (
-      <div className="h-[140px] w-full animate-pulse rounded bg-gray-200" />
-    );
+    return <div className="h-full w-full animate-pulse rounded bg-gray-200" />;
   }
 
   return (
-    <div className={`relative h-[140px] w-full overflow-hidden ${className}`}>
+    <div className={`relative h-full w-full overflow-hidden ${className}`}>
       {/* Next/Image usage with external URL requires domain config. 
             For Supabase standard setup, the domain is often known.
             If not configured in next.config.mjs, it will crash.
