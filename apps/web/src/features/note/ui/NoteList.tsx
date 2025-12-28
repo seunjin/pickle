@@ -1,26 +1,22 @@
 "use client";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { deleteNote as deleteNoteApi } from "../api/deleteNote";
-import { noteKeys, noteQueries } from "../model/noteQueries";
+import { useSuspenseQuery } from "@tanstack/react-query";
+// import { deleteNote as deleteNoteApi } from "../api/deleteNote";
+import { noteQueries } from "../model/noteQueries";
 import { NoteCard } from "./NoteCard";
 
 export function NoteList() {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   // 1. Fetch Data (Suspense)
   const { data: notes } = useSuspenseQuery(noteQueries.all());
 
   // 2. Mutation (Delete)
-  const { mutate: deleteNote } = useMutation({
-    mutationFn: (id: string) => deleteNoteApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: noteKeys.all });
-    },
-  });
+  // const { mutate: deleteNote } = useMutation({
+  //   mutationFn: (id: string) => deleteNoteApi(id),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: noteKeys.all });
+  //   },
+  // });
 
   if (notes.length === 0) {
     return (
@@ -37,7 +33,7 @@ export function NoteList() {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,295px)] gap-4">
       {notes.map((note) => (
-        <NoteCard key={note.id} note={note} onDelete={deleteNote} />
+        <NoteCard key={note.id} note={note} />
       ))}
     </div>
   );
