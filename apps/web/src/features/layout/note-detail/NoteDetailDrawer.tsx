@@ -210,10 +210,56 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     })}
                   </div>
                 </div>
+                <div className="pb-20">
+                  <div className="flex h-9 items-center justify-between">
+                    <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
+                      DETAILS
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {(note.type === "image" || note.type === "capture") && (
+                      <>
+                        <dl className="flex items-center">
+                          <dt className="w-[70px] text-[12px] text-neutral-500">
+                            파일 종류
+                          </dt>
+                          <dd className="text-[13px] text-neutral-500">
+                            webp 이미지
+                          </dd>
+                        </dl>
+                        <dl className="flex items-center">
+                          <dt className="w-[70px] text-[12px] text-neutral-500">
+                            파일 크기
+                          </dt>
+                          <dd className="text-[13px] text-neutral-500">
+                            129,344 bytes
+                          </dd>
+                        </dl>
+                      </>
+                    )}
+
+                    <dl className="flex items-center">
+                      <dt className="w-[70px] text-[12px] text-neutral-500">
+                        등록일
+                      </dt>
+                      <dd className="text-[13px] text-neutral-500">
+                        2025-12-24 15:22
+                      </dd>
+                    </dl>
+                    <dl className="flex items-center">
+                      <dt className="w-[70px] text-[12px] text-neutral-500">
+                        수정일
+                      </dt>
+                      <dd className="text-[13px] text-neutral-500">
+                        2025-12-24 15:22
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
               </div>
             </ScrollArea>
             {/* drawer footer */}
-            <div className="flex gap-2 px-5">
+            <div className="flex gap-2 border-base-border-light border-t px-5 pt-5">
               <button
                 type="button"
                 className="flex size-[38px] items-center justify-center rounded-lg border border-base-border-light"
