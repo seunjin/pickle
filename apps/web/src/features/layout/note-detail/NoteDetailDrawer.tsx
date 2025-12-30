@@ -1,7 +1,7 @@
 import type { NoteWithAsset } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import { useDialogController } from "@pickle/lib";
-import { ScrollArea, TextareaContainLabel } from "@pickle/ui";
+import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
@@ -263,20 +263,11 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                 </div>
               </div>
             </ScrollArea>
+
             {/* drawer footer */}
             <div className="flex gap-2 border-base-border-light border-t px-5 pt-5">
-              <button
-                type="button"
-                className="flex size-[38px] items-center justify-center rounded-lg border border-base-border-light"
-              >
-                <Icon name="trash" size={"20"} />
-              </button>
-              <button
-                type="button"
-                className="flex-1 rounded-lg bg-base-primary font-semibold text-neutral-900 text-sm disabled:bg-base-primary/50 disabled:text-base-disabled"
-              >
-                저장하기
-              </button>
+              <Button.Action icon="trash" />
+              <Button.Default className="flex-1">저장하기</Button.Default>
             </div>
           </motion.div>
         </motion.div>
