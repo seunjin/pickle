@@ -64,7 +64,7 @@ export const Sidebar = () => {
                 <Icon
                   name={foldersFolding ? "arrow_up" : "arrow_down"}
                   className="text-inherit"
-                  size={16}
+                  size={"16"}
                 />
               </button>
             </div>
@@ -100,7 +100,7 @@ export const Sidebar = () => {
                 >
                   <Icon
                     name="plus"
-                    size={20}
+                    size={"20"}
                     className="text-color-[inherit]"
                   />
                   <span>새 노트 생성하기</span>
@@ -122,7 +122,7 @@ export const Sidebar = () => {
                 <Icon
                   name={tagsFolding ? "arrow_up" : "arrow_down"}
                   className="text-inherit"
-                  size={16}
+                  size={"16"}
                 />
               </button>
             </div>
@@ -168,7 +168,11 @@ export const Sidebar = () => {
                       key={tag.id}
                       className="group flex h-9 cursor-pointer items-center gap-2 rounded-sm px-3 transition-[background-color] hover:bg-base-foreground-background"
                     >
-                      <Icon name="tag" size={20} className={color(tag.style)} />
+                      <Icon
+                        name="tag"
+                        size={"20"}
+                        className={color(tag.style)}
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-muted-foreground transition-colors group-hover:text-base-foreground">
                           {tag.name}

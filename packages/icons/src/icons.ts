@@ -1,4 +1,3 @@
-import type { SVGProps } from "react";
 import IconArchive20 from "./react/IconArchive20";
 import IconArrowDown16 from "./react/IconArrowDown16";
 import IconArrowLeft16 from "./react/IconArrowLeft16";
@@ -26,11 +25,6 @@ import IconSetting20 from "./react/IconSetting20";
 import IconTag20 from "./react/IconTag20";
 import IconTrash16 from "./react/IconTrash16";
 import IconTrash20 from "./react/IconTrash20";
-
-export interface IconProps extends SVGProps<SVGSVGElement> {
-  size?: number;
-  title?: string;
-}
 
 export {
   IconArchive20,
@@ -64,78 +58,76 @@ export {
 
 export const ICON_PALETTE = {
   archive: {
-    20: IconArchive20,
+    "20": IconArchive20,
   },
   arrow_down: {
-    16: IconArrowDown16,
+    "16": IconArrowDown16,
   },
   arrow_left: {
-    16: IconArrowLeft16,
+    "16": IconArrowLeft16,
   },
   arrow_right: {
-    16: IconArrowRight16,
+    "16": IconArrowRight16,
   },
   arrow_up: {
-    16: IconArrowUp16,
+    "16": IconArrowUp16,
   },
   bookmark: {
-    16: IconBookmark16,
-    20: IconBookmark20,
+    "16": IconBookmark16,
+    "20": IconBookmark20,
   },
   check: {
-    16: IconCheck16,
+    "16": IconCheck16,
   },
   delete: {
-    16: IconDelete16,
+    "16": IconDelete16,
   },
   edit: {
-    16: IconEdit16,
+    "16": IconEdit16,
   },
   ellipsis: {
-    16: IconEllipsis16,
-    20: IconEllipsis20,
+    "16": IconEllipsis16,
+    "20": IconEllipsis20,
   },
   folder: {
-    20: IconFolder20,
+    "20": IconFolder20,
   },
   layout: {
-    20: IconLayout20,
+    "20": IconLayout20,
   },
   layout_card: {
-    16: IconLayoutCard16,
+    "16": IconLayoutCard16,
   },
   layout_list: {
-    16: IconLayoutList16,
+    "16": IconLayoutList16,
   },
   move: {
-    16: IconMove16,
+    "16": IconMove16,
   },
   note_empty: {
-    20: IconNoteEmpty20,
+    "20": IconNoteEmpty20,
   },
   note_full: {
-    20: IconNoteFull20,
+    "20": IconNoteFull20,
   },
   plus: {
-    16: IconPlus16,
-    20: IconPlus20,
+    "16": IconPlus16,
+    "20": IconPlus20,
   },
   sample: {
-    20: IconSample20,
+    "20": IconSample20,
   },
   search: {
-    20: IconSearch20,
+    "20": IconSearch20,
   },
   setting: {
-    20: IconSetting20,
+    "20": IconSetting20,
   },
   tag: {
-    20: IconTag20,
+    "20": IconTag20,
   },
   trash: {
-    16: IconTrash16,
-    20: IconTrash20,
+    "16": IconTrash16,
+    "20": IconTrash20,
   },
 } as const;
-
-export type IconName = keyof typeof ICON_PALETTE;

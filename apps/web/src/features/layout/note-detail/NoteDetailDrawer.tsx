@@ -72,13 +72,14 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             {/* drawer header */}
             <header className="flex justify-between px-5 pb-5">
               <span className="inline-flex items-center gap-2 font-semibold text-[18px] text-base-foreground">
-                <Icon name="archive" size={20} className="text-inherit" /> Inbox
+                <Icon name="archive" size={"20"} className="text-inherit" />{" "}
+                Inbox
               </span>
               <button
                 type="button"
                 className="flex items-center gap-0.5 rounded-[6px] border border-base-border-light bg-neutral-800 px-1.5 text-[12px] text-base-muted-foreground"
               >
-                <Icon name="move" size={16} /> 옮기기
+                <Icon name="move" size={"16"} /> 옮기기
               </button>
             </header>
 
@@ -115,7 +116,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                   >
                     <Icon
                       name="bookmark"
-                      size={20}
+                      size={"20"}
                       className={cn(
                         "transition-colors group-hover:text-neutral-300",
                         isBookmarked &&
@@ -149,7 +150,11 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       onClick={() => setCreateTag(!createTag)}
                       className="flex items-center justify-between text-base-muted"
                     >
-                      <Icon name={"plus"} className="text-inherit" size={16} />
+                      <Icon
+                        name={"plus"}
+                        className="text-inherit"
+                        size={"16"}
+                      />
                     </button>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -201,7 +206,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                           <button type="button">
                             <Icon
                               name="delete"
-                              size={16}
+                              size={"16"}
                               className={cn(style.buttonColor)}
                             />
                           </button>
@@ -264,7 +269,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                 type="button"
                 className="flex size-[38px] items-center justify-center rounded-lg border border-base-border-light"
               >
-                <Icon name="trash" size={20} />
+                <Icon name="trash" size={"20"} />
               </button>
               <button
                 type="button"

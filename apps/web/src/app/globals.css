@@ -8,7 +8,6 @@
 @source "../../../../packages/icons/src/**/*.{ts,tsx}";
 
 body {
-  background: var(--color-base-background);
   color: var(--color-base-foreground);
   font-family: var(--font-sans);
 }

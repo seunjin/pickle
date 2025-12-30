@@ -48,7 +48,7 @@ export function NoteCardFooter({ url, meta, onDelete }: NoteCardFooterProps) {
           onDelete();
         }}
       >
-        <Icon name="trash" size={20} className="size-4" />
+        <Icon name="trash" size={"20"} className="size-4" />
       </button>
     </div>
   );

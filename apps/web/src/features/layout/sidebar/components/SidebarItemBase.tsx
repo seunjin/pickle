@@ -1,11 +1,11 @@
-import { Icon, type IconName } from "@pickle/icons";
+import { Icon20, type IconNameOnly20 } from "@pickle/icons";
 import { cn } from "@pickle/ui/lib/utils";
 import Link from "next/link";
 import type React from "react";
 
 export interface SidebarItemBaseProps {
   href: string;
-  icon: IconName;
+  icon: IconNameOnly20;
   label: string;
   active?: boolean;
   rightSection?: React.ReactNode;
@@ -36,10 +36,8 @@ export const SidebarItemBase = ({
         )}
       >
         <div className={cn("flex min-w-0 flex-1 items-center gap-2")}>
-          <Icon
+          <Icon20
             name={icon}
-            // @ts-expect-error: icon union type causes size inference to be never
-            size={20}
             className={cn(
               "w-5 shrink-0 transition-colors",
               active && "text-base-primary group-hover:text-base-primary",

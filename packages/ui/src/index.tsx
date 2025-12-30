@@ -3,4 +3,5 @@ export * from "./dropdown-menu";
 export * from "./input";
 export * from "./resizable";
 export * from "./scroll-area";
+export * from "./tag";
 export * from "./textarea";

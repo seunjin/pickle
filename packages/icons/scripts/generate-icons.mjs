@@ -128,20 +128,14 @@ async function generate() {
   const paletteEntries = Object.entries(palette)
     .map(([name, sizes]) => {
       const sizeEntries = Object.entries(sizes)
-        .map(([size, comp]) => `    ${size}: ${comp}`)
+        .map(([size, comp]) => `    "${size}": ${comp}`)
         .join(",\n");
       return `  ${name}: {\n${sizeEntries}\n  }`;
     })
     .join(",\n");
 
   const iconsContent = `
-import type { SVGProps } from "react";
 ${imports.join("\n")}
-
-export interface IconProps extends SVGProps<SVGSVGElement> {
-  size?: number;
-  title?: string;
-}
 
 export {
   ${componentExports.join(",\n  ")}
@@ -151,7 +145,7 @@ export const ICON_PALETTE = {
 ${paletteEntries}
 } as const;
 
-export type IconName = keyof typeof ICON_PALETTE;
+
 `;
 
   await fs.writeFile(ICONS_PATH, `${iconsContent.trim()}\n`);

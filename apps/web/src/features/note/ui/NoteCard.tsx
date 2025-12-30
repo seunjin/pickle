@@ -71,7 +71,7 @@ export function NoteCard({ note }: NoteCardProps) {
             >
               <Icon
                 name="ellipsis"
-                size={16}
+                size={"16"}
                 className="transition-colors group-hover:text-neutral-300"
               />
             </button>
@@ -86,7 +86,7 @@ export function NoteCard({ note }: NoteCardProps) {
             >
               <Icon
                 name="bookmark"
-                size={16}
+                size={"16"}
                 className={cn(
                   "transition-colors group-hover:text-neutral-300",
                   isBookmarked &&

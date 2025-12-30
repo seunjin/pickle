@@ -44,7 +44,7 @@ export default async function DashboardPage() {
             />
             {/* 검색 아이콘 placeholder */}
             <span className="-translate-y-1/2 absolute top-1/2 left-3 text-form-input-placeholder">
-              <Icon name="search" size={20} />
+              <Icon name="search" size={"20"} />
             </span>
           </div>
           {avatar_url && (

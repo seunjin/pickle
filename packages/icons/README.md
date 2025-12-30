@@ -30,10 +30,10 @@ Pickle 프로젝트의 통합 아이콘 시스템입니다. SVG 아이콘을 Rea
 import { Icon } from "@pickle/ui"; // 또는 "@pickle/icons"
 
 // ✅ 상위에서 지원하는 'layout' 아이콘의 20px 에셋을 타입 추론합니다.
-<Icon name="layout" size={20} />
+<Icon name="layout" size={"20"} />
 
 // ❌ 지원하지 않는 사이즈(예: 24)를 입력하면 타입 에러가 발생합니다.
-<Icon name="layout" size={24} />
+<Icon name="layout" size={"24"} />
 ```
 
 ### 2. 개별 아이콘 컴포넌트 직접 사용
@@ -50,7 +50,7 @@ import { IconLayout20 } from "@pickle/icons";
 1.  **기본 형식**: `{아이콘명}-{사이즈}.svg` (예: `search-20.svg`)
 2.  **하이픈(`-`)**: 이름과 사이즈를 구분하는 **예약어**입니다. 파일명의 마지막 하이픈 뒤가 사이즈로 인식됩니다.
 3.  **언더스코어(`_`)**: 이름 내부에서 단어를 구분할 때 사용합니다. `ICON_PALETTE`의 키값에 그대로 보존됩니다.
-    - 예: `note_full-20.svg` → `<Icon name="note_full" size={20} />`
+    - 예: `note_full-20.svg` → `<Icon name="note_full" size={"20"} />`
 4.  **권장 사항**: 모든 이름은 소문자로 작성하는 것을 권장합니다.
 
 ## ➕ 새 아이콘 추가하기
