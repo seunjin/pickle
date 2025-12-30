@@ -1,1 +1,2 @@
-export * from "./TagMaker";
+import TagMaker from "./TagMaker";
+export { TagMaker };

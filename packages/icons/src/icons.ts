@@ -7,6 +7,7 @@ import IconBookmark16 from "./react/IconBookmark16";
 import IconBookmark20 from "./react/IconBookmark20";
 import IconCheck16 from "./react/IconCheck16";
 import IconDelete16 from "./react/IconDelete16";
+import IconDownload16 from "./react/IconDownload16";
 import IconEdit16 from "./react/IconEdit16";
 import IconEllipsis16 from "./react/IconEllipsis16";
 import IconEllipsis20 from "./react/IconEllipsis20";
@@ -21,6 +22,7 @@ import IconPlus16 from "./react/IconPlus16";
 import IconPlus20 from "./react/IconPlus20";
 import IconSample20 from "./react/IconSample20";
 import IconSearch20 from "./react/IconSearch20";
+import IconSetting16 from "./react/IconSetting16";
 import IconSetting20 from "./react/IconSetting20";
 import IconTag20 from "./react/IconTag20";
 import IconTrash16 from "./react/IconTrash16";
@@ -36,6 +38,7 @@ export {
   IconBookmark20,
   IconCheck16,
   IconDelete16,
+  IconDownload16,
   IconEdit16,
   IconEllipsis16,
   IconEllipsis20,
@@ -50,6 +53,7 @@ export {
   IconPlus20,
   IconSample20,
   IconSearch20,
+  IconSetting16,
   IconSetting20,
   IconTag20,
   IconTrash16,
@@ -81,6 +85,9 @@ export const ICON_PALETTE = {
   },
   delete: {
     "16": IconDelete16,
+  },
+  download: {
+    "16": IconDownload16,
   },
   edit: {
     "16": IconEdit16,
@@ -121,6 +128,7 @@ export const ICON_PALETTE = {
     "20": IconSearch20,
   },
   setting: {
+    "16": IconSetting16,
     "20": IconSetting20,
   },
   tag: {

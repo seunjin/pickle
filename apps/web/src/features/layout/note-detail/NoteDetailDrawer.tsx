@@ -1,12 +1,17 @@
 import type { NoteWithAsset } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import { useDialogController } from "@pickle/lib";
-import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
+import {
+  Button,
+  ScrollArea,
+  TAG_VARIANTS,
+  TagMaker,
+  TextareaContainLabel,
+} from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
-import { TAG_VARIANTS } from "@/shared/constants/tag";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
@@ -145,17 +150,25 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
                       TAGS
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setCreateTag(!createTag)}
-                      className="flex items-center justify-between text-base-muted"
-                    >
-                      <Icon
-                        name={"plus"}
-                        className="text-inherit"
-                        size={"16"}
-                      />
-                    </button>
+                    <TagMaker
+                      open={createTag}
+                      onOpenChange={setCreateTag}
+                      trigger={
+                        <button
+                          type="button"
+                          role="combobox"
+                          aria-expanded={createTag}
+                          onClick={() => setCreateTag(!createTag)}
+                          className="flex items-center justify-between text-base-muted"
+                        >
+                          <Icon
+                            name={"plus"}
+                            className="text-inherit"
+                            size={"16"}
+                          />
+                        </button>
+                      }
+                    />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {[
@@ -197,9 +210,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                           key={tag.id}
                           className={cn(
                             "flex h-[26px] items-center gap-0.5 rounded-[4px] border px-1.5",
-                            style.textColor,
-                            style.backgroundColor,
-                            style.borderColor,
+                            style.tagColor,
                           )}
                         >
                           #{tag.name}

@@ -1,5 +1,6 @@
 "use client";
 import { Icon } from "@pickle/icons";
+import { TAG_VARIANTS } from "@pickle/ui";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
@@ -160,9 +161,8 @@ export const Sidebar = () => {
                     name: "strategy",
                   },
                 ].map((tag) => {
-                  const color = (style: string) => {
-                    return `text-tag-${style}`;
-                  };
+                  const style =
+                    TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
                   return (
                     <li
                       key={tag.id}
@@ -171,7 +171,7 @@ export const Sidebar = () => {
                       <Icon
                         name="tag"
                         size={"20"}
-                        className={color(tag.style)}
+                        className={style.baseColor}
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-muted-foreground transition-colors group-hover:text-base-foreground">

@@ -36,7 +36,8 @@ const inputVariants = cva(
     variants: {
       variant: {
         default: "",
-        ghost: "border-none px-0 shadow-none focus-visible:ring-0",
+        ghost:
+          "border-none bg-transparent px-0 shadow-none focus-visible:ring-0",
       },
       size: {
         standard: "h-10 px-3",
