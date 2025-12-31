@@ -2,6 +2,7 @@ import type { NoteWithAsset } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import { useDialogController } from "@pickle/lib";
 import {
+  ActionButton,
   Button,
   ScrollArea,
   TAG_VARIANTS,
@@ -68,7 +69,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
 
           {/* drawer */}
           <motion.div
-            className="relative z-20 mr-[15px] grid h-[calc(100%-30px)] w-90 grid-rows-[auto_1fr_auto] rounded-[16px] border border-base-border-light bg-base-foreground-background py-5"
+            className="relative z-20 mr-[15px] grid h-[calc(100%-30px)] w-90 grid-rows-[auto_1fr_auto] rounded-[16px] border border-base-border-light bg-base-foreground-background py-5 shadow-black/50 shadow-lg"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -77,14 +78,13 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             {/* drawer header */}
             <header className="flex justify-between px-5 pb-5">
               <span className="inline-flex items-center gap-2 font-semibold text-[18px] text-base-foreground">
-                <Icon name="archive" size={"20"} className="text-inherit" />{" "}
-                Inbox
+                <Icon name="archive_20" className="text-inherit" /> Inbox
               </span>
               <button
                 type="button"
                 className="flex items-center gap-0.5 rounded-[6px] border border-base-border-light bg-neutral-800 px-1.5 text-[12px] text-base-muted-foreground"
               >
-                <Icon name="move" size={"16"} /> 옮기기
+                <Icon name="move_16" /> 옮기기
               </button>
             </header>
 
@@ -120,8 +120,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     onClick={() => setIsBookmarked(!isBookmarked)}
                   >
                     <Icon
-                      name="bookmark"
-                      size={"20"}
+                      name="bookmark_20"
                       className={cn(
                         "transition-colors group-hover:text-neutral-300",
                         isBookmarked &&
@@ -154,19 +153,11 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       open={createTag}
                       onOpenChange={setCreateTag}
                       trigger={
-                        <button
-                          type="button"
-                          role="combobox"
-                          aria-expanded={createTag}
+                        <ActionButton
+                          icon="plus_16"
                           onClick={() => setCreateTag(!createTag)}
-                          className="flex items-center justify-between text-base-muted"
-                        >
-                          <Icon
-                            name={"plus"}
-                            className="text-inherit"
-                            size={"16"}
-                          />
-                        </button>
+                          forceFocus={createTag}
+                        />
                       }
                     />
                   </div>
@@ -216,8 +207,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                           #{tag.name}
                           <button type="button">
                             <Icon
-                              name="delete"
-                              size={"16"}
+                              name="delete_16"
                               className={cn(style.buttonColor)}
                             />
                           </button>
@@ -277,8 +267,8 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
 
             {/* drawer footer */}
             <div className="flex gap-2 border-base-border-light border-t px-5 pt-5">
-              <Button.Action icon="trash" />
-              <Button.Default className="flex-1">저장하기</Button.Default>
+              <Button variant="icon" icon="trash_20" />
+              <Button className="flex-1">저장하기</Button>
             </div>
           </motion.div>
         </motion.div>

@@ -61,81 +61,35 @@ export {
 };
 
 export const ICON_PALETTE = {
-  archive: {
-    "20": IconArchive20,
-  },
-  arrow_down: {
-    "16": IconArrowDown16,
-  },
-  arrow_left: {
-    "16": IconArrowLeft16,
-  },
-  arrow_right: {
-    "16": IconArrowRight16,
-  },
-  arrow_up: {
-    "16": IconArrowUp16,
-  },
-  bookmark: {
-    "16": IconBookmark16,
-    "20": IconBookmark20,
-  },
-  check: {
-    "16": IconCheck16,
-  },
-  delete: {
-    "16": IconDelete16,
-  },
-  download: {
-    "16": IconDownload16,
-  },
-  edit: {
-    "16": IconEdit16,
-  },
-  ellipsis: {
-    "16": IconEllipsis16,
-    "20": IconEllipsis20,
-  },
-  folder: {
-    "20": IconFolder20,
-  },
-  layout: {
-    "20": IconLayout20,
-  },
-  layout_card: {
-    "16": IconLayoutCard16,
-  },
-  layout_list: {
-    "16": IconLayoutList16,
-  },
-  move: {
-    "16": IconMove16,
-  },
-  note_empty: {
-    "20": IconNoteEmpty20,
-  },
-  note_full: {
-    "20": IconNoteFull20,
-  },
-  plus: {
-    "16": IconPlus16,
-    "20": IconPlus20,
-  },
-  sample: {
-    "20": IconSample20,
-  },
-  search: {
-    "20": IconSearch20,
-  },
-  setting: {
-    "16": IconSetting16,
-    "20": IconSetting20,
-  },
-  tag: {
-    "20": IconTag20,
-  },
-  trash: {
-    "16": IconTrash16,
-    "20": IconTrash20,
-  },
+  archive_20: IconArchive20,
+  arrow_down_16: IconArrowDown16,
+  arrow_left_16: IconArrowLeft16,
+  arrow_right_16: IconArrowRight16,
+  arrow_up_16: IconArrowUp16,
+  bookmark_16: IconBookmark16,
+  bookmark_20: IconBookmark20,
+  check_16: IconCheck16,
+  delete_16: IconDelete16,
+  download_16: IconDownload16,
+  edit_16: IconEdit16,
+  ellipsis_16: IconEllipsis16,
+  ellipsis_20: IconEllipsis20,
+  folder_20: IconFolder20,
+  layout_20: IconLayout20,
+  layout_card_16: IconLayoutCard16,
+  layout_list_16: IconLayoutList16,
+  move_16: IconMove16,
+  note_empty_20: IconNoteEmpty20,
+  note_full_20: IconNoteFull20,
+  plus_16: IconPlus16,
+  plus_20: IconPlus20,
+  sample_20: IconSample20,
+  search_20: IconSearch20,
+  setting_16: IconSetting16,
+  setting_20: IconSetting20,
+  tag_20: IconTag20,
+  trash_16: IconTrash16,
+  trash_20: IconTrash20,
 } as const;
+
+export type IconName = keyof typeof ICON_PALETTE;

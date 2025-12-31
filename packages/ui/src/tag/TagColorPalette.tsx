@@ -4,17 +4,11 @@ import { TAG_COLORS, TAG_VARIANTS, type TagColor } from "../constants/tag";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../dropdown-menu";
 import { cn } from "../lib/utils";
 
-const Label = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex h-7 items-center px-1 font-medium text-[12px] text-neutral-500">
-      {children}
-    </div>
-  );
-};
 interface TagColorPaletteProps {
   trigger: React.ReactNode;
   color: TagColor;
@@ -31,8 +25,13 @@ export function TagColorPalette({
   return (
     <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent side="bottom" align="end" className="z-[1100000]">
-        <Label>색</Label>
+      <DropdownMenuContent
+        side="bottom"
+        align="end"
+        className="z-[110000] shadow-black/50 shadow-lg"
+      >
+        <DropdownMenuLabel>색</DropdownMenuLabel>
+        {/* shadow-[0,4px,6px,0] shadow-[#000]/70 */}
         <div className="flex w-[145px] flex-wrap gap-1 pb-1.5">
           {TAG_COLORS.map((tag) => {
             const style = TAG_VARIANTS[tag as keyof typeof TAG_VARIANTS];
@@ -49,8 +48,7 @@ export function TagColorPalette({
                 onClick={() => onColorChange(tag)}
               >
                 <Icon
-                  name="check"
-                  size={"16"}
+                  name="check_16"
                   className={cn(
                     "text-base-foreground transition-opacity",
                     color === tag ? "opacity-100" : "opacity-0",
@@ -65,7 +63,7 @@ export function TagColorPalette({
           type="button"
           className="flex h-[26px] w-full items-center gap-2 rounded-[4px] px-2 text-[13px] text-base-muted-foreground transition-[background-color,color] hover:bg-neutral-650/50 hover:text-neutral-300"
         >
-          <Icon name="setting" size="16" className="text-inherit" />
+          <Icon name="setting_16" className="text-inherit" />
           태그 설정
         </button>
       </DropdownMenuContent>

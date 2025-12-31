@@ -54,7 +54,7 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
                 type="button"
                 className="cursor-pointer items-center rounded-md p-0.5 text-base-muted opacity-0 transition-[background-color,color,opacity] hover:bg-green-100/16 hover:text-base-foreground group-focus-within:opacity-100 group-hover:flex group-hover:opacity-100"
               >
-                <Icon name="ellipsis" size={"16"} />
+                <Icon name="ellipsis_16" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -79,13 +79,13 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
                     setIsEditing(true);
                   }}
                 >
-                  <Icon name="edit" size={"16"} /> 이름 변경
+                  <Icon name="edit_16" /> 이름 변경
                 </button>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
                 <button type="button" className="w-full cursor-pointer">
-                  <Icon name="trash" size={"16"} />
+                  <Icon name="trash_16" />
                   폴더 삭제
                 </button>
               </DropdownMenuItem>
@@ -118,7 +118,7 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
             ref={popupRef}
             className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg border border-base-border-light bg-neutral-850 px-3 shadow-md"
           >
-            <Icon name="folder" size={"20"} />
+            <Icon name="folder_20" />
             <Input
               ref={inputRef}
               autoFocus

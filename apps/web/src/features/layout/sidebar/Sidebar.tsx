@@ -38,7 +38,7 @@ export const Sidebar = () => {
           <ul className="flex flex-col gap-1 pb-[30px]">
             <SidebarNavItem
               href="/dashboard"
-              icon="archive"
+              icon="archive_20"
               label="Inbox"
               badge={3}
               active
@@ -46,7 +46,7 @@ export const Sidebar = () => {
 
             <SidebarNavItem
               href="/favorites"
-              icon="bookmark"
+              icon="bookmark_20"
               label="즐겨찾기"
             />
           </ul>
@@ -63,9 +63,8 @@ export const Sidebar = () => {
                   FOLDERS
                 </span>
                 <Icon
-                  name={foldersFolding ? "arrow_up" : "arrow_down"}
+                  name={foldersFolding ? "arrow_up_16" : "arrow_down_16"}
                   className="text-inherit"
-                  size={"16"}
                 />
               </button>
             </div>
@@ -76,17 +75,17 @@ export const Sidebar = () => {
                 <>
                   <SidebarFolderItem
                     href="/dashboard"
-                    icon="folder"
+                    icon="folder_20"
                     label={"제목없음1"}
                   />
                   <SidebarFolderItem
                     href="/dashboard"
-                    icon="folder"
+                    icon="folder_20"
                     label={"제목없음2"}
                   />
                   <SidebarFolderItem
                     href="/dashboard"
-                    icon="folder"
+                    icon="folder_20"
                     label={"제목없음3"}
                   />
                 </>
@@ -99,11 +98,7 @@ export const Sidebar = () => {
                   className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground active:text-base-primary"
                   onClick={() => setFoldersFolding(true)}
                 >
-                  <Icon
-                    name="plus"
-                    size={"20"}
-                    className="text-color-[inherit]"
-                  />
+                  <Icon name="plus_20" className="text-color-[inherit]" />
                   <span>새 노트 생성하기</span>
                 </button>
               </li>
@@ -120,10 +115,10 @@ export const Sidebar = () => {
                 <span className="font-semibold text-[13px] text-neutral-650 leading-none tracking-wider">
                   TAGS
                 </span>
+
                 <Icon
-                  name={tagsFolding ? "arrow_up" : "arrow_down"}
+                  name={tagsFolding ? "arrow_up_16" : "arrow_down_16"}
                   className="text-inherit"
-                  size={"16"}
                 />
               </button>
             </div>
@@ -168,11 +163,7 @@ export const Sidebar = () => {
                       key={tag.id}
                       className="group flex h-9 cursor-pointer items-center gap-2 rounded-sm px-3 transition-[background-color] hover:bg-base-foreground-background"
                     >
-                      <Icon
-                        name="tag"
-                        size={"20"}
-                        className={style.baseColor}
-                      />
+                      <Icon name="tag_20" className={style.baseColor} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-muted-foreground transition-colors group-hover:text-base-foreground">
                           {tag.name}
@@ -188,9 +179,9 @@ export const Sidebar = () => {
 
         <div className="mt-auto">
           {/* 설정 */}
-          <SidebarNavItem href="/trash" icon="setting" label="설정" />
+          <SidebarNavItem href="/trash" icon="setting_20" label="설정" />
           {/* 휴지통 */}
-          <SidebarNavItem href="/trash" icon="trash" label="휴지통" />
+          <SidebarNavItem href="/trash" icon="trash_20" label="휴지통" />
         </div>
       </div>
     </nav>

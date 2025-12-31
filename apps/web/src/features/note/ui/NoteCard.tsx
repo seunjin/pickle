@@ -1,9 +1,8 @@
 "use client";
 
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
-import { Icon } from "@pickle/icons";
 import { useDialog } from "@pickle/lib";
-import { cn } from "@pickle/ui/lib/utils";
+import { ActionButton } from "@pickle/ui";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -61,39 +60,27 @@ export function NoteCard({ note }: NoteCardProps) {
             {new Date(note.created_at).toLocaleDateString("ko-KR")}
           </span>
           <div className="flex gap-1">
-            <button
-              type="button"
-              className="group flex size-[26px] items-center justify-center rounded-sm transition-colors hover:bg-neutral-600/5"
+            {/* 메뉴 버튼 */}
+            <ActionButton
+              icon={"ellipsis_16"}
+              variant="action"
               onClick={(e) => {
                 e.stopPropagation();
                 // TODO: Open menu
               }}
-            >
-              <Icon
-                name="ellipsis"
-                size={"16"}
-                className="transition-colors group-hover:text-neutral-300"
-              />
-            </button>
+            />
             {/* 북마크 버튼 */}
-            <button
-              type="button"
-              className="group flex size-[26px] items-center justify-center rounded-sm transition-colors hover:bg-neutral-600/5"
+            <ActionButton
+              icon={"bookmark_16"}
+              variant="action"
+              className={
+                isBookmarked ? "text-base-primary hover:text-base-primary" : ""
+              }
               onClick={(e) => {
                 e.stopPropagation();
                 setIsBookmarked(!isBookmarked);
               }}
-            >
-              <Icon
-                name="bookmark"
-                size={"16"}
-                className={cn(
-                  "transition-colors group-hover:text-neutral-300",
-                  isBookmarked &&
-                    "text-base-primary group-hover:text-base-primary",
-                )}
-              />
-            </button>
+            />
           </div>
         </div>
       </div>

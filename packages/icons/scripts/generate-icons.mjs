@@ -44,10 +44,14 @@ async function generate() {
         .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
         .join("")}`;
 
+      // 플랫 키: note_full_20
+      const flatKey = `${namePart}_${sizePart}`;
+
       svgMetadata.push({
         file,
         name: namePart,
         size: sizePart,
+        flatKey,
         componentName,
       });
     }
@@ -104,10 +108,10 @@ async function generate() {
   const _processedFiles = await fs.readdir(REACT_DIR);
   const imports = [];
   const componentExports = [];
-  const palette = {};
+  const paletteEntries = [];
 
   for (const meta of svgMetadata) {
-    const { name, size, componentName } = meta;
+    const { flatKey, componentName } = meta;
 
     // 파일이 실제로 존재하는지 확인 (리네임 단계에서 생성됨)
     const filePath = path.join(REACT_DIR, `${componentName}.tsx`);
@@ -117,22 +121,12 @@ async function generate() {
       imports.push(`import ${componentName} from "./react/${componentName}";`);
       componentExports.push(componentName);
 
-      if (!palette[name]) palette[name] = {};
-      palette[name][size] = componentName;
+      // 플랫 키 형태로 팔레트 엔트리 생성
+      paletteEntries.push(`  ${flatKey}: ${componentName}`);
     } catch (_e) {
       console.warn(`⚠️  컴포넌트 파일을 찾을 수 없습니다: ${filePath}`);
     }
   }
-
-  // Generate Palette String
-  const paletteEntries = Object.entries(palette)
-    .map(([name, sizes]) => {
-      const sizeEntries = Object.entries(sizes)
-        .map(([size, comp]) => `    "${size}": ${comp}`)
-        .join(",\n");
-      return `  ${name}: {\n${sizeEntries}\n  }`;
-    })
-    .join(",\n");
 
   const iconsContent = `
 ${imports.join("\n")}
@@ -142,10 +136,10 @@ export {
 };
 
 export const ICON_PALETTE = {
-${paletteEntries}
+${paletteEntries.join(",\n")}
 } as const;
 
-
+export type IconName = keyof typeof ICON_PALETTE;
 `;
 
   await fs.writeFile(ICONS_PATH, `${iconsContent.trim()}\n`);

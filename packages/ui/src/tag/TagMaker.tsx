@@ -1,11 +1,16 @@
 "use client";
 
-import { Icon } from "@pickle/icons";
 import { useState } from "react";
+import { ActionButton } from "../button";
 import { TAG_VARIANTS, type TagColor } from "../constants/tag";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "../dropdown-menu";
 import { Input } from "../input";
 import { cn } from "../lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 import { ScrollArea } from "../scroll-area";
 import { TagColorPalette } from "./TagColorPalette";
 
@@ -20,14 +25,6 @@ interface TagItem {
   style: TagColor;
   name: string;
 }
-
-const Label = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex h-7 items-center px-1 font-medium text-[12px] text-neutral-500">
-      {children}
-    </div>
-  );
-};
 
 // 초기 태그 데이터 (실제로는 props나 API에서 받아올 수 있음)
 const INITIAL_TAGS: TagItem[] = [
@@ -56,23 +53,23 @@ const TagMaker = ({ trigger, open, onOpenChange }: TagMakerProps) => {
   };
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuContent
         align="end"
         side="bottom"
         className={cn(
           "z-[10000] h-[170px] w-[260px] p-0",
-          "border border-base-border-light bg-neutral-850",
+          "border border-base-border-light bg-neutral-850 shadow-black/50 shadow-lg",
         )}
       >
         <div className="grid h-full grid-rows-[auto_1fr]">
           <div className="h-9 border-base-border-light border-b bg-neutral-800">
-            <Input variant={"ghost"} size={"mini"} />
+            <Input variant={"ghost"} size={"mini"} autoFocus />
           </div>
           <ScrollArea className="h-full overflow-auto">
             <div className="px-[5px_10px] py-[5px_12px]">
-              <Label>태그 선택 및 추가</Label>
+              <DropdownMenuLabel>태그 선택 및 추가</DropdownMenuLabel>
 
               <ul className="space-y-0.5">
                 {tags.map((tag) => {
@@ -97,19 +94,11 @@ const TagMaker = ({ trigger, open, onOpenChange }: TagMakerProps) => {
                       </span>
                       <TagColorPalette
                         trigger={
-                          <button
-                            type="button"
-                            className={cn(
-                              "inline-flex size-[26px] items-center justify-center rounded-[4px] opacity-0 transition-[background-color,opacity] hover:bg-neutral-650/50 group-hover:opacity-100",
-                              isActive && "bg-neutral-650/50 opacity-100",
-                            )}
-                          >
-                            <Icon
-                              name="ellipsis"
-                              size="16"
-                              className="text-neutral-300"
-                            />
-                          </button>
+                          <ActionButton
+                            icon="ellipsis_16"
+                            variant="subAction"
+                            forceFocus={isActive}
+                          />
                         }
                         color={tag.style}
                         onColorChange={(newColor) =>
@@ -126,8 +115,8 @@ const TagMaker = ({ trigger, open, onOpenChange }: TagMakerProps) => {
             </div>
           </ScrollArea>
         </div>
-      </PopoverContent>
-    </Popover>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

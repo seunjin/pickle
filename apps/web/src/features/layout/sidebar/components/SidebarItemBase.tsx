@@ -1,11 +1,11 @@
-import { Icon20, type IconNameOnly20 } from "@pickle/icons";
+import { Icon, type IconName } from "@pickle/icons";
 import { cn } from "@pickle/ui/lib/utils";
 import Link from "next/link";
 import type React from "react";
 
 export interface SidebarItemBaseProps {
   href: string;
-  icon: IconNameOnly20;
+  icon: IconName;
   label: string;
   active?: boolean;
   rightSection?: React.ReactNode;
@@ -36,7 +36,7 @@ export const SidebarItemBase = ({
         )}
       >
         <div className={cn("flex min-w-0 flex-1 items-center gap-2")}>
-          <Icon20
+          <Icon
             name={icon}
             className={cn(
               "w-5 shrink-0 transition-colors",
