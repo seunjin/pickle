@@ -1,4 +1,5 @@
 import { Icon } from "@pickle/icons";
+import { InputWithAddon } from "@pickle/ui";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -35,18 +36,18 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <InputWithAddon
+            containerClassName="group w-90"
+            placeholder="검색어를 입력해 주세요."
+            startAddon={
+              <Icon
+                name="search_20"
+                className="transition-colors group-focus-within:text-base-primary"
+              />
+            }
+          />
           {/* 검색바 */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="검색..."
-              className="w-64 rounded-lg border border-form-input-border bg-form-input-background py-2 pr-4 pl-10 text-form-input-foreground text-sm placeholder:text-form-input-placeholder focus:border-base-primary focus:outline-none"
-            />
-            {/* 검색 아이콘 placeholder */}
-            <span className="-translate-y-1/2 absolute top-1/2 left-3 text-form-input-placeholder">
-              <Icon name="search_20" />
-            </span>
-          </div>
+
           {avatar_url && (
             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-base-border">
               <img

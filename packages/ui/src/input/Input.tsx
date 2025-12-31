@@ -1,7 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
-
-import { cn } from "./lib/utils";
+import { cn } from "../lib/utils";
 
 const inputVariants = cva(
   [
@@ -12,7 +11,7 @@ const inputVariants = cva(
     "border border-form-input-border bg-form-input-background text-base-foreground outline-none",
 
     /* 3. 타이포그래피 */
-    "text-base placeholder:text-form-input-placeholder",
+    "placeholder:text-form-input-placeholder",
 
     /* 4. 애니메이션 & 상태 전환 */
     "transition-[color,box-shadow]",
@@ -40,7 +39,7 @@ const inputVariants = cva(
           "border-none bg-transparent px-0 shadow-none focus-visible:ring-0",
       },
       size: {
-        standard: "h-10 px-3",
+        standard: "h-10 px-3 text-[14px]",
         mini: "h-8 px-2 text-[13px]",
       },
     },
