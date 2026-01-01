@@ -1,4 +1,5 @@
 import { Header } from "@overlay/components/Header";
+import { TextareaContainLabel } from "@pickle/ui";
 import type { NoteData } from "@shared/types";
 
 /**
@@ -22,7 +23,7 @@ export function TextEditor({
   onSave,
 }: TextEditorProps) {
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    <div className="flex h-full flex-col gap-3 bg-base-background p-4">
       <Header title="텍스트 저장" onClose={onClose} />
       <div className="flex flex-col gap-1">
         <label
@@ -46,14 +47,16 @@ export function TextEditor({
         >
           Content
         </label>
+        <TextareaContainLabel label="MEMO" />
         <textarea
           id="note-content"
           value={note.text || ""}
           onChange={(e) => onUpdate({ text: e.target.value })}
           className="h-full w-full resize-none rounded-lg border p-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="저장할 텍스트를 입력하세요..."
+          placeholder="메모"
         />
       </div>
+
       <button
         type="button"
         onClick={onSave}

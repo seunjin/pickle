@@ -58,7 +58,7 @@ const TextareaContainLabel = ({
         /* 4. 애니메이션 & 상태 전환 */
         "transition-[color,box-shadow]",
         /* 5. 포커스 상태 (링 스타일) */
-        "focus-within:ring-[1px] focus-within:ring-base-primary",
+        "focus-within:ring-1 focus-within:ring-base-primary",
         /* 6. 선택(Selection) 스타일 */
         "selection:bg-base-muted-foreground",
       )}
@@ -69,7 +69,9 @@ const TextareaContainLabel = ({
             {label}
           </span>
           {required && (
-            <span className="text-base-primary leading-none">*</span>
+            <span className="text-[12px] text-base-primary leading-none">
+              *
+            </span>
           )}
         </label>
       </div>

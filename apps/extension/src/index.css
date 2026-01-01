@@ -1,3 +1,8 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+/* Pretendard font is loaded via HTML <link> tag */
 @import "tailwindcss";
-@import "@pickle/ui/src/theme.css";
+@import "@pickle/ui/base.css";
+
+/* apps/extension/src 기준 3단계 상위가 루트(pickle-note) */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/icons/src/**/*.{ts,tsx}";
+@source "./**/*.{ts,tsx}";

@@ -1,7 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { crx } from "@crxjs/vite-plugin";
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import manifest from "./manifest.json";
@@ -9,11 +8,11 @@ import manifest from "./manifest.json";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vitejs.dev/config/
+// Tailwind is handled via PostCSS (see postcss.config.mjs) - same as Web app
 export default defineConfig({
   plugins: [
     react(),
     crx({ manifest }),
-    tailwindcss(),
     {
       name: "stub-ws",
       enforce: "pre",
@@ -34,6 +33,12 @@ export default defineConfig({
     },
   ],
 
+  // CSS: PostCSS handles Tailwind, Lightning CSS is only used for minification
+  // Note: css.transformer: "lightningcss" would bypass PostCSS, so we DON'T use it
+  css: {
+    // PostCSS is automatically used (postcss.config.mjs)
+  },
+
   envPrefix: "NEXT_PUBLIC_", // Expose NEXT_PUBLIC_ variables
   resolve: {
     mainFields: ["browser", "module", "main"], // Force browser build
@@ -44,6 +49,9 @@ export default defineConfig({
       "@overlay": path.resolve(__dirname, "./src/content/ui"),
       "@background": path.resolve(__dirname, "./src/background"),
       "@content": path.resolve(__dirname, "./src/content"),
+      // Force single instance of React
+      react: path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
       // Explicit alias as backup
       ws: path.resolve(__dirname, "./src/shared/lib/ws-stub.ts"),
     },
@@ -54,5 +62,7 @@ export default defineConfig({
         overlay: path.resolve(__dirname, "src/overlay/index.html"),
       },
     },
+    // Use Lightning CSS for production build as well
+    cssMinify: "lightningcss",
   },
 });

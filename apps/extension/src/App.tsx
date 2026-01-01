@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-
 import { LoginScreen } from "@features/auth/components/LoginScreen";
 import { useExtensionAuth } from "@features/auth/hooks/useExtensionAuth";
 import { BookmarkEditor } from "@features/bookmark/components/BookmarkEditor";
 import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
+import {
+  extensionRuntime,
+  extensionStorage,
+  extensionTabs,
+} from "@shared/lib/extension-api";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
+import { useEffect, useState } from "react";
 
 function App() {
   const { session, loading: authLoading } = useExtensionAuth();
@@ -18,9 +21,9 @@ function App() {
 
   // 1. Get Active Tab ID
   useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        setTabId(tabs[0].id);
+    extensionTabs.getCurrentActiveTab((tab) => {
+      if (tab?.id) {
+        setTabId(tab.id);
       }
     });
   }, []);
@@ -32,7 +35,7 @@ function App() {
     const storageKey = getNoteKey(tabId);
 
     // Initial load
-    chrome.storage.local.get(storageKey, (result) => {
+    extensionStorage.get(storageKey, (result) => {
       if (result[storageKey]) {
         const data = result[storageKey] as NoteData;
         setNote(data);
@@ -44,7 +47,7 @@ function App() {
 
     // Change listener
     const handleStorageChange = (
-      changes: { [key: string]: chrome.storage.StorageChange },
+      changes: { [key: string]: any },
       areaName: string,
     ) => {
       if (areaName === "local" && changes[storageKey]) {
@@ -58,11 +61,11 @@ function App() {
       }
     };
 
-    chrome.storage.onChanged.addListener(handleStorageChange);
-    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
+    extensionStorage.onChanged.addListener(handleStorageChange);
+    return () => extensionStorage.onChanged.removeListener(handleStorageChange);
   }, [tabId, view]);
 
-  const handleClose = () => window.close();
+  const handleClose = () => extensionRuntime.closePopup();
 
   const handleUpdateNote = (data: Partial<NoteData>) => {
     setNote((prev) => ({ ...prev, ...data }));
@@ -71,7 +74,7 @@ function App() {
   const handleSave = () => {
     console.log("Saving note:", note);
     // TODO: Implement actual save logic (API call)
-    window.close();
+    extensionRuntime.closePopup();
   };
 
   if (!tabId || authLoading) {
@@ -87,7 +90,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen w-full bg-white text-gray-900">
+    <div className="h-screen w-full">
       {view === "text" && (
         <TextEditor
           note={note}

@@ -1,0 +1,12 @@
+@import "./theme.css";
+
+/* 1. 전역 기본 스타일 강제 정의 */
+@layer base {
+  body {
+    color: var(--color-base-foreground);
+    background-color: var(--color-base-background);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

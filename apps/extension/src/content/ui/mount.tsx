@@ -1,4 +1,5 @@
 import { OVERLAY_DIMENSIONS } from "@shared/layout";
+import { extensionRuntime } from "@shared/lib/extension-api";
 
 const MOUNT_ID = "pickle-overlay-root";
 
@@ -12,7 +13,7 @@ export function mountOverlay(tabId: number) {
   iframe.id = MOUNT_ID;
 
   // Create URL with tabId query param
-  const overlayUrl = chrome.runtime.getURL(
+  const overlayUrl = extensionRuntime.getURL(
     `src/overlay/index.html?tabId=${tabId}`,
   );
   iframe.src = overlayUrl;
@@ -59,14 +60,16 @@ export function mountOverlay(tabId: number) {
 }
 
 // Global Message Listener for Opening Overlay
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  if (request.action === "OPEN_OVERLAY") {
-    // Background에서 tabId를 함께 보내줘야 함
-    if (request.tabId) {
-      mountOverlay(request.tabId);
-    } else {
-      console.error("Tab ID missing in OPEN_OVERLAY request");
+extensionRuntime.onMessage.addListener(
+  (request: any, _sender: any, sendResponse: (response?: any) => void) => {
+    if (request.action === "OPEN_OVERLAY") {
+      // Background에서 tabId를 함께 보내줘야 함
+      if (request.tabId) {
+        mountOverlay(request.tabId);
+      } else {
+        console.error("Tab ID missing in OPEN_OVERLAY request");
+      }
+      sendResponse({ status: "opened" });
     }
-    sendResponse({ status: "opened" });
-  }
-});
+  },
+);

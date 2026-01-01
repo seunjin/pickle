@@ -1,3 +1,4 @@
+import { extensionStorage } from "@shared/lib/extension-api";
 import type { Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 
@@ -7,7 +8,7 @@ export function useExtensionAuth() {
 
   useEffect(() => {
     // 1. Initial Load
-    chrome.storage.local.get("supabaseSession", (result) => {
+    extensionStorage.get("supabaseSession", (result) => {
       if (result.supabaseSession) {
         setSession(result.supabaseSession as Session);
       }
@@ -16,7 +17,7 @@ export function useExtensionAuth() {
 
     // 2. Listen for changes (e.g. re-sync)
     const handleStorageChange = (
-      changes: { [key: string]: chrome.storage.StorageChange },
+      changes: { [key: string]: any },
       areaName: string,
     ) => {
       if (areaName === "local" && changes.supabaseSession) {
@@ -25,12 +26,12 @@ export function useExtensionAuth() {
       }
     };
 
-    chrome.storage.onChanged.addListener(handleStorageChange);
-    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
+    extensionStorage.onChanged.addListener(handleStorageChange);
+    return () => extensionStorage.onChanged.removeListener(handleStorageChange);
   }, []);
 
   const logout = () => {
-    chrome.storage.local.remove("supabaseSession", () => {
+    extensionStorage.remove("supabaseSession", () => {
       setSession(null);
     });
   };

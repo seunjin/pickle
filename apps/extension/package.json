@@ -14,13 +14,13 @@
     "@pickle/lib": "workspace:^",
     "@pickle/ui": "workspace:^",
     "@supabase/supabase-js": "^2.87.1",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "2.0.0-beta.33",
     "@eslint/js": "^9.39.1",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/postcss": "^4",
     "@types/chrome": "^0.1.32",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
@@ -30,6 +30,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "lightningcss": "^1.30.2",
     "tailwindcss": "^4.1.17",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",

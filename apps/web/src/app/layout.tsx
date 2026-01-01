@@ -17,7 +17,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
-      <body className="bg-neutral-950/70 antialiased">
+      <body className="">
         <ClientProviders initialUser={user} initialAppUser={appUser}>
           {children}
         </ClientProviders>

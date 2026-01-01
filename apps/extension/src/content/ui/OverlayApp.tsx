@@ -4,6 +4,7 @@ import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
 import { saveNote } from "@shared/api/note";
+import { extensionStorage } from "@shared/lib/extension-api";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
 import { useEffect, useEffectEvent, useState } from "react";
@@ -30,10 +31,7 @@ export default function OverlayApp({
 
   // Event handler that reads reactive 'view' state but remains stable
   const handleStorageChange = useEffectEvent(
-    (
-      changes: { [key: string]: chrome.storage.StorageChange },
-      areaName: string,
-    ) => {
+    (changes: { [key: string]: any }, areaName: string) => {
       if (areaName === "local" && changes[STORAGE_KEY]) {
         console.log("Storage changed:", changes[STORAGE_KEY]);
         const newValue = changes[STORAGE_KEY].newValue as NoteData;
@@ -52,7 +50,7 @@ export default function OverlayApp({
   // 1. Initial Load & Change Listener
   useEffect(() => {
     // 초기 로드
-    chrome.storage.local.get(STORAGE_KEY, (result) => {
+    extensionStorage.get(STORAGE_KEY, (result) => {
       if (result[STORAGE_KEY]) {
         console.log("Loaded note:", result[STORAGE_KEY]);
         const data = result[STORAGE_KEY] as NoteData;
@@ -63,11 +61,11 @@ export default function OverlayApp({
 
     // 2. Storage Sync (Note Data + Session Recovery)
     // useEffectEvent로 생성된 핸들러는 안정적이므로 listener 등록에 안전하게 사용 가능
-    chrome.storage.onChanged.addListener(handleStorageChange);
+    extensionStorage.onChanged.addListener(handleStorageChange);
 
     // 🚀 Auto-Recovery Listener: Session restored via Auth Sync
     const handleSessionRecovery = (
-      changes: { [key: string]: chrome.storage.StorageChange },
+      changes: { [key: string]: any },
       areaName: string,
     ) => {
       if (areaName === "local" && changes.supabaseSession?.newValue) {
@@ -77,11 +75,11 @@ export default function OverlayApp({
         // For now, just clearing error is enough to let user click "Save" again.
       }
     };
-    chrome.storage.onChanged.addListener(handleSessionRecovery);
+    extensionStorage.onChanged.addListener(handleSessionRecovery);
 
     return () => {
-      chrome.storage.onChanged.removeListener(handleStorageChange);
-      chrome.storage.onChanged.removeListener(handleSessionRecovery);
+      extensionStorage.onChanged.removeListener(handleStorageChange);
+      extensionStorage.onChanged.removeListener(handleSessionRecovery);
     };
   }, [STORAGE_KEY]); // handleStorageChange is stable thanks to useEffectEvent
 
