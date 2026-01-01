@@ -46,7 +46,7 @@ const actionButtonVariants = cva(
       {
         variant: "subAction",
         forceFocus: false,
-        className: `text-base-muted opacity-0 group-hover:opacity-100 hover:bg-neutral-650/50`,
+        className: `text-base-muted opacity-0 group-hover:opacity-100 hover:bg-neutral-650/50 hover:text-neutral-300`,
       },
       // subAction + forceFocus:true
       {

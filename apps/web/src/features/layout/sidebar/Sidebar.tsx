@@ -51,7 +51,7 @@ export const Sidebar = () => {
             />
           </ul>
 
-          {/* NOTES 섹션 */}
+          {/* FOLDERS 섹션 */}
           <div className="pb-[30px]">
             <div className="mb-1 h-9">
               <button

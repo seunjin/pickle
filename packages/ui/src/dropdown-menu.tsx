@@ -40,8 +40,9 @@ const DropdownMenuContent = React.forwardRef<
       data-slot="dropdown-menu-content"
       sideOffset={sideOffset}
       className={cn(
-        "border-base-border-light bg-base-foreground-background",
-        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border p-[5px] shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in",
+        "border border-base-border-light bg-base-foreground-background",
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md p-[5px] shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in",
+        "shadow-black/50 shadow-lg",
         className,
       )}
       {...props}
@@ -72,7 +73,7 @@ const DropdownMenuItem = React.forwardRef<
     data-variant={variant}
     className={cn(
       /* --- [기본 레이아웃 및 스타일] --- */
-      "relative flex select-none items-center gap-1 rounded-sm px-2 py-2 text-[13px] text-base-muted-foreground outline-hidden hover:text-base-foreground hover:[&_svg]:text-base-foreground",
+      "relative flex h-[26px] select-none items-center gap-1 rounded-sm px-2 text-[13px] text-base-muted-foreground outline-hidden hover:text-base-foreground hover:[&_svg]:text-neutral-300",
       "cursor-pointer",
 
       /* --- [비활성화 상태] --- */
@@ -88,7 +89,7 @@ const DropdownMenuItem = React.forwardRef<
       "data-[variant=destructive]:hover:text-red-500",
       "data-[variant=destructive]:focus:text-red-500",
       "data-[variant=destructive]:hover:[&_svg]:text-red-500", // 아이콘도 항상 텍스트 색상(빨강)을 따르도록
-      "hover:bg-neutral-700/90",
+      "hover:bg-neutral-700",
       className,
     )}
     {...props}

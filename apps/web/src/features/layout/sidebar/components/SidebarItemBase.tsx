@@ -8,6 +8,7 @@ export interface SidebarItemBaseProps {
   icon: IconName;
   label: string;
   active?: boolean;
+  forceFocus?: boolean;
   rightSection?: React.ReactNode;
 }
 
@@ -19,12 +20,14 @@ export const SidebarItemBase = ({
   icon,
   label,
   active,
+  forceFocus,
   rightSection,
 }: SidebarItemBaseProps) => {
   return (
     <div
       className={cn(
         "group flex items-center rounded-lg transition-[background-color] hover:bg-base-foreground-background",
+        forceFocus && "bg-base-foreground-background",
         active &&
           "bg-base-primary-active-background hover:bg-base-primary-active-background",
       )}
@@ -42,12 +45,14 @@ export const SidebarItemBase = ({
               "w-5 shrink-0 transition-colors",
               active && "text-base-primary group-hover:text-base-primary",
               "group-hover:text-neutral-300",
+              forceFocus && "text-neutral-300",
             )}
           />
           <span
             className={cn(
               "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-foreground",
               active && "text-base-primary group-hover:text-base-primary",
+              forceFocus && "text-base-foreground",
             )}
           >
             {label}

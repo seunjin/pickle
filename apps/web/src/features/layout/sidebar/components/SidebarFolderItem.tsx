@@ -1,5 +1,6 @@
 import { Icon } from "@pickle/icons";
 import {
+  ActionButton,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,6 +14,7 @@ import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
  * NOTES 섹션 등을 위한 확장 기능(폴더 이름 변경, 편집 등)이 포함된 메뉴 아이템
  */
 export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
+  const [open, setOpen] = useState<boolean>(false);
   /* --- [Rename Logic] --- */
   const [changeFolderName, setChangeFolderName] = useState<string>(props.label); // 초기값 설정 수정 필요할 수 있음
   const [isEditing, setIsEditing] = useState(false);
@@ -46,21 +48,21 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
   return (
     <div className="relative">
       <SidebarItemBase
+        forceFocus={open}
         {...props}
         rightSection={
-          <DropdownMenu>
+          <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="cursor-pointer items-center rounded-md p-0.5 text-base-muted opacity-0 transition-[background-color,color,opacity] hover:bg-green-100/16 hover:text-base-foreground group-focus-within:opacity-100 group-hover:flex group-hover:opacity-100"
-              >
-                <Icon name="ellipsis_16" />
-              </button>
+              <ActionButton
+                variant={"subAction"}
+                icon="ellipsis_16"
+                forceFocus={open}
+              />
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              side="right"
-              sideOffset={0}
+              side="bottom"
+              sideOffset={10}
               className="w-fit"
               onCloseAutoFocus={(e) => {
                 if (preventFocusRestore.current) {
