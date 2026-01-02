@@ -12,10 +12,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: cn(
+        primary: cn(
           "bg-base-primary text-neutral-950",
           "hover:bg-green-200",
           "disabled:bg-green-300/50 disabled:text-base-disabled",
+        ),
+        secondary: cn(
+          "bg-neutral-700 text-neutral-400",
+          "hover:bg-neutral-650",
+          "disabled:bg-neutral-700 disabled:text-neutral-600",
         ),
         icon: cn(
           "!px-0 aspect-square",
@@ -25,13 +30,14 @@ const buttonVariants = cva(
         ),
       },
       size: {
-        default: cn("h-[38px] px-4", "font-semibold text-sm", "rounded-[6px]"),
-        small: cn("h-[26px] px-4", "font-semibold text-sm", "rounded-[4px]"),
+        h38: cn("h-[38px] px-4", "font-semibold text-sm", "rounded-[6px]"),
+        h32: cn("h-[32px] px-4", "font-semibold text-[13px]", "rounded-[6px]"),
+        // h26: cn("h-[26px] px-4", "font-semibold text-sm", "rounded-[4px]"),
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: "primary",
+      size: "h38",
     },
   },
 );
@@ -49,8 +55,8 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
 const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
   const {
     className,
-    variant = "default",
-    size = "default",
+    variant = "primary",
+    size = "h38",
     asChild = false,
     iconSide = "right",
     icon,
