@@ -34,8 +34,10 @@ export function mountOverlay(tabId: number) {
   iframe.style.width = `${totalWidth}px`;
   iframe.style.height = `calc(100vh - ${OVERLAY_DIMENSIONS.margin * 2}px)`;
   iframe.style.zIndex = "2147483647";
-  iframe.className =
-    "shadow-standard border border-base-border-light bg-neutral-850 rounded-2xl";
+  iframe.style.boxShadow = "0 4px 12px 0px rgba(0, 0, 0, 0.7)"; //shadow-standard
+  iframe.style.border = "1px solid oklch(0.31317 0 0)"; //border border-base-border-light
+  iframe.style.backgroundColor = "oklch(0.23929 0 0)"; //bg-neutral-850
+  iframe.style.borderRadius = "16px"; //rounded-2xl
   // Important: allow pointer events to pass through, but children in iframe will block
   // However, for iframe, 'pointer-events: none' on iframe element makes the WHOLE iframe unclickable.
   // We want the iframe to be clickable where the UI is.
