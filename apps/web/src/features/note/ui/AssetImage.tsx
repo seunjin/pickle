@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 
 interface AssetImageProps {
@@ -17,20 +16,13 @@ interface AssetImageProps {
 const loadedImages = new Set<string>();
 
 /**
- * Supabase Storage에서 Signed URL을 가져오는 함수
- * React Query로 캐싱되어 동일 path에 대해 재요청을 방지합니다.
+ * Supabase Storage Public URL을 생성합니다.
+ * Public 버킷이므로 Signed URL이 필요 없어 브라우저 캐싱이 완벽하게 동작합니다.
  */
-async function fetchSignedUrl(path: string): Promise<string> {
+function getPublicImageUrl(path: string): string {
   const supabase = createClient();
-  const { data, error } = await supabase.storage
-    .from("bitmaps")
-    .createSignedUrl(path, 60 * 60); // 1 hour validity
-
-  if (error) {
-    throw new Error(`Failed to sign URL: ${error.message}`);
-  }
-
-  return data.signedUrl;
+  const { data } = supabase.storage.from("bitmaps").getPublicUrl(path);
+  return data.publicUrl;
 }
 
 export const AssetImage = ({
@@ -39,19 +31,22 @@ export const AssetImage = ({
   className,
   blurDataUrl,
 }: AssetImageProps) => {
-  // 이미 로드된 이미지면 즉시 표시 (블러 스킵)
-  const [isLoaded, setIsLoaded] = useState(() => loadedImages.has(path));
+  // 이미 로드된 이미지면 즉시 표시 (블러 스킵, 애니메이션 스킵)
+  const isCached = loadedImages.has(path);
+  const [isLoaded, setIsLoaded] = useState(isCached);
+  // 플레이스홀더 표시를 100ms 지연 (빠른 캐시 로드 시 깜빡임 방지)
+  const [showPlaceholder, setShowPlaceholder] = useState(false);
 
-  // React Query로 Signed URL 캐싱 (같은 path면 재요청 X)
-  const { data: signedUrl, isError } = useQuery({
-    queryKey: ["signedUrl", path],
-    queryFn: () => fetchSignedUrl(path),
-    staleTime: 1000 * 60 * 50, // 50분간 fresh (Signed URL은 1시간 유효)
-    gcTime: 1000 * 60 * 60, // 1시간 캐시 유지
-    enabled: !!path,
-  });
+  useEffect(() => {
+    if (isCached || isLoaded) return;
+    const timer = setTimeout(() => setShowPlaceholder(true), 100);
+    return () => clearTimeout(timer);
+  }, [isCached, isLoaded]);
 
-  if (isError) {
+  // Public URL은 고정이므로 React Query 캐싱 불필요 (브라우저가 캐싱)
+  const publicUrl = path ? getPublicImageUrl(path) : null;
+
+  if (!publicUrl) {
     return (
       <div className="flex h-full w-full select-none items-center justify-center bg-base-muted text-center font-semibold text-base text-neutral-600">
         Failed to load image
@@ -63,46 +58,46 @@ export const AssetImage = ({
     <div
       className={`relative h-full w-full overflow-hidden ${className || ""}`}
     >
-      {/* 블러 플레이스홀더 (실제 이미지 로드 시 fade out) */}
-      {blurDataUrl && (
+      {/* 블러 플레이스홀더 (100ms 후에만 표시) */}
+      {blurDataUrl && showPlaceholder && !isLoaded && (
         <Image
           src={blurDataUrl}
           alt=""
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className={`object-cover transition-opacity duration-1000 ${
-            isLoaded ? "opacity-0" : "opacity-100"
-          }`}
+          className="object-cover"
           unoptimized
         />
       )}
 
-      {/* 스켈레톤 (블러 데이터 없을 때만) */}
-      {!blurDataUrl && !isLoaded && (
+      {/* 스켈레톤 (블러 없고 100ms 후에도 로드 안 됨) */}
+      {!blurDataUrl && showPlaceholder && !isLoaded && (
         <div className="absolute inset-0 animate-pulse bg-gray-200" />
       )}
 
       {/* 실제 이미지 */}
-      {signedUrl && (
-        <Image
-          src={signedUrl}
-          alt={alt}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className={`object-cover transition-opacity duration-1000 ${
-            isLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          unoptimized={
-            signedUrl?.includes("127.0.0.1") ||
-            signedUrl?.includes("localhost") ||
-            signedUrl?.includes("supabase.co")
-          }
-          onLoad={() => {
-            loadedImages.add(path);
-            setIsLoaded(true);
-          }}
-        />
-      )}
+      <Image
+        src={publicUrl}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className={`object-cover ${!isCached && showPlaceholder ? "transition-opacity duration-500" : ""} ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        unoptimized={
+          publicUrl?.includes("127.0.0.1") ||
+          publicUrl?.includes("localhost") ||
+          publicUrl?.includes("supabase.co")
+        }
+        onLoad={() => {
+          loadedImages.add(path);
+          setIsLoaded(true);
+        }}
+        onError={() => {
+          // 에러 시에도 로드 완료 처리 (스켈레톤 제거)
+          setIsLoaded(true);
+        }}
+      />
     </div>
   );
 };
