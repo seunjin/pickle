@@ -116,6 +116,7 @@ export default function OverlayApp({
         meta: inputMeta, // Moved to top-level meta
         memo: note.memo,
         tags: [],
+        blurDataUrl: note.blurDataUrl, // [추가] 이미지 블러 플레이스홀더 데이터
       };
 
       let input: CreateNoteInput;

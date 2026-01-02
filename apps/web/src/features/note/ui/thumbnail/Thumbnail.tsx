@@ -24,19 +24,28 @@ export const Thumbnail = ({
             src={note.meta.image}
             alt={note.meta?.description}
             className={cn("h-full w-full object-cover")}
+            loading="lazy"
           />
         ) : (
           <ThumbnailNoImage />
         );
       case "image":
         return note.assets ? (
-          <AssetImage path={note.assets?.full_path} alt={""} />
+          <AssetImage
+            path={note.assets?.full_path}
+            alt={""}
+            blurDataUrl={note.assets?.blur_data_url}
+          />
         ) : (
           <ThumbnailNoImage />
         );
       case "capture":
         return note.assets ? (
-          <AssetImage path={note.assets?.full_path} alt={""} />
+          <AssetImage
+            path={note.assets?.full_path}
+            alt={""}
+            blurDataUrl={note.assets?.blur_data_url}
+          />
         ) : (
           <ThumbnailNoImage />
         );

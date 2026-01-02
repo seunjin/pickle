@@ -101,6 +101,7 @@ const commonInputFields = z.object({
   meta: createInputMetaSchema,
   memo: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  blurDataUrl: z.string().optional(), // [NEW] Transient field for blur preview
 });
 
 // 4-2. 공통 DB 필드 (엄격한 DB 행)

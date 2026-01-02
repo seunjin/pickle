@@ -24,6 +24,7 @@ export const assetSchema = z.object({
   thumb_size_bytes: z.number().int().nullable(),
   width: z.number().int().nullable(),
   height: z.number().int().nullable(),
+  blur_data_url: z.string().nullable(),
   created_at: z.string(), // DbDate
 });
 

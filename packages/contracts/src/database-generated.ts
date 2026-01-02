@@ -36,6 +36,7 @@ export type Database = {
     Tables: {
       assets: {
         Row: {
+          blur_data_url: string | null;
           created_at: string;
           full_path: string;
           full_size_bytes: number;
@@ -49,6 +50,7 @@ export type Database = {
           workspace_id: string;
         };
         Insert: {
+          blur_data_url?: string | null;
           created_at?: string;
           full_path: string;
           full_size_bytes: number;
@@ -62,6 +64,7 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
+          blur_data_url?: string | null;
           created_at?: string;
           full_path?: string;
           full_size_bytes?: number;

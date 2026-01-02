@@ -151,6 +151,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
             type: note.type,
             full_path: uploadData.path,
             full_size_bytes: fileSize,
+            blur_data_url: note.blurDataUrl ?? null,
           })
           .select()
           .single();

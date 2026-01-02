@@ -25,6 +25,7 @@ export interface NoteData {
   captureData?: CaptureData;
   pageMeta?: PageMetadata; // [Refactor] Renamed from bookmarkData
   isLoading?: boolean;
+  blurDataUrl?: string; // [NEW] Low-res preview for high-quality blur
 
   // Fields used in OverlayApp but previously missing from type
   title?: string;

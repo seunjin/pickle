@@ -27,7 +27,7 @@ function CaptureProcessor({
   onReady,
 }: {
   captureData: CaptureData;
-  onReady: (url: string) => void;
+  onReady: (url: string, blurUrl: string) => void;
 }) {
   useEffect(() => {
     const canvas = document.createElement("canvas");
@@ -39,7 +39,17 @@ function CaptureProcessor({
       canvas.width = width;
       canvas.height = height;
       ctx?.drawImage(img, x, y, width, height, 0, 0, width, height);
-      onReady(canvas.toDataURL());
+      const fullResUrl = canvas.toDataURL("image/png");
+
+      // 블러 플레이스홀더를 위한 저해상도(10x10) 이미지 생성
+      const blurCanvas = document.createElement("canvas");
+      blurCanvas.width = 10;
+      blurCanvas.height = 10;
+      const blurCtx = blurCanvas.getContext("2d");
+      blurCtx?.drawImage(canvas, 0, 0, 10, 10);
+      const blurDataUrl = blurCanvas.toDataURL("image/webp", 0.3); // 용량 최적화를 위해 webp/저품질 선호
+
+      onReady(fullResUrl, blurDataUrl);
     };
 
     img.src = captureData.image;
@@ -101,7 +111,10 @@ export function CaptureEditor({
             {note.captureData && !processedImage && (
               <CaptureProcessor
                 captureData={note.captureData}
-                onReady={setProcessedImage}
+                onReady={(processedUrl, blurUrl) => {
+                  setProcessedImage(processedUrl);
+                  onUpdate({ blurDataUrl: blurUrl });
+                }}
               />
             )}
           </div>

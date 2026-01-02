@@ -1,8 +1,16 @@
 "use client";
 
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
+import { Icon } from "@pickle/icons";
 import { useDialog } from "@pickle/lib";
-import { ActionButton } from "@pickle/ui";
+import {
+  ActionButton,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@pickle/ui";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -10,11 +18,13 @@ import { Thumbnail } from "./thumbnail/Thumbnail";
 
 interface NoteCardProps {
   note: NoteWithAsset;
+  onDelete?: (noteId: string) => void;
 }
 
-export function NoteCard({ note }: NoteCardProps) {
+export function NoteCard({ note, onDelete }: NoteCardProps) {
   const dialog = useDialog();
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleCardClick = () => {
     dialog.open(() => <NoteDetailDrawer note={note} />);
@@ -61,14 +71,34 @@ export function NoteCard({ note }: NoteCardProps) {
           </span>
           <div className="flex gap-1">
             {/* 메뉴 버튼 */}
-            <ActionButton
-              icon={"ellipsis_16"}
-              variant="action"
-              onClick={(e) => {
-                e.stopPropagation();
-                // TODO: Open menu
-              }}
-            />
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <ActionButton
+                  icon={"ellipsis_16"}
+                  variant="action"
+                  forceFocus={isMenuOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // TODO: Open menu
+                  }}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" side="bottom" sideOffset={5}>
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete?.(note.id);
+                      // setIsMenuOpen(false);
+                    }}
+                  >
+                    <Icon name="trash_16" /> 휴지통으로 이동
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* 북마크 버튼 */}
             <ActionButton
               icon={"bookmark_16"}

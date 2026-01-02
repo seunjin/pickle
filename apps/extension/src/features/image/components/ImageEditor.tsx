@@ -88,7 +88,18 @@ export function ImageEditor({
                     ? "opacity-100"
                     : "absolute opacity-0",
                 )}
-                onLoad={() => setImageStatus("success")}
+                onLoad={(e) => {
+                  setImageStatus("success");
+                  // 블러 플레이스홀더를 위한 저해상도(10x10) 이미지 생성
+                  const imgElement = e.currentTarget;
+                  const canvas = document.createElement("canvas");
+                  canvas.width = 10;
+                  canvas.height = 10;
+                  const ctx = canvas.getContext("2d");
+                  ctx?.drawImage(imgElement, 0, 0, 10, 10);
+                  const blurUrl = canvas.toDataURL("image/webp", 0.3);
+                  onUpdate({ blurDataUrl: blurUrl });
+                }}
                 onError={() => {
                   setImageStatus("error");
                   if (!diagnosis)
