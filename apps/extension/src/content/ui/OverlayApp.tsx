@@ -23,7 +23,7 @@ export default function OverlayApp({
   onClose: () => void;
   tabId: number;
 }) {
-  const [view, setView] = useState<ViewType>("bookmark");
+  const [view, setView] = useState<ViewType>("text");
   const [note, setNote] = useState<NoteData>({});
 
   // Storage Key: Tab ID 기반으로 분리
