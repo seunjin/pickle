@@ -17,46 +17,59 @@ export async function sendMessageToContentScript(
     // Content Script가 로드되지 않아서 실패한 경우를 감지합니다.
     const err = error as Error;
     if (err.message?.includes("Receiving end does not exist")) {
-      console.log(
-        "Found 'Receiving end does not exist' error. Attempting injection...",
-      );
-
       try {
+        // 탭 정보를 가져와 주입 가능한 페이지인지 확인합니다. (보안 정책 대응)
+        const tab = await chrome.tabs.get(tabId);
+        if (!tab.url || isRestrictedUrl(tab.url)) {
+          console.warn(
+            `Skipping script injection: Restricted URL detected (${tab.url || "unknown"})`,
+          );
+          throw new Error("CANNOT_INJECT_RESTRICTED_URL");
+        }
+
+        console.log("Attempting injection into tab:", tabId);
+
         // manifest.json에서 content_scripts 파일 목록을 가져옵니다.
         const manifest = chrome.runtime.getManifest();
         const contentScripts = manifest.content_scripts?.[0]?.js;
 
         if (contentScripts && contentScripts.length > 0) {
-          console.log(
-            `Injecting content scripts: ${contentScripts.join(", ")} into tab ${tabId}`,
-          );
-
           // 스크립트를 해당 탭에 강제로 주입(Execute)합니다.
           await chrome.scripting.executeScript({
             target: { tabId: tabId },
             files: contentScripts,
           });
 
-          console.log(
-            "Injection successful. Waiting for script initialization...",
-          );
-          // 스크립트가 실행되고 초기화될 시간을 잠깐 줍니다 (0.5초).
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          console.log("Retrying message send...");
-          // 2차 시도: 이제 스크립트가 있으니 다시 메시지를 보냅니다.
-          const response = await chrome.tabs.sendMessage(tabId, message);
-          console.log("Retry response received:", response);
-          return response;
-        } else {
-          console.error("No content scripts found in manifest to inject.");
+          console.log("Injection successful. Retrying message...");
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          return await chrome.tabs.sendMessage(tabId, message);
         }
       } catch (injectionError) {
-        // 주입조차 실패하면 어쩔 수 없으므로 에러를 던집니다.
-        console.error("Script injection failed:", injectionError);
-        throw injectionError; // 상위 catch로 전달
+        console.error("Script injection or retry failed:", injectionError);
+        throw injectionError;
       }
     }
     throw error;
   }
+}
+
+/**
+ * 서비스 페이지나 설정 페이지 등 스크립트 주입이 불가능한 특수 URL인지 확인합니다.
+ */
+function isRestrictedUrl(url: string): boolean {
+  const restrictedProtocols = [
+    "chrome:",
+    "chrome-extension:",
+    "about:",
+    "edge:",
+  ];
+  const restrictedDomains = [
+    "chrome.google.com/webstore",
+    "chromewebstore.google.com",
+  ];
+
+  return (
+    restrictedProtocols.some((protocol) => url.startsWith(protocol)) ||
+    restrictedDomains.some((domain) => url.includes(domain))
+  );
 }
