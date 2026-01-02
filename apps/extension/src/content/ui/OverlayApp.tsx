@@ -23,7 +23,7 @@ export default function OverlayApp({
   onClose: () => void;
   tabId: number;
 }) {
-  const [view, setView] = useState<ViewType>("text");
+  const [view, setView] = useState<ViewType>("bookmark");
   const [note, setNote] = useState<NoteData>({});
 
   // Storage Key: Tab ID 기반으로 분리
@@ -177,7 +177,7 @@ export default function OverlayApp({
   };
 
   return (
-    <div className="fade-in slide-in-from-right-4 h-full w-full animate-in overflow-hidden rounded-2xl border border-gray-200 bg-white font-sans text-gray-900 duration-300">
+    <div className="h-full">
       {view === "text" && (
         <TextEditor
           note={note}

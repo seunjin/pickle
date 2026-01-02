@@ -29,15 +29,13 @@ export function mountOverlay(tabId: number) {
   // Given current 'shadow-2xl', it extends OUTSIDE.
   // So Iframe needs to be slightly larger or we change shadow strategy.
   // For now, setting Iframe to exact requested content size (360x600) + small buffer for shadow to appear.
-  const totalWidth = OVERLAY_DIMENSIONS.width + OVERLAY_DIMENSIONS.shadowBuffer;
-  const totalHeight =
-    OVERLAY_DIMENSIONS.height + OVERLAY_DIMENSIONS.shadowBuffer;
+  const totalWidth = OVERLAY_DIMENSIONS.width;
 
   iframe.style.width = `${totalWidth}px`;
-  iframe.style.height = `${totalHeight}px`;
+  iframe.style.height = `calc(100vh - ${OVERLAY_DIMENSIONS.margin * 2}px)`;
   iframe.style.zIndex = "2147483647";
-  iframe.style.border = "none";
-  iframe.style.backgroundColor = "transparent";
+  iframe.className =
+    "shadow-standard border border-base-border-light bg-neutral-850 rounded-2xl";
   // Important: allow pointer events to pass through, but children in iframe will block
   // However, for iframe, 'pointer-events: none' on iframe element makes the WHOLE iframe unclickable.
   // We want the iframe to be clickable where the UI is.

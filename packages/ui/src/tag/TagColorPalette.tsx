@@ -29,7 +29,7 @@ export function TagColorPalette({
       <DropdownMenuContent
         side="bottom"
         align="end"
-        className="z-[110000] shadow-black/50 shadow-lg"
+        className="z-[110000] shadow-standard"
       >
         <DropdownMenuLabel>색</DropdownMenuLabel>
 

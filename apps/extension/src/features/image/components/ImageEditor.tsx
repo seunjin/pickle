@@ -1,5 +1,9 @@
 import { Header } from "@overlay/components/Header";
+import { Button, ScrollArea, Spinner, TextareaContainLabel } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import type { NoteData } from "@shared/types";
+import { useEffect, useState } from "react";
+import { EditorContainer } from "@/content/ui/components/EditorContainer";
 
 /**
  * ImageEditor Component
@@ -21,53 +25,123 @@ export function ImageEditor({
   onClose,
   onSave,
 }: ImageEditorProps) {
+  const srcUrl = note.srcUrl;
+  const [imageStatus, setImageStatus] = useState<
+    "loading" | "success" | "error"
+  >(srcUrl ? "loading" : "error");
+  const [diagnosis, setDiagnosis] = useState<string | null>(null);
+
+  const isLoading = imageStatus === "loading";
+  const isError = imageStatus === "error";
+
+  useEffect(() => {
+    if (!srcUrl || imageStatus !== "loading") return;
+
+    const checkImage = async () => {
+      try {
+        // HEAD 요청으로 메타데이터만 빠르게 확인 (CORS 허용 서버인 경우에만 작동)
+        const res = await fetch(srcUrl!, { method: "HEAD" });
+
+        if (!res.ok) {
+          if (res.status === 404) {
+            setDiagnosis("이미지가 원본 서버에서 삭제되었습니다 (404)");
+          } else if (res.status === 403 || res.status === 401) {
+            setDiagnosis("접근 권한이 없거나 차단된 이미지입니다 (403)");
+          } else {
+            setDiagnosis(`서버 응답 오류가 발생했습니다 (${res.status})`);
+          }
+          // <img> 태그도 실패할 수 있지만, <img> 자체가 로드될 가능성이 있으므로
+          // 여기서 강제로 error 상태로 만들지 않습니다.
+        }
+      } catch (e) {
+        // TypeError는 보통 CORS 보안 정책 차단
+        // <img> 태그는 CORS와 무관하게 표시 가능하므로, 진단 실패가 로드 차단으로 이어지지 않게 합니다.
+        setDiagnosis(
+          "보안 정책(CORS)으로 인해 상세 정보 확인이 제한되었습니다",
+        );
+      }
+    };
+
+    checkImage();
+  }, [srcUrl, imageStatus]);
+
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    <EditorContainer>
       <Header title="이미지 저장" onClose={onClose} />
+      <ScrollArea className="mr-2 h-full overflow-auto">
+        <div className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5">
+          {/* 이미지 컨테이너 영역 */}
+          <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
+            {isLoading && (
+              <div className="flex h-full items-center justify-center">
+                <Spinner className="size-7 text-base-primary" />
+              </div>
+            )}
 
-      <div className="group relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
-        {note.srcUrl ? (
-          <img
-            src={note.srcUrl}
-            alt="Captured content"
-            className="max-h-full max-w-full object-contain shadow-lg"
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-gray-400">
-            <span className="text-4xl">🖼️</span>
-            <p className="text-sm">이미지를 찾을 수 없습니다.</p>
+            {srcUrl ? (
+              <img
+                src={srcUrl}
+                alt={note.altText || "Captured content"}
+                className={cn(
+                  "max-h-full max-w-full object-contain shadow-lg transition-opacity duration-300",
+                  imageStatus === "success"
+                    ? "opacity-100"
+                    : "absolute opacity-0",
+                )}
+                onLoad={() => setImageStatus("success")}
+                onError={() => {
+                  setImageStatus("error");
+                  if (!diagnosis)
+                    setDiagnosis(
+                      "이미지를 불러오는 중 알 수 없는 오류가 발생했습니다",
+                    );
+                }}
+              />
+            ) : null}
+
+            {isError && (
+              <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-neutral-500">
+                <span className="text-4xl opacity-50 grayscale">🖼️</span>
+                <p className="font-medium text-sm">
+                  이미지를 불러올 수 없습니다
+                </p>
+                {diagnosis && (
+                  <p className="break-keep text-neutral-600 text-xs leading-relaxed">
+                    {diagnosis}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="image-note"
-          className="font-medium text-gray-500 text-xs"
+          {/* 타이틀 영역 */}
+          <TextareaContainLabel
+            label="TITLE"
+            placeholder="타이틀"
+            value={note.title || ""}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+          />
+          {/* 메모 영역 */}
+          <TextareaContainLabel
+            label="MEMO"
+            placeholder="메모"
+            value={note.memo || ""}
+            onChange={(e) => onUpdate({ memo: e.target.value })}
+            autoFocus
+          />
+        </div>
+      </ScrollArea>
+
+      <div className="px-5 pb-5">
+        <Button
+          className="w-full"
+          disabled={!srcUrl}
+          icon="download_16"
+          onClick={onSave}
         >
-          Note
-        </label>
-        <textarea
-          id="image-note"
-          className="h-20 w-full resize-none rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-          placeholder="이미지에 대한 메모를 남겨보세요..."
-          value={note.memo || ""}
-          onChange={(e) => onUpdate({ memo: e.target.value })}
-        />
+          피클에 저장하기
+        </Button>
       </div>
-
-      <button
-        type="button"
-        disabled={!note.srcUrl}
-        onClick={onSave}
-        className={`w-full rounded-lg py-3 font-bold text-white shadow-md transition-colors ${
-          note.srcUrl
-            ? "bg-purple-600 hover:bg-purple-700"
-            : "cursor-not-allowed bg-gray-400"
-        }`}
-      >
-        Save Image
-      </button>
-    </div>
+    </EditorContainer>
   );
 }

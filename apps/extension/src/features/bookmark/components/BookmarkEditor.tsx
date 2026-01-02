@@ -1,5 +1,7 @@
 import { Header } from "@overlay/components/Header";
+import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import type { NoteData } from "@shared/types";
+import { EditorContainer } from "@/content/ui/components/EditorContainer";
 
 /**
  * BookmarkEditor Component
@@ -22,95 +24,83 @@ export function BookmarkEditor({
   onSave,
 }: BookmarkEditorProps) {
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    <EditorContainer>
       <Header title="북마크 저장" onClose={onClose} />
-      {note.isLoading ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-yellow-600">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-600 border-t-transparent"></div>
-          <p className="animate-pulse font-semibold text-sm">
-            페이지 분석 중...
-          </p>
-        </div>
-      ) : note.pageMeta ? (
-        <div className="flex flex-1 flex-col gap-3 overflow-y-auto">
-          <div className="group overflow-hidden rounded-xl border bg-gray-50 shadow-sm transition-shadow hover:shadow-md">
-            {note.pageMeta.image && (
+      <ScrollArea className="mr-2 h-full overflow-auto">
+        <div className="mr-4 flex min-w-0 flex-col gap-2.5 py-0.5 pl-5">
+          <div className="aspect-video w-full overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
+            {note.pageMeta?.image && (
               <img
-                src={note.pageMeta.image}
-                alt="OG Img"
-                className="h-32 w-full object-cover"
+                src={note.pageMeta?.image}
+                alt="OG Preview"
+                className="h-full w-full object-cover"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  console.error("Image load failed:", note.pageMeta?.image);
                   e.currentTarget.style.display = "none";
                 }}
               />
             )}
-            <div className="flex flex-col gap-2 p-3">
-              <div className="flex items-center gap-1.5 opacity-70">
-                {note.pageMeta.favicon ? (
-                  <img src={note.pageMeta.favicon} alt="" className="h-3 w-3" />
-                ) : (
-                  <span className="text-[10px]">🔗</span>
-                )}
-                <span className="font-semibold text-[10px] text-gray-500">
-                  {note.pageMeta.site_name}
+          </div>
+          {(note.pageMeta?.favicon ||
+            note.pageMeta?.title ||
+            note.pageMeta?.image ||
+            note.pageMeta?.url) && (
+            <div className="flex max-w-xs flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="line-clamp-2 items-center text-ellipsis break-all font-semibold text-[15px] text-base-foreground">
+                  {/* favicon */}
+                  {note.pageMeta?.favicon && (
+                    <span className="mr-1.5 inline-block size-5 shrink-0 translate-y-[5px] overflow-hidden rounded-sm border border-base-border-light bg-white px-0.25">
+                      <img
+                        src={note.pageMeta?.favicon}
+                        alt={`${note.pageMeta?.site_name} favicon`}
+                        className="h-full w-full object-contain"
+                      />
+                    </span>
+                  )}
+
+                  {/* site name */}
+                  <span>
+                    {note.pageMeta?.site_name || note.pageMeta?.title}
+                  </span>
                 </span>
               </div>
-              <div>
-                <h3 className="mb-1 line-clamp-2 font-bold text-sm leading-tight">
-                  {note.pageMeta.title}
-                </h3>
-                <p className="line-clamp-2 text-gray-500 text-xs">
-                  {note.pageMeta.description}
-                </p>
-              </div>
-              <div className="mt-1 flex flex-col gap-0.5 border-gray-100 border-t pt-2">
-                <a
-                  href={note.pageMeta.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="truncate text-[10px] text-blue-500 hover:underline"
-                >
-                  {note.pageMeta.url}
-                </a>
-                <span className="text-right text-[10px] text-gray-400">
-                  {note.timestamp
-                    ? new Date(note.timestamp).toLocaleDateString()
-                    : ""}
+              {/* url */}
+              {note.pageMeta?.url && (
+                <span className="truncate text-[13px] text-neutral-500">
+                  {note.pageMeta?.url}
                 </span>
-              </div>
+              )}
             </div>
-          </div>
-          <div className="flex flex-1 flex-col gap-1">
-            <label
-              htmlFor="bookmark-note"
-              className="font-medium text-gray-500 text-xs"
-            >
-              Note
-            </label>
-            <textarea
-              id="bookmark-note"
-              className="h-full w-full resize-none rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="이 페이지에 대한 생각을 남겨보세요..."
-              value={note.memo || ""}
-              onChange={(e) => onUpdate({ memo: e.target.value })}
-            />
-          </div>
+          )}
+          {/* 타이틀 영역 */}
+          <TextareaContainLabel
+            label="TITLE"
+            placeholder="타이틀"
+            value={note.title || ""}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+          />
+          {/* 메모 영역 */}
+          <TextareaContainLabel
+            label="MEMO"
+            placeholder="메모"
+            value={note.memo || ""}
+            onChange={(e) => onUpdate({ memo: e.target.value })}
+            autoFocus
+          />
         </div>
-      ) : (
-        <div className="flex flex-1 items-center justify-center text-gray-400">
-          <p>데이터를 불러올 수 없습니다.</p>
-        </div>
-      )}
-      <button
-        type="button"
-        disabled={!note.pageMeta}
-        onClick={onSave}
-        className="w-full rounded-lg bg-yellow-500 py-3 font-bold text-white shadow-md transition-colors hover:bg-yellow-600"
-      >
-        Save Bookmark
-      </button>
-    </div>
+      </ScrollArea>
+
+      <div className="mt-auto px-5 pb-5">
+        <Button
+          className="w-full"
+          disabled={!note.pageMeta}
+          onClick={onSave}
+          icon="download_16"
+        >
+          피클에 저장하기
+        </Button>
+      </div>
+    </EditorContainer>
   );
 }

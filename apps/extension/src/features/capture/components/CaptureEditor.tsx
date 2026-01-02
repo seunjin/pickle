@@ -1,6 +1,8 @@
 import { Header } from "@overlay/components/Header";
+import { Button, ScrollArea, Spinner, TextareaContainLabel } from "@pickle/ui";
 import type { CaptureData, NoteData } from "@shared/types";
 import { useEffect, useState } from "react";
+import { EditorContainer } from "@/content/ui/components/EditorContainer";
 
 /**
  * CaptureEditor Component
@@ -16,9 +18,16 @@ interface CaptureEditorProps {
   onSave?: () => void;
 }
 
-function CapturePreview({ captureData }: { captureData: CaptureData }) {
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
-
+/**
+ * CaptureProcessor: UI를 렌더링하지 않고 캔버스를 이용해 이미지 가공 로직만 수행하는 컴포넌트
+ */
+function CaptureProcessor({
+  captureData,
+  onReady,
+}: {
+  captureData: CaptureData;
+  onReady: (url: string) => void;
+}) {
   useEffect(() => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -29,22 +38,13 @@ function CapturePreview({ captureData }: { captureData: CaptureData }) {
       canvas.width = width;
       canvas.height = height;
       ctx?.drawImage(img, x, y, width, height, 0, 0, width, height);
-      setCroppedImage(canvas.toDataURL());
+      onReady(canvas.toDataURL());
     };
 
     img.src = captureData.image;
-  }, [captureData]);
+  }, [captureData, onReady]);
 
-  if (!croppedImage)
-    return <div className="h-full w-full animate-pulse bg-gray-200" />;
-
-  return (
-    <img
-      src={croppedImage}
-      alt="Cropped capture"
-      className="max-h-full max-w-full object-contain shadow-lg"
-    />
-  );
+  return null; // 가공 로직만 수행하므로 아무것도 렌더링하지 않음
 }
 
 export function CaptureEditor({
@@ -53,53 +53,76 @@ export function CaptureEditor({
   onClose,
   onSave,
 }: CaptureEditorProps) {
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
+
+  // 새로운 캡쳐 데이터가 들어오면 이전 가공 이미지 초기화
+  useEffect(() => {
+    if (!note.captureData) {
+      setProcessedImage(null);
+    }
+  }, [note.captureData]);
+
+  // 데이터 수신 중이거나, 수신은 했지만 아직 캔버스 가공이 완료되지 않은 상태
+  const isWaiting = note.isLoading || (!!note.captureData && !processedImage);
+
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    <EditorContainer>
+      {/* 헤더 영역 */}
       <Header title="캡쳐 저장" onClose={onClose} />
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-lg border bg-gray-100">
-        {note.isLoading ? (
-          <div className="flex flex-col items-center gap-2 text-blue-600">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-            <p className="animate-pulse font-semibold text-sm">
-              캡쳐 처리 중...
-            </p>
+      {/* 스크롤 영역 */}
+      <ScrollArea className="mr-2 h-full overflow-auto">
+        <div className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5">
+          <div className="relative aspect-square overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
+            {isWaiting ? (
+              <div className="flex h-full items-center justify-center">
+                <Spinner className="size-7 text-base-primary" />
+              </div>
+            ) : (
+              processedImage && (
+                <img
+                  src={processedImage}
+                  alt="Cropped capture"
+                  className="max-h-full max-w-full object-contain"
+                />
+              )
+            )}
+
+            {/* 실제 이미지 가공 프로세서 (UI 없이 백그라운드 로직만 실행) */}
+            {note.captureData && !processedImage && (
+              <CaptureProcessor
+                captureData={note.captureData}
+                onReady={setProcessedImage}
+              />
+            )}
           </div>
-        ) : note.captureData ? (
-          <CapturePreview captureData={note.captureData} />
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-gray-400">
-            <span className="animate-bounce text-2xl">🖱️</span>
-            <p className="text-sm">화면을 드래그하여 선택하세요...</p>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="capture-note"
-          className="font-medium text-gray-500 text-xs"
+          {/* title */}
+          <TextareaContainLabel
+            label="TITLE"
+            placeholder="타이틀"
+            value={note.title}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+          />
+          {/* 메모 영역 */}
+          <TextareaContainLabel
+            label="MEMO"
+            placeholder="메모"
+            value={note.memo}
+            onChange={(e) => onUpdate({ memo: e.target.value })}
+            autoFocus
+          />
+        </div>
+      </ScrollArea>
+      {/* 버튼 영역 */}
+      <div className="px-5 pb-5">
+        <Button
+          className="w-full"
+          disabled={!note.captureData}
+          icon="download_16"
+          onClick={onSave}
         >
-          Note
-        </label>
-        <textarea
-          id="capture-note"
-          className="h-20 w-full resize-none rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="캡쳐에 대한 메모를 남겨보세요..."
-          value={note.memo || ""}
-          onChange={(e) => onUpdate({ memo: e.target.value })}
-        />
+          피클에 저장하기
+        </Button>
       </div>
-      <button
-        type="button"
-        disabled={!note.captureData}
-        onClick={onSave}
-        className={`w-full rounded-lg py-3 font-bold text-white shadow-md transition-colors ${
-          note.captureData
-            ? "bg-blue-600 hover:bg-blue-700"
-            : "cursor-not-allowed bg-gray-400"
-        }`}
-      >
-        Save Capture
-      </button>
-    </div>
+    </EditorContainer>
   );
 }

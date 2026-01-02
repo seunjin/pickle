@@ -60,7 +60,7 @@ const TagMaker = ({ trigger, open, onOpenChange }: TagMakerProps) => {
         side="bottom"
         className={cn(
           "z-[10000] h-[170px] w-[260px] p-0",
-          "border border-base-border-light bg-neutral-850 shadow-black/50 shadow-lg",
+          "border border-base-border-light bg-neutral-850 shadow-standard",
         )}
       >
         <div className="grid h-full grid-rows-[auto_1fr]">

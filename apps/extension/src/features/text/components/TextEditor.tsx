@@ -1,6 +1,7 @@
 import { Header } from "@overlay/components/Header";
-import { TextareaContainLabel } from "@pickle/ui";
+import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import type { NoteData } from "@shared/types";
+import { EditorContainer } from "@/content/ui/components/EditorContainer";
 
 /**
  * TextEditor Component
@@ -23,47 +24,38 @@ export function TextEditor({
   onSave,
 }: TextEditorProps) {
   return (
-    <div className="flex h-full flex-col gap-3 bg-base-background p-4">
+    <EditorContainer>
       <Header title="텍스트 저장" onClose={onClose} />
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="url-input"
-          className="font-medium text-gray-500 text-xs"
-        >
-          URL
-        </label>
-        <input
-          id="url-input"
-          type="text"
-          value={note.url || ""}
-          readOnly
-          className="w-full truncate rounded border bg-gray-50 p-2 text-gray-400 text-xs"
-        />
-      </div>
-      <div className="flex flex-1 flex-col gap-1">
-        <label
-          htmlFor="note-content"
-          className="font-medium text-gray-500 text-xs"
-        >
-          Content
-        </label>
-        <TextareaContainLabel label="MEMO" />
-        <textarea
-          id="note-content"
-          value={note.text || ""}
-          onChange={(e) => onUpdate({ text: e.target.value })}
-          className="h-full w-full resize-none rounded-lg border p-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="메모"
-        />
-      </div>
 
-      <button
-        type="button"
-        onClick={onSave}
-        className="w-full rounded-lg bg-green-600 py-3 font-bold text-white shadow-md transition-colors hover:bg-green-700"
-      >
-        Save to Pickle
-      </button>
-    </div>
+      <ScrollArea className="mr-2 h-full overflow-auto">
+        <div className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5">
+          <TextareaContainLabel
+            label="TITLE"
+            placeholder="타이틀"
+            value={note.title || ""}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+          ></TextareaContainLabel>
+          <TextareaContainLabel
+            label="TEXT"
+            placeholder="텍스트"
+            value={note.text || ""}
+            onChange={(e) => onUpdate({ text: e.target.value })}
+          ></TextareaContainLabel>
+          <TextareaContainLabel
+            label="MEMO"
+            placeholder="메모"
+            value={note.memo}
+            onChange={(e) => onUpdate({ memo: e.target.value })}
+            autoFocus
+          />
+        </div>
+      </ScrollArea>
+
+      <div className="px-5 pb-5">
+        <Button className="w-full" icon="download_16" onClick={onSave}>
+          피클에 저장하기
+        </Button>
+      </div>
+    </EditorContainer>
   );
 }
