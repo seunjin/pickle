@@ -104,6 +104,7 @@ function App() {
           note={note}
           onUpdate={handleUpdateNote}
           onClose={handleClose}
+          onRetake={() => console.log("Retake clicked (App)")}
           onSave={handleSave}
         />
       )}

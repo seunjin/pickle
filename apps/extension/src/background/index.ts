@@ -24,7 +24,9 @@ chrome.contextMenus.onClicked.addListener(
   async (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
     // 2-1. 앱 열기: 대시보드 웹사이트를 새 탭으로 엽니다.
     if (info.menuItemId === "open-app") {
-      chrome.tabs.create({ url: "https://picklenote.vercel.app" });
+      const appUrl =
+        import.meta.env.NEXT_PUBLIC_APP_URL || "https://picklenote.vercel.app";
+      chrome.tabs.create({ url: appUrl });
       return;
     }
 
@@ -70,9 +72,9 @@ chrome.contextMenus.onClicked.addListener(
         .then((metadata: PageMetadata) => {
           if (metadata && tab.id) {
             console.log("Metadata fetched in background:", metadata);
-            // import type { BookmarkData } ... (위에서 추가 필요)
             updateNote(tab.id, {
               pageMeta: metadata,
+              title: metadata.title, // [추가] 추출된 제목을 에디터의 초기 제목으로 설정
             });
           }
         })
@@ -116,48 +118,48 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const tabId = sender.tab?.id;
 
     if (windowId && tabId) {
-      // 로딩 상태 시작
-      updateNote(tabId, { isLoading: true }).then(() => {
-        // 실제 화면 캡쳐 수행 (chrome.tabs.captureVisibleTab)
-        chrome.tabs.captureVisibleTab(
-          windowId,
-          { format: "png" },
-          async (dataUrl) => {
-            const captureData: CaptureData = {
-              image: dataUrl, // Base64 이미지 데이터
-              area: request.area, // 선택 영역 좌표
-            };
-
-            // 캡쳐된 데이터를 스토리지에 저장하고 로딩 상태 해제
-            await updateNote(tabId, {
-              isLoading: false,
-              captureData: captureData,
-              mode: "capture", // 뷰 모드를 캡쳐로 변경
-            });
-
-            // 🚨 핵심 수정: 캡처 완료 후 메타데이터(Title, Favicon 등) 가져오기
-            sendMessageToContentScript(tabId, { action: "GET_METADATA" })
-              .then((metadata) => {
-                if (metadata) {
-                  console.log("Metadata fetched after capture:", metadata);
-                  updateNote(tabId, {
-                    pageMeta: metadata as PageMetadata,
-                  });
-                }
-              })
-              .catch((err) =>
-                console.warn("Capture metadata fetch failed:", err),
-              );
-
-            // 오버레이 열기 요청
-            await sendMessageToContentScript(tabId, {
-              action: "OPEN_OVERLAY",
-              mode: "capture",
-              tabId: tabId,
-            });
-          },
-        );
+      // 1. [최적화] 즉시 로딩 상태로 변경하고 오버레이부터 열기 요청!
+      // 이렇게 하면 사용자가 마우스를 떼는 즉시 스피너가 포함된 오버레이가 나타납니다.
+      updateNote(tabId, { isLoading: true, mode: "capture" }).then(() => {
+        sendMessageToContentScript(tabId, {
+          action: "OPEN_OVERLAY",
+          mode: "capture",
+          tabId: tabId,
+        });
       });
+
+      // 2. 그 사이에 백그라운드에서 스크린샷 작업을 수행
+      chrome.tabs.captureVisibleTab(
+        windowId,
+        { format: "png" },
+        async (dataUrl) => {
+          const captureData: CaptureData = {
+            image: dataUrl, // Base64 이미지 데이터
+            area: request.area, // 선택 영역 좌표
+          };
+
+          // 캡쳐된 데이터를 스토리지에 저장하고 로딩 상태 해제
+          await updateNote(tabId, {
+            isLoading: false,
+            captureData: captureData,
+          });
+
+          // 3. 메타데이터(Title, Favicon 등) 가져오기
+          sendMessageToContentScript(tabId, { action: "GET_METADATA" })
+            .then((metadata) => {
+              if (metadata) {
+                console.log("Metadata fetched after capture:", metadata);
+                updateNote(tabId, {
+                  pageMeta: metadata as PageMetadata,
+                  title: (metadata as PageMetadata).title,
+                });
+              }
+            })
+            .catch((err) =>
+              console.warn("Capture metadata fetch failed:", err),
+            );
+        },
+      );
     }
   }
   // 4-2. 노트 저장 요청 (SAVE_NOTE)
@@ -166,6 +168,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // 실제 DB 저장 로직은 Service 모듈(saveNote.ts)로 위임합니다.
     saveNoteToSupabase(request.note).then((result) => sendResponse(result));
     return true; // 비동기 응답(sendResponse)을 위해 true 반환 필수
+  }
+  // 4-3. 재캡쳐 요청 (RE_CAPTURE)
+  else if (request.action === "RE_CAPTURE") {
+    if (sender.tab) {
+      startCaptureFlow(sender.tab);
+    }
   }
 });
 

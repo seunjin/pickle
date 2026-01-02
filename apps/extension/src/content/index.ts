@@ -99,9 +99,21 @@ function startCapture() {
   overlay.style.left = "0";
   overlay.style.width = "100%";
   overlay.style.height = "100%";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
   overlay.style.zIndex = "999999";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
   overlay.id = "pickle-capture-overlay";
+
+  //Overlay 텍스트 추가
+  const overlayChild = document.createElement("span");
+  overlayChild.textContent = "Select area to capture";
+  overlayChild.style.color = "white";
+  overlayChild.style.fontSize = "20px";
+  overlayChild.style.fontWeight = "bold";
+  overlayChild.style.textAlign = "center";
+  overlay.appendChild(overlayChild);
   document.body.appendChild(overlay);
 
   // Selection Box 생성

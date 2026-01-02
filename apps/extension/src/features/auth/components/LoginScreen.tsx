@@ -1,8 +1,9 @@
 export const LoginScreen = () => {
   const handleConnect = () => {
-    // Opens the Web App Sync Page
-    // TODO: Use env var for URL in real prod, hardcoded for local dev as per context
-    chrome.tabs.create({ url: "http://localhost:3000/auth/sync" });
+    // Opens the Web App Sync Page using environment variable
+    const appUrl =
+      import.meta.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    chrome.tabs.create({ url: `${appUrl}/auth/sync` });
   };
 
   return (

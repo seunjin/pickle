@@ -15,6 +15,7 @@ interface CaptureEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
   onClose: () => void;
+  onRetake: () => void;
   onSave?: () => void;
 }
 
@@ -51,6 +52,7 @@ export function CaptureEditor({
   note,
   onUpdate,
   onClose,
+  onRetake,
   onSave,
 }: CaptureEditorProps) {
   const [processedImage, setProcessedImage] = useState<string | null>(null);
@@ -72,18 +74,32 @@ export function CaptureEditor({
       {/* 스크롤 영역 */}
       <ScrollArea className="mr-2 h-full overflow-auto">
         <div className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5">
-          <div className="relative aspect-square overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
+          <div className="group aspect-square overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
             {isWaiting ? (
               <div className="flex h-full items-center justify-center">
                 <Spinner className="size-7 text-base-primary" />
               </div>
             ) : (
               processedImage && (
-                <img
-                  src={processedImage}
-                  alt="Cropped capture"
-                  className="max-h-full max-w-full object-contain"
-                />
+                <div className="relative flex h-full w-full items-center justify-center">
+                  <img
+                    src={processedImage}
+                    alt="Cropped capture"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                  {/* 재캡쳐 버튼 */}
+                  <div className="absolute right-2 bottom-2 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Button
+                      size="small"
+                      variant="default"
+                      className="h-7 gap-1 border border-neutral-700 bg-neutral-900/80 px-2 text-xs backdrop-blur-sm hover:bg-neutral-800"
+                      onClick={onRetake}
+                    >
+                      <span className="text-[14px]">🔄</span>
+                      retake
+                    </Button>
+                  </div>
+                </div>
               )
             )}
 
@@ -116,7 +132,7 @@ export function CaptureEditor({
       <div className="px-5 pb-5">
         <Button
           className="w-full"
-          disabled={!note.captureData}
+          disabled={!note.captureData || isWaiting}
           icon="download_16"
           onClick={onSave}
         >

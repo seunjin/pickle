@@ -112,7 +112,7 @@ export default function OverlayApp({
       };
 
       const common = {
-        title: note.pageMeta?.title, // [NEW] Set top-level title from metadata
+        title: note.title || note.pageMeta?.title, // [수정] 사용자가 수정한 제목을 우선순위로 저장
         meta: inputMeta, // Moved to top-level meta
         memo: note.memo,
         tags: [],
@@ -176,6 +176,15 @@ export default function OverlayApp({
     }
   };
 
+  const handleRetake = async () => {
+    console.log("Retake capture requested");
+    // 1. 현재 오버레이 닫기 (새로운 캡쳐 영역 선택을 위해)
+    onClose();
+
+    // 2. 백그라운드에 캡쳐 시작 요청 전송
+    chrome.runtime.sendMessage({ action: "RE_CAPTURE" });
+  };
+
   return (
     <div className="h-full">
       {view === "text" && (
@@ -191,6 +200,7 @@ export default function OverlayApp({
           note={note}
           onUpdate={handleUpdateNote}
           onClose={onClose}
+          onRetake={handleRetake}
           onSave={handleSave}
         />
       )}
@@ -241,8 +251,11 @@ export default function OverlayApp({
             <button
               type="button"
               onClick={() => {
-                // Open new tab for auth sync
-                window.open("http://localhost:3000/auth/sync", "_blank");
+                // Open new tab for auth sync using env var
+                const appUrl =
+                  import.meta.env.NEXT_PUBLIC_APP_URL ||
+                  "http://localhost:3000";
+                window.open(`${appUrl}/auth/sync`, "_blank");
               }}
               className="mt-1 w-full rounded bg-red-600 py-1.5 font-medium text-white text-xs transition-colors hover:bg-red-700"
             >

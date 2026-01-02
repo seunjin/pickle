@@ -35,6 +35,7 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
       mode: "bookmark",
       isLoading: false,
       pageMeta: metadata,
+      title: metadata.title, // [추가] 추출된 제목을 에디터의 초기 제목으로 설정
     });
   } catch (error) {
     console.warn("메타데이터 추출 실패 (Retry Failed):", error);
