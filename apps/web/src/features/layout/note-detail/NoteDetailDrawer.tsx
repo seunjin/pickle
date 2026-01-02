@@ -4,6 +4,11 @@ import { useDialogController } from "@pickle/lib";
 import {
   ActionButton,
   Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
   ScrollArea,
   TAG_VARIANTS,
   TagMaker,
@@ -50,6 +55,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
   const [createTag, setCreateTag] = useState<boolean>(false);
+  const [isMove, setIsMove] = useState<boolean>(false);
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -65,7 +71,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={close}
-          ></motion.div>
+          />
 
           {/* drawer */}
           <motion.div
@@ -80,12 +86,60 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
               <span className="inline-flex items-center gap-2 font-semibold text-[18px] text-base-foreground">
                 <Icon name="archive_20" className="text-inherit" /> Inbox
               </span>
-              <button
-                type="button"
-                className="flex items-center gap-0.5 rounded-[6px] border border-base-border-light bg-neutral-800 px-1.5 text-[12px] text-base-muted-foreground"
-              >
-                <Icon name="move_16" /> 옮기기
-              </button>
+              <DropdownMenu open={isMove} onOpenChange={setIsMove}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex items-center gap-0.5 rounded-[6px] border border-base-border-light bg-neutral-800 px-1.5 text-[12px] text-base-muted-foreground transition-colors hover:text-base-foreground",
+                      isMove && "text-base-foreground",
+                    )}
+                  >
+                    <Icon name="move_16" /> 옮기기
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="bottom"
+                  align="end"
+                  className="z-1000 w-40"
+                >
+                  <ScrollArea className="h-auto max-h-[148px] *:data-radix-scroll-area-viewport:max-h-[148px]">
+                    <DropdownMenuLabel>이동할 폴더 선택</DropdownMenuLabel>
+                    {[
+                      "폴더1",
+                      "폴더2",
+                      "폴더3",
+                      "폴더4",
+                      "폴더5",
+                      "폴더6",
+                      "폴더7",
+                      "폴더8",
+                      "폴더9",
+                      "폴더10",
+                      "폴더11",
+                      "폴더12",
+                      "폴더13",
+                      "폴더14",
+                      "폴더15",
+                      "폴더16",
+                      "폴더17",
+                      "폴더18",
+                      "폴더19",
+                      "폴더20",
+                    ].map((folder) => (
+                      <DropdownMenuItem asChild key={folder}>
+                        <button
+                          type="button"
+                          className="grid w-full grid-cols-[auto_1fr] items-center gap-2 text-left"
+                        >
+                          <Icon name="folder_20" className="shrink-0" />
+                          <span className="w-full truncate">{folder}</span>
+                        </button>
+                      </DropdownMenuItem>
+                    ))}
+                  </ScrollArea>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </header>
 
             {/* drawer content */}

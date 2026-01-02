@@ -79,25 +79,26 @@ const TagMaker = ({ trigger, open, onOpenChange }: TagMakerProps) => {
                     <li
                       key={tag.id}
                       className={cn(
-                        "group flex h-[30px] items-center justify-between gap-2 rounded-[4px] px-1 hover:bg-neutral-700",
+                        "group grid h-[30px] grid-cols-[auto_1fr] items-center justify-between gap-2 rounded-[4px] px-1 hover:bg-neutral-700",
                         // 팔레트가 열린 아이템은 호버 스타일 유지
                         isActive && "bg-neutral-700",
                       )}
                     >
-                      <span
+                      <div
                         className={cn(
-                          "inline-flex h-6 items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px]",
+                          "flex h-6 min-w-0 flex-1 items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px]",
                           style.tagColor,
                         )}
                       >
-                        #{tag.name}
-                      </span>
+                        <span className="truncate">#{tag.name}</span>
+                      </div>
                       <TagColorPalette
                         trigger={
                           <ActionButton
                             icon="ellipsis_16"
                             variant="subAction"
                             forceFocus={isActive}
+                            className="shrink-0"
                           />
                         }
                         color={tag.style}
