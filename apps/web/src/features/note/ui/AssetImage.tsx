@@ -65,7 +65,9 @@ export const AssetImage = ({ path, alt, className }: AssetImageProps) => {
         // 127.0.0.1 is blocked by Next.js Image Optimization for security (SSRF prevention).
         // We disable optimization for local development URLs.
         unoptimized={
-          signedUrl?.includes("127.0.0.1") || signedUrl?.includes("localhost")
+          signedUrl?.includes("127.0.0.1") ||
+          signedUrl?.includes("localhost") ||
+          signedUrl?.includes("supabase.co")
         }
       />
     </div>

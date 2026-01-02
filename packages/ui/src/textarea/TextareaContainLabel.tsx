@@ -44,7 +44,7 @@ export const TextareaContainLabel = ({
         id={id}
         {...props}
         className={cn(
-          "field-sizing-content block min-h-[40px] w-full resize-none appearance-none border-0 bg-transparent p-0 text-sm outline-none",
+          "field-sizing-content block min-h-[40px] w-full resize-none appearance-none border-0 bg-transparent p-0 text-sm outline-none placeholder:text-form-input-placeholder",
           /* 8. 비활성화(Disabled) 상태 */
           "disabled:cursor-not-allowed disabled:text-form-input-disabled-foreground",
         )}
