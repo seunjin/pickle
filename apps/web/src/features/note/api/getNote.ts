@@ -3,6 +3,7 @@ import {
   type NoteWithAsset,
   noteWithAssetSchema,
 } from "@pickle/contracts/src/note";
+import type { Tag } from "@pickle/contracts/src/tag";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/shared/lib/supabase/client";
 
@@ -31,7 +32,10 @@ export const getNote = async (
   // 데이터 평탄화
   const transformedData = {
     ...data,
-    tag_list: data.tag_list?.map((item: any) => item.tag).filter(Boolean) || [],
+    tag_list:
+      (data.tag_list as { tag: Tag | null }[] | null)
+        ?.map((item) => item.tag)
+        .filter(Boolean) || [],
   };
 
   const parsed = noteWithAssetSchema.safeParse(transformedData);
