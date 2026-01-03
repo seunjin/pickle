@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@pickle/icons";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { TAG_COLORS, TAG_VARIANTS, type TagColor } from "../constants/tag";
 import {
   DropdownMenu,
@@ -35,9 +35,16 @@ export function TagColorPalette({
   onSave,
   onOpenChange,
 }: TagColorPaletteProps) {
+  const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
+
   return (
-    <DropdownMenu onOpenChange={onOpenChange}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent
         side="bottom"
@@ -65,6 +72,7 @@ export function TagColorPalette({
                 if (e.nativeEvent.isComposing) return;
                 if (e.key === "Enter") {
                   onSave?.();
+                  handleOpenChange(false);
                 }
               }}
               onPointerDown={(e) => e.stopPropagation()}
@@ -110,14 +118,7 @@ export function TagColorPalette({
             })}
           </div>
 
-          <CustomMenuItem
-            onClick={onDeleteTag}
-            onPointerDown={(e) => e.preventDefault()}
-          >
-            <Icon name="setting_16" className="text-inherit" />
-            태그 설정
-          </CustomMenuItem>
-          <DropdownMenuItem asChild></DropdownMenuItem>
+          <DropdownMenuItem asChild />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

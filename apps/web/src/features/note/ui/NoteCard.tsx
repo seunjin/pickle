@@ -9,9 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  TAG_VARIANTS,
 } from "@pickle/ui";
-import { cn } from "@pickle/ui/lib/utils";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -55,7 +53,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
           </div>
 
           {/* TAGS */}
-          <div className="mb-2 flex flex-wrap gap-1">
+          {/* <div className="mb-2 flex flex-wrap gap-1">
             {note.tag_list?.slice(0, 3).map((tag) => (
               <div
                 key={tag.id}
@@ -72,7 +70,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
                 +{(note.tag_list?.length || 0) - 3}
               </div>
             )}
-          </div>
+          </div> */}
 
           <a
             href={note.meta?.url}

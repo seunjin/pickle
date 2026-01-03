@@ -37,3 +37,36 @@ export async function removeTagFromNote(
 
   return true;
 }
+
+/**
+ * 노트의 태그 목록을 일괄 업데이트합니다.
+ * 기존 관계를 모두 제거하고 새로운 태그 ID 리스트로 대체합니다.
+ */
+export async function setNoteTags(
+  noteId: string,
+  tagIds: string[],
+): Promise<boolean> {
+  const supabase = createClient();
+
+  // 1. 기존 태그 관계 삭제
+  const { error: deleteError } = await supabase
+    .from("note_tags")
+    .delete()
+    .eq("note_id", noteId);
+
+  if (deleteError) throw new Error(deleteError.message);
+
+  // 2. 새로운 태그 관계 추가 (리스트가 비어있지 않은 경우)
+  if (tagIds.length > 0) {
+    const { error: insertError } = await supabase.from("note_tags").insert(
+      tagIds.map((tagId) => ({
+        note_id: noteId,
+        tag_id: tagId,
+      })),
+    );
+
+    if (insertError) throw new Error(insertError.message);
+  }
+
+  return true;
+}

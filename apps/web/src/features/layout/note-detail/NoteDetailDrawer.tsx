@@ -1,4 +1,4 @@
-import type { NoteWithAsset } from "@pickle/contracts";
+import type { NoteWithAsset, Tag, TagColor } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import { useDialogController } from "@pickle/lib";
 import {
@@ -18,11 +18,12 @@ import { cn } from "@pickle/ui/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
+import { getNote } from "@/features/note/api/getNote";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
 import { createTag as createTagApi } from "@/features/tag/api/createTag";
 import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
 import { getTags } from "@/features/tag/api/getTags";
-import { addTagToNote, removeTagFromNote } from "@/features/tag/api/noteTags";
+import { setNoteTags } from "@/features/tag/api/noteTags";
 import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
 
 interface NoteDetailDrawerProps {
@@ -66,16 +67,23 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const [isMove, setIsMove] = useState<boolean>(false);
   const [noteData, setNoteData] = useState<NoteWithAsset>(note);
 
-  // 1. 전체 태그 목록 조회 (Workspace 기준)
+  // 1. 개별 노트 정보 조회 (실시간 동기화용)
+  const { data: currentNote = note } = useQuery({
+    queryKey: ["notes", note.id],
+    queryFn: () => getNote(note.id),
+    initialData: note,
+  });
+
+  // 2. 전체 태그 목록 조회 (Workspace 기준)
   const { data: allTags = [] } = useQuery({
     queryKey: ["tags", note.workspace_id],
     queryFn: () => getTags(note.workspace_id),
     enabled: !!note.workspace_id,
   });
 
-  // 2. 태그 조작 Mutations
+  // 3. 태그 조작 Mutations
   const createTagMutation = useMutation({
-    mutationFn: (input: { name: string; style: any }) =>
+    mutationFn: (input: { name: string; style: TagColor }) =>
       createTagApi({ ...input, workspace_id: note.workspace_id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
@@ -83,11 +91,17 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   });
 
   const updateTagMutation = useMutation({
-    mutationFn: ({ tagId, updates }: { tagId: string; updates: any }) =>
-      updateTagApi(tagId, updates),
+    mutationFn: ({
+      tagId,
+      updates,
+    }: {
+      tagId: string;
+      updates: Partial<Tag>;
+    }) => updateTagApi(tagId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes", note.id] });
     },
   });
 
@@ -96,25 +110,20 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes", note.id] });
     },
   });
 
-  const linkTagMutation = useMutation({
-    mutationFn: (tagId: string) => addTagToNote(note.id, tagId),
+  const setTagsMutation = useMutation({
+    mutationFn: (tagIds: string[]) => setNoteTags(note.id, tagIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes", note.id] });
     },
   });
 
-  const unlinkTagMutation = useMutation({
-    mutationFn: (tagId: string) => removeTagFromNote(note.id, tagId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-    },
-  });
-
-  // 현재 노트의 태그 ID들
-  const selectedTagIds = note.tag_list?.map((t) => t.id) || [];
+  // 현재 노트의 태그 ID들 (실시간 데이터 기준)
+  const selectedTagIds = currentNote.tag_list?.map((t) => t.id) || [];
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -300,11 +309,14 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       onOpenChange={setIsTagMakerOpen}
                       tags={allTags}
                       selectedTagIds={selectedTagIds}
-                      onSelectTag={(tagId) => linkTagMutation.mutate(tagId)}
-                      onUnselectTag={(tagId) => unlinkTagMutation.mutate(tagId)}
-                      onCreateTag={(name, style) =>
-                        createTagMutation.mutate({ name, style })
-                      }
+                      onSetTags={(tagIds) => setTagsMutation.mutate(tagIds)}
+                      onCreateTag={async (name, style) => {
+                        const newTag = await createTagMutation.mutateAsync({
+                          name,
+                          style,
+                        });
+                        return newTag.id;
+                      }}
                       onUpdateTag={(tagId, updates) =>
                         updateTagMutation.mutate({ tagId, updates })
                       }
@@ -319,23 +331,29 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {note.tag_list?.map((tag) => {
+                    {currentNote.tag_list?.map((tag) => {
                       const style = TAG_VARIANTS[tag.style];
                       return (
                         <div
                           key={tag.id}
                           className={cn(
-                            "flex h-[26px] items-center gap-0.5 rounded-[4px] border px-1.5",
+                            "grid h-[26px] grid-cols-[1fr_auto] items-center gap-0.5 rounded-[4px] border px-1.5",
                             style.tagColor,
                           )}
                         >
-                          <span className="text-[13px]">#{tag.name}</span>
+                          <span className="truncate text-[13px]">
+                            #{tag.name}
+                          </span>
                           <button
                             type="button"
                             className={cn(
-                              "ml-0.5 flex size-4 items-center justify-center rounded-full",
+                              "ml-0.5 flex size-4 items-center justify-center rounded-full transition-colors hover:bg-black/10",
                             )}
-                            onClick={() => unlinkTagMutation.mutate(tag.id)}
+                            onClick={() =>
+                              setTagsMutation.mutate(
+                                selectedTagIds.filter((id) => id !== tag.id),
+                              )
+                            }
                           >
                             <Icon
                               name="delete_16"

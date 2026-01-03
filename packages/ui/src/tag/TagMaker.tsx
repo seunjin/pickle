@@ -1,7 +1,8 @@
 "use client";
 
 import type { Tag, TagColor } from "@pickle/contracts";
-import { useMemo, useRef, useState } from "react";
+import { Icon } from "@pickle/icons";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActionButton } from "../button";
 import { TAG_COLORS, TAG_VARIANTS } from "../constants/tag";
 import {
@@ -26,9 +27,8 @@ interface TagMakerProps {
   selectedTagIds: string[]; // 현재 선택된 태그 ID들
 
   // 콜백 핸들러
-  onSelectTag: (tagId: string) => void;
-  onUnselectTag: (tagId: string) => void;
-  onCreateTag: (name: string, style: TagColor) => void;
+  onSetTags: (tagIds: string[]) => void;
+  onCreateTag: (name: string, style: TagColor) => Promise<string | undefined>;
   onUpdateTag: (tagId: string, updates: Partial<Tag>) => void;
   onDeleteTag: (tagId: string) => void;
 }
@@ -39,12 +39,16 @@ const TagMaker = ({
   onOpenChange,
   tags,
   selectedTagIds,
-  onSelectTag,
+  onSetTags,
   onCreateTag,
   onUpdateTag,
   onDeleteTag,
 }: TagMakerProps) => {
   const [search, setSearch] = useState("");
+
+  // 현재 선택된 태그 ID들 (로컬 상태로 관리)
+  const [localSelectedTagIds, setLocalSelectedTagIds] =
+    useState<string[]>(selectedTagIds);
 
   // 현재 팔레트가 열려있는 태그 ID (active 상태용)
   const [activePaletteId, setActivePaletteId] = useState<string | null>(null);
@@ -60,6 +64,14 @@ const TagMaker = ({
   const lastSavedTagRef = useRef<{ name: string; style: TagColor } | null>(
     null,
   );
+
+  // Props가 변경될 때 로컬 상태 동기화 (패널이 열릴 때만 초기값 설정)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 패널이 열려있는 동안 외부 변경에 의해 로컬 편집 상태가 덮어씌워지지 않도록 함
+  useEffect(() => {
+    if (open) {
+      setLocalSelectedTagIds(selectedTagIds);
+    }
+  }, [open]);
 
   // 검색 필터링된 태그 목록
   const filteredTags = tags.filter((tag) =>
@@ -80,41 +92,99 @@ const TagMaker = ({
         (t) => t.name.toLowerCase() === search.trim().toLowerCase(),
       );
       if (exactMatch) {
-        if (!selectedTagIds.includes(exactMatch.id)) {
-          onSelectTag(exactMatch.id);
+        if (!localSelectedTagIds.includes(exactMatch.id)) {
+          setLocalSelectedTagIds((prev) => [...prev, exactMatch.id]);
         }
       } else {
-        // 미리보기와 동일한 랜덤 색상으로 새 태그 생성
-        onCreateTag(search.trim(), randomColor);
+        // 미리보기와 동일한 랜덤 색상으로 새 태그 생성 후 로컬 상태에 추가
+        onCreateTag(search.trim(), randomColor).then((newId) => {
+          if (newId) {
+            setLocalSelectedTagIds((prev) => [...prev, newId]);
+          }
+        });
       }
       setSearch("");
+    }
+    // Backspace로 태그 삭제 기능
+    if (
+      e.key === "Backspace" &&
+      search === "" &&
+      localSelectedTagIds.length > 0
+    ) {
+      setLocalSelectedTagIds((prev) => prev.slice(0, -1));
+    }
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    onOpenChange?.(isOpen);
+    if (!isOpen) {
+      // 닫힐 때 변경 사항 확인 후 업데이트
+      const isChanged =
+        localSelectedTagIds.length !== selectedTagIds.length ||
+        localSelectedTagIds.some((id) => !selectedTagIds.includes(id));
+
+      if (isChanged) {
+        onSetTags(localSelectedTagIds);
+      }
     }
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         side="bottom"
         className={cn(
-          "z-[10000] h-[200px] w-[260px] p-0",
+          "z-[10000] h-auto max-h-[400px] w-[400px] p-0",
           "border border-base-border-light bg-neutral-850 shadow-standard",
         )}
       >
-        <div className="grid h-full grid-rows-[auto_1fr]">
-          <div className="h-9 border-base-border-light border-b bg-neutral-800">
+        <div className="flex flex-col overflow-hidden">
+          <div className="flex min-h-[36px] flex-wrap items-center gap-1 border-base-border-light border-b bg-neutral-800 px-2 py-1.5 transition-all">
+            {localSelectedTagIds.map((id) => {
+              const tag = tags.find((t) => t.id === id);
+              if (!tag) return null;
+              const style = TAG_VARIANTS[tag.style];
+              return (
+                <div
+                  key={tag.id}
+                  className={cn(
+                    "grid h-[26px] grid-cols-[1fr_auto] items-center gap-0.5 rounded-[4px] border px-1 transition-all",
+                    style.tagColor,
+                  )}
+                >
+                  <span className="truncate text-[12px]">#{tag.name}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLocalSelectedTagIds((prev) =>
+                        prev.filter((tid) => tid !== tag.id),
+                      )
+                    }
+                    className="ml-0.5 flex size-4 items-center justify-center rounded-full"
+                  >
+                    <Icon name="delete_16" className={cn(style.buttonColor)} />
+                  </button>
+                </div>
+              );
+            })}
             <Input
               variant={"ghost"}
               size={"mini"}
-              placeholder="Search or create tag..."
+              placeholder={
+                localSelectedTagIds.length === 0
+                  ? "Search or create tag..."
+                  : ""
+              }
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleKeyDown}
+              className="h-5 min-w-[60px] flex-1 border-none bg-transparent p-0 text-[13px] focus-visible:ring-0"
               autoFocus
             />
           </div>
-          <ScrollArea className="h-full overflow-auto">
+          <ScrollArea className="h-full max-h-[200px] min-h-[160px] overflow-auto *:data-radix-scroll-area-viewport:max-h-[200px]">
             <div className="px-[5px_10px] py-[5px_12px]">
               <DropdownMenuLabel className="mb-1 font-normal text-neutral-500">
                 태그 선택 및 추가
@@ -128,6 +198,7 @@ const TagMaker = ({
                     ? TAG_VARIANTS[editingTag.style]
                     : TAG_VARIANTS[tag.style];
                   const isActive = activePaletteId === tag.id;
+                  const isSelected = localSelectedTagIds.includes(tag.id);
 
                   const handleSave = () => {
                     if (editingTag) {
@@ -158,60 +229,97 @@ const TagMaker = ({
                     <li
                       key={tag.id}
                       className={cn(
-                        "group grid h-[30px] grid-cols-[auto_1fr] items-center gap-1 rounded-[4px] px-1 transition-colors hover:bg-neutral-700",
-                        isActive && "bg-neutral-700",
+                        "group grid h-[30px] grid-cols-[auto_1fr] items-center gap-2 rounded-[4px] px-1 transition-colors hover:bg-neutral-700",
+                        (isActive || isSelected) && "bg-neutral-700",
                       )}
                     >
                       <div
                         className={cn(
-                          "flex h-6 min-w-0 flex-1 items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px] transition-colors duration-200",
+                          "flex h-6 min-w-0 cursor-pointer items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px] transition-colors duration-200",
                           displayStyle.tagColor,
+                          // isSelected && "border-white/40 shadow-sm",
                         )}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => {
+                          if (isSelected) {
+                            setLocalSelectedTagIds((prev) =>
+                              prev.filter((id) => id !== tag.id),
+                            );
+                          } else {
+                            setLocalSelectedTagIds((prev) => [...prev, tag.id]);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            if (isSelected) {
+                              setLocalSelectedTagIds((prev) =>
+                                prev.filter((id) => id !== tag.id),
+                              );
+                            } else {
+                              setLocalSelectedTagIds((prev) => [
+                                ...prev,
+                                tag.id,
+                              ]);
+                            }
+                          }
+                        }}
                       >
                         <span className="truncate">#{tag.name}</span>
                       </div>
-                      <TagColorPalette
-                        trigger={
-                          <ActionButton
-                            icon="ellipsis_16"
-                            variant="subAction"
-                            forceFocus={isActive}
-                            className={cn(
-                              "ml-auto shrink-0 opacity-0 group-hover:opacity-100",
-                              isActive && "opacity-100",
-                            )}
-                          />
-                        }
-                        name={isEditing ? editingTag.name : tag.name}
-                        color={isEditing ? editingTag.style : tag.style}
-                        onNameChange={(newName) =>
-                          setEditingTag((prev) =>
-                            prev ? { ...prev, name: newName } : null,
-                          )
-                        }
-                        onColorChange={(newColor) =>
-                          setEditingTag((prev) =>
-                            prev ? { ...prev, style: newColor } : null,
-                          )
-                        }
-                        onDeleteTag={() => onDeleteTag(tag.id)}
-                        onSave={handleSave}
-                        onOpenChange={(isOpen) => {
-                          setActivePaletteId(isOpen ? tag.id : null);
-                          if (isOpen) {
-                            // 열릴 때 현재 상태 복사 및 저장 기록 초기화
-                            lastSavedTagRef.current = null;
-                            setEditingTag({
-                              id: tag.id,
-                              name: tag.name,
-                              style: tag.style,
-                            });
-                          } else {
-                            // 닫힐 때 변경사항이 있다면 저장 로직 수행
-                            handleSave();
+
+                      <div className="ml-auto flex shrink-0 items-center gap-2">
+                        <div className="shrink-0">
+                          {isSelected && (
+                            <Icon
+                              name="check_16"
+                              className="ml-auto size-3 text-base-primary"
+                            />
+                          )}
+                        </div>
+                        <TagColorPalette
+                          trigger={
+                            <ActionButton
+                              icon="ellipsis_16"
+                              variant="subAction"
+                              forceFocus={isActive}
+                              className={cn(
+                                "opacity-0 group-hover:opacity-100",
+                                isActive && "opacity-100",
+                              )}
+                            />
                           }
-                        }}
-                      />
+                          name={isEditing ? editingTag.name : tag.name}
+                          color={isEditing ? editingTag.style : tag.style}
+                          onNameChange={(newName) =>
+                            setEditingTag((prev) =>
+                              prev ? { ...prev, name: newName } : null,
+                            )
+                          }
+                          onColorChange={(newColor) =>
+                            setEditingTag((prev) =>
+                              prev ? { ...prev, style: newColor } : null,
+                            )
+                          }
+                          onDeleteTag={() => onDeleteTag(tag.id)}
+                          onSave={handleSave}
+                          onOpenChange={(isOpen) => {
+                            setActivePaletteId(isOpen ? tag.id : null);
+                            if (isOpen) {
+                              // 열릴 때 현재 상태 복사 및 저장 기록 초기화
+                              lastSavedTagRef.current = null;
+                              setEditingTag({
+                                id: tag.id,
+                                name: tag.name,
+                                style: tag.style,
+                              });
+                            } else {
+                              // 닫힐 때 변경사항이 있다면 저장 로직 수행
+                              handleSave();
+                            }
+                          }}
+                        />
+                      </div>
                     </li>
                   );
                 })}
@@ -225,8 +333,14 @@ const TagMaker = ({
                 <div className="flex h-[30px] min-w-0 items-center rounded-[4px] bg-neutral-700 px-[8px_4px]">
                   <button
                     type="button"
-                    onClick={() => {
-                      onCreateTag(search.trim(), randomColor);
+                    onClick={async () => {
+                      const newId = await onCreateTag(
+                        search.trim(),
+                        randomColor,
+                      );
+                      if (newId) {
+                        setLocalSelectedTagIds((prev) => [...prev, newId]);
+                      }
                       setSearch("");
                     }}
                     className="flex min-w-0 items-center gap-2 text-left"
