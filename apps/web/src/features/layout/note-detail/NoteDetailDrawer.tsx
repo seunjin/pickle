@@ -15,9 +15,15 @@ import {
   TextareaContainLabel,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
+import { createTag as createTagApi } from "@/features/tag/api/createTag";
+import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
+import { getTags } from "@/features/tag/api/getTags";
+import { addTagToNote, removeTagFromNote } from "@/features/tag/api/noteTags";
+import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
@@ -53,9 +59,62 @@ const type_per_icon: Record<
 
 export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
+  const queryClient = useQueryClient();
+
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
-  const [createTag, setCreateTag] = useState<boolean>(false);
+  const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
   const [isMove, setIsMove] = useState<boolean>(false);
+  const [noteData, setNoteData] = useState<NoteWithAsset>(note);
+
+  // 1. 전체 태그 목록 조회 (Workspace 기준)
+  const { data: allTags = [] } = useQuery({
+    queryKey: ["tags", note.workspace_id],
+    queryFn: () => getTags(note.workspace_id),
+    enabled: !!note.workspace_id,
+  });
+
+  // 2. 태그 조작 Mutations
+  const createTagMutation = useMutation({
+    mutationFn: (input: { name: string; style: any }) =>
+      createTagApi({ ...input, workspace_id: note.workspace_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
+    },
+  });
+
+  const updateTagMutation = useMutation({
+    mutationFn: ({ tagId, updates }: { tagId: string; updates: any }) =>
+      updateTagApi(tagId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
+  const deleteTagMutation = useMutation({
+    mutationFn: (tagId: string) => deleteTagApi(tagId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
+  const linkTagMutation = useMutation({
+    mutationFn: (tagId: string) => addTagToNote(note.id, tagId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
+  const unlinkTagMutation = useMutation({
+    mutationFn: (tagId: string) => removeTagFromNote(note.id, tagId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
+  // 현재 노트의 태그 ID들
+  const selectedTagIds = note.tag_list?.map((t) => t.id) || [];
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -187,16 +246,49 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                 {/* form */}
                 <div className="mb-6 flex flex-col gap-2 border-base-border-light border-b pb-3">
                   {/* TITLE */}
-                  <TextareaContainLabel label="TITLE" required />
+                  <TextareaContainLabel
+                    label="TITLE"
+                    value={noteData.title || ""}
+                    onChange={(e) =>
+                      setNoteData({ ...noteData, title: e.target.value })
+                    }
+                    required
+                  />
 
                   {/* CONTENT */}
-                  {note.type === "text" && (
-                    <TextareaContainLabel label="CONTENT" required />
+                  {noteData.type === "text" && (
+                    <TextareaContainLabel
+                      label="CONTENT"
+                      value={noteData.data.text || ""}
+                      onChange={(e) =>
+                        setNoteData({
+                          ...noteData,
+                          data: { ...noteData.data, text: e.target.value },
+                        })
+                      }
+                      required
+                    />
                   )}
                   {/* URL */}
-                  <TextareaContainLabel label="URL" required />
+                  <TextareaContainLabel
+                    label="URL"
+                    value={noteData.meta?.url || ""}
+                    onChange={(e) =>
+                      setNoteData({
+                        ...noteData,
+                        meta: { ...noteData.meta, url: e.target.value },
+                      })
+                    }
+                    required
+                  />
                   {/* MEMO */}
-                  <TextareaContainLabel label="MEMO" required />
+                  <TextareaContainLabel
+                    label="MEMO"
+                    value={noteData.memo || ""}
+                    onChange={(e) =>
+                      setNoteData({ ...noteData, memo: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="mb-5 border-base-border-light border-b pb-3">
                   <div className="flex h-9 items-center justify-between">
@@ -204,52 +296,31 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       TAGS
                     </span>
                     <TagMaker
-                      open={createTag}
-                      onOpenChange={setCreateTag}
+                      open={isTagMakerOpen}
+                      onOpenChange={setIsTagMakerOpen}
+                      tags={allTags}
+                      selectedTagIds={selectedTagIds}
+                      onSelectTag={(tagId) => linkTagMutation.mutate(tagId)}
+                      onUnselectTag={(tagId) => unlinkTagMutation.mutate(tagId)}
+                      onCreateTag={(name, style) =>
+                        createTagMutation.mutate({ name, style })
+                      }
+                      onUpdateTag={(tagId, updates) =>
+                        updateTagMutation.mutate({ tagId, updates })
+                      }
+                      onDeleteTag={(tagId) => deleteTagMutation.mutate(tagId)}
                       trigger={
                         <ActionButton
                           icon="plus_16"
-                          onClick={() => setCreateTag(!createTag)}
-                          forceFocus={createTag}
+                          onClick={() => setIsTagMakerOpen(!isTagMakerOpen)}
+                          forceFocus={isTagMakerOpen}
                         />
                       }
                     />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {[
-                      {
-                        id: 1,
-                        style: "purple",
-                        name: "design",
-                      },
-                      {
-                        id: 2,
-                        style: "rose",
-                        name: "dev",
-                      },
-                      {
-                        id: 3,
-                        style: "green",
-                        name: "ideation",
-                      },
-                      {
-                        id: 4,
-                        style: "orange",
-                        name: "planning",
-                      },
-                      {
-                        id: 5,
-                        style: "yellow",
-                        name: "inspiration",
-                      },
-                      {
-                        id: 6,
-                        style: "blue",
-                        name: "strategy",
-                      },
-                    ].map((tag) => {
-                      const style =
-                        TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
+                    {note.tag_list?.map((tag) => {
+                      const style = TAG_VARIANTS[tag.style];
                       return (
                         <div
                           key={tag.id}
@@ -258,11 +329,19 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                             style.tagColor,
                           )}
                         >
-                          #{tag.name}
-                          <button type="button">
+                          <span className="text-[13px]">#{tag.name}</span>
+                          <button
+                            type="button"
+                            className={cn(
+                              "ml-0.5 flex size-4 items-center justify-center rounded-full",
+                            )}
+                            onClick={() => unlinkTagMutation.mutate(tag.id)}
+                          >
                             <Icon
                               name="delete_16"
-                              className={cn(style.buttonColor)}
+                              className={cn(
+                                TAG_VARIANTS[tag.style].buttonColor,
+                              )}
                             />
                           </button>
                         </div>
@@ -303,7 +382,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         등록일
                       </dt>
                       <dd className="text-[13px] text-neutral-500">
-                        2025-12-24 15:22
+                        {new Date(note.created_at).toLocaleDateString("ko-KR")}
                       </dd>
                     </dl>
                     <dl className="flex items-center">
@@ -311,7 +390,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         수정일
                       </dt>
                       <dd className="text-[13px] text-neutral-500">
-                        2025-12-24 15:22
+                        {new Date(note.updated_at).toLocaleDateString("ko-KR")}
                       </dd>
                     </dl>
                   </div>

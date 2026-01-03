@@ -277,6 +277,9 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
     devDependencies:
+      '@pickle/contracts':
+        specifier: workspace:^
+        version: link:../contracts
       '@pickle/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

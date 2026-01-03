@@ -87,6 +87,39 @@ export type Database = {
           },
         ];
       };
+      note_tags: {
+        Row: {
+          created_at: string;
+          note_id: string;
+          tag_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          note_id: string;
+          tag_id: string;
+        };
+        Update: {
+          created_at?: string;
+          note_id?: string;
+          tag_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "note_tags_note_id_fkey";
+            columns: ["note_id"];
+            isOneToOne: false;
+            referencedRelation: "notes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "note_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       notes: {
         Row: {
           asset_id: string | null;
@@ -143,6 +176,41 @@ export type Database = {
           },
           {
             foreignKeyName: "notes_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tags: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          style: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          style: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          style?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tags_workspace_id_fkey";
             columns: ["workspace_id"];
             isOneToOne: false;
             referencedRelation: "workspaces";

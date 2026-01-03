@@ -1,23 +1,6 @@
-export const TAG_COLORS = [
-  "red",
-  "rose",
-  "orange",
-  "brown",
-  "yellow",
-  "lime",
-  "green",
-  "emerald",
-  "cyan",
-  "blue",
-  "indigo",
-  "violet",
-  "purple",
-  "pink",
-  "magenta",
-  "gray",
-] as const;
+import { TAG_COLORS, type TagColor } from "@pickle/contracts";
 
-export type TagColor = (typeof TAG_COLORS)[number];
+export { TAG_COLORS, type TagColor };
 
 export const TAG_VARIANTS: Record<
   TagColor,

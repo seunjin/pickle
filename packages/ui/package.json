@@ -19,6 +19,7 @@
     "react-dom": "19.2.1"
   },
   "devDependencies": {
+    "@pickle/contracts": "workspace:^",
     "@pickle/tsconfig": "workspace:*",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",

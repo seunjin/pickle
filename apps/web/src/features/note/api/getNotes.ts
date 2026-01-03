@@ -27,10 +27,16 @@ export const getNotes = async (
 
   if (!workspace) return [];
 
-  // 2. 노트와 연결된 에셋 정보 함께 조회
+  // 2. 노트와 연결된 에셋 및 태그 정보 함께 조회
   const { data, error } = await supabase
     .from("notes")
-    .select("*, assets(*)")
+    .select(`
+      *,
+      assets(*),
+      tag_list:note_tags(
+        tag:tags(*)
+      )
+    `)
     .eq("workspace_id", workspace.workspace_id)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -39,9 +45,14 @@ export const getNotes = async (
     throw new Error(error.message);
   }
 
-  // Zod 스키마를 확장하여 Note + Assets 구조를 정의합니다.
-  // DB 조인 쿼리 결과(Note & { assets: Asset | null })를 안전하게 검증합니다.
-  const parsed = noteWithAssetSchema.array().safeParse(data);
+  // 중첩된 tag 구조를 평탄화 (tag_list: [{ tag: { ... } }] -> tag_list: [{ ... }])
+  const transformedData = data?.map((note: any) => ({
+    ...note,
+    tag_list: note.tag_list?.map((item: any) => item.tag).filter(Boolean) || [],
+  }));
+
+  // Zod 스키마를 확장하여 Note + Assets + Tags 구조를 정의합니다.
+  const parsed = noteWithAssetSchema.array().safeParse(transformedData);
 
   if (!parsed.success) {
     console.error("Notes fetch validation failed:", parsed.error);

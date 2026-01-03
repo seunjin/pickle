@@ -19,7 +19,7 @@ export const TextareaContainLabel = ({
         /* 2. 배경 & 테두리 & 그림자 */
         "border border-form-input-border bg-form-input-background text-base-foreground outline-none",
         /* 3. 타이포그래피 */
-        "text-base placeholder:text-form-input-placeholder",
+        "break-all text-base placeholder:text-form-input-placeholder",
         /* 4. 애니메이션 & 상태 전환 */
         "transition-[color,box-shadow]",
         /* 5. 포커스 상태 (링 스타일) */

@@ -212,9 +212,13 @@ export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
 
 // --- 7. 타입 검증 (스키마 우선) ---
 import { assetSchema } from "./asset";
+import { tagSchema } from "./tag";
 
 export const noteWithAssetSchema = strictNoteSchema.and(
-  z.object({ assets: assetSchema.nullable() }),
+  z.object({
+    assets: assetSchema.nullable(),
+    tag_list: z.array(tagSchema).optional(), // note_tags 조인을 통해 가져올 정규화된 태그 목록
+  }),
 );
 
 // Explicitly define NoteWithAsset as Discriminated Union

@@ -8,9 +8,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
+  TAG_VARIANTS,
 } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -49,9 +50,30 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
         <div className="min-w-0 pb-3">
           <NoteCardHeader type={note.type} />
 
-          <div className="ellipsis line-clamp-2 pb-2 font-semibold text-[15px] text-neutral-100 leading-[1.3]">
+          <div className="ellipsis line-clamp-2 pb-1 font-semibold text-[15px] text-neutral-100 leading-[1.3]">
             {note.title || "Untitled"}
           </div>
+
+          {/* TAGS */}
+          <div className="mb-2 flex flex-wrap gap-1">
+            {note.tag_list?.slice(0, 3).map((tag) => (
+              <div
+                key={tag.id}
+                className={cn(
+                  "rounded-[4px] border px-1 py-0.2 text-[10px]",
+                  TAG_VARIANTS[tag.style].tagColor,
+                )}
+              >
+                #{tag.name}
+              </div>
+            ))}
+            {(note.tag_list?.length || 0) > 3 && (
+              <div className="self-center text-[10px] text-neutral-500">
+                +{(note.tag_list?.length || 0) - 3}
+              </div>
+            )}
+          </div>
+
           <a
             href={note.meta?.url}
             target="_blank"
