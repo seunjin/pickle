@@ -20,6 +20,7 @@ interface TagColorPaletteProps {
   onNameChange: (name: string) => void;
   onColorChange: (color: TagColor) => void;
   onDeleteTag: () => void;
+  onSave?: () => void;
 
   /** 드롭다운 열림/닫힘 상태 콜백 (부모에서 active 스타일 적용 시 사용) */
   onOpenChange?: (open: boolean) => void;
@@ -31,6 +32,7 @@ export function TagColorPalette({
   onNameChange,
   onColorChange,
   onDeleteTag,
+  onSave,
   onOpenChange,
 }: TagColorPaletteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +60,13 @@ export function TagColorPalette({
               size={"mini"}
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
-              onKeyDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.nativeEvent.isComposing) return;
+                if (e.key === "Enter") {
+                  onSave?.();
+                }
+              }}
               onPointerDown={(e) => e.stopPropagation()}
             />
           </div>

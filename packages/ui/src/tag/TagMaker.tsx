@@ -1,7 +1,7 @@
 "use client";
 
 import type { Tag, TagColor } from "@pickle/contracts";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ActionButton } from "../button";
 import { TAG_COLORS, TAG_VARIANTS } from "../constants/tag";
 import {
@@ -40,7 +40,6 @@ const TagMaker = ({
   tags,
   selectedTagIds,
   onSelectTag,
-  onUnselectTag,
   onCreateTag,
   onUpdateTag,
   onDeleteTag,
@@ -57,12 +56,24 @@ const TagMaker = ({
     style: TagColor;
   } | null>(null);
 
+  // 마지막으로 저장(API 호출)된 상태를 추적하여 중복 호출 방지
+  const lastSavedTagRef = useRef<{ name: string; style: TagColor } | null>(
+    null,
+  );
+
   // 검색 필터링된 태그 목록
   const filteredTags = tags.filter((tag) =>
     tag.name.toLowerCase().includes(search.toLowerCase()),
   );
 
+  // 생성될 태그의 랜덤 스타일 (검색어가 바뀔 때마다 일정하게 유지하되, 완전히 새로 시작할 때만 변경)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 검색어가 비워질 때(생성 후 등)만 색상을 새로 고침
+  const randomColor = useMemo(() => {
+    return TAG_COLORS[Math.floor(Math.random() * TAG_COLORS.length)];
+  }, [search === ""]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "Enter" && search.trim()) {
       // 정확히 일치하는 태그가 없으면 새로 생성
       const exactMatch = tags.find(
@@ -73,9 +84,7 @@ const TagMaker = ({
           onSelectTag(exactMatch.id);
         }
       } else {
-        // 랜덤 색상으로 새 태그 생성
-        const randomColor =
-          TAG_COLORS[Math.floor(Math.random() * TAG_COLORS.length)];
+        // 미리보기와 동일한 랜덤 색상으로 새 태그 생성
         onCreateTag(search.trim(), randomColor);
       }
       setSearch("");
@@ -120,6 +129,31 @@ const TagMaker = ({
                     : TAG_VARIANTS[tag.style];
                   const isActive = activePaletteId === tag.id;
 
+                  const handleSave = () => {
+                    if (editingTag) {
+                      const isChangedFromOriginal =
+                        editingTag.name !== tag.name ||
+                        editingTag.style !== tag.style;
+
+                      const isChangedFromLastSaved =
+                        !lastSavedTagRef.current ||
+                        editingTag.name !== lastSavedTagRef.current.name ||
+                        editingTag.style !== lastSavedTagRef.current.style;
+
+                      if (isChangedFromOriginal && isChangedFromLastSaved) {
+                        onUpdateTag(editingTag.id, {
+                          name: editingTag.name,
+                          style: editingTag.style,
+                        });
+                        // 마지막 저장 상태 업데이트
+                        lastSavedTagRef.current = {
+                          name: editingTag.name,
+                          style: editingTag.style,
+                        };
+                      }
+                    }
+                  };
+
                   return (
                     <li
                       key={tag.id}
@@ -161,29 +195,20 @@ const TagMaker = ({
                           )
                         }
                         onDeleteTag={() => onDeleteTag(tag.id)}
+                        onSave={handleSave}
                         onOpenChange={(isOpen) => {
                           setActivePaletteId(isOpen ? tag.id : null);
                           if (isOpen) {
-                            // 열릴 때 현재 상태 복사
+                            // 열릴 때 현재 상태 복사 및 저장 기록 초기화
+                            lastSavedTagRef.current = null;
                             setEditingTag({
                               id: tag.id,
                               name: tag.name,
                               style: tag.style,
                             });
                           } else {
-                            // 닫힐 때 변경사항이 있다면 API 호출
-                            if (editingTag) {
-                              const hasChanged =
-                                editingTag.name !== tag.name ||
-                                editingTag.style !== tag.style;
-                              if (hasChanged) {
-                                onUpdateTag(editingTag.id, {
-                                  name: editingTag.name,
-                                  style: editingTag.style,
-                                });
-                              }
-                              // setEditingTag(null); // 즉시 해제하지 않고 다른 태그를 열거나 창이 닫힐 때까지 유지하여 깜빡임 방지
-                            }
+                            // 닫힐 때 변경사항이 있다면 저장 로직 수행
+                            handleSave();
                           }
                         }}
                       />
@@ -197,30 +222,22 @@ const TagMaker = ({
             <>
               <DropdownMenuSeparator />
               <div className="p-1">
-                <div className="bg-neutral-700 h-[30px] rounded-[4px] px-[8px_4px] flex items-center min-w-0">
+                <div className="flex h-[30px] min-w-0 items-center rounded-[4px] bg-neutral-700 px-[8px_4px]">
                   <button
                     type="button"
                     onClick={() => {
-                      const randomColor =
-                        TAG_COLORS[
-                          Math.floor(Math.random() * TAG_COLORS.length)
-                        ];
                       onCreateTag(search.trim(), randomColor);
                       setSearch("");
                     }}
-                    className="min-w-0 text-left flex items-center gap-2"
+                    className="flex min-w-0 items-center gap-2 text-left"
                   >
-                    <span className="text-[12px] shrink-0 text-neutral-300">
+                    <span className="shrink-0 text-[12px] text-neutral-300">
                       생성
                     </span>{" "}
                     <p
                       className={cn(
-                        TAG_VARIANTS[
-                          TAG_COLORS[
-                            Math.floor(Math.random() * TAG_COLORS.length)
-                          ]
-                        ].tagColor,
-                        "rounded-[4px] border px-1.5 text-[13px] transition-colors duration-200 h-6 leading-[22px] truncate",
+                        TAG_VARIANTS[randomColor].tagColor,
+                        "h-6 truncate rounded-[4px] border px-1.5 text-[13px] leading-[22px] transition-colors duration-200",
                       )}
                     >
                       #{search}
