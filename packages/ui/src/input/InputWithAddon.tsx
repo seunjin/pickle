@@ -14,8 +14,8 @@ const inputContainerVariants = cva(
   {
     variants: {
       size: {
-        standard: "h-10 px-3",
-        mini: "h-8 px-2",
+        standard: "h-[38] px-3",
+        mini: "h-[30px] px-2",
       },
     },
     defaultVariants: {

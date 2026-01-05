@@ -40,8 +40,8 @@ const inputVariants = cva(
           "border-none bg-transparent px-0 shadow-none focus-visible:ring-0",
       },
       size: {
-        standard: "h-10 px-3 text-[14px]",
-        mini: "h-8 px-2 text-[13px]",
+        standard: "h-[38px] px-3 text-[14px]",
+        mini: "h-[30px] px-2 text-[13px]",
       },
     },
     defaultVariants: {
