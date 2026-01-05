@@ -3,6 +3,7 @@ import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
+import { Spinner } from "@pickle/ui";
 import { saveNote } from "@shared/api/note";
 import { extensionStorage } from "@shared/lib/extension-api";
 import { getNoteKey } from "@shared/storage";
@@ -224,11 +225,8 @@ export default function OverlayApp({
 
       {/* Loading & Error Overlay */}
       {isSaving && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-green-600" />
-            <span className="font-medium text-gray-600 text-sm">Saving...</span>
-          </div>
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-base-dimed">
+          <Spinner className="size-6 text-base-primary" />
         </div>
       )}
 

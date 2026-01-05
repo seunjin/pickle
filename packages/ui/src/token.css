@@ -96,24 +96,21 @@
   --color-base-foreground-background: var(--color-neutral-850);
   --color-base-disabled: var(--color-neutral-700);
   --color-base-border-light: var(--color-neutral-700);
+  --color-base-dimed: oklch(0.1822 0 0 / 0.8);
 
   /* tag */
   --color-tag-purple: oklch(0.70268 0.16432 286.95162);
   --color-tag-blue: oklch(0.71936 0.14636 259.38508);
-  --color-tag-pink: oklch(0.75561 0.135 351.75053);
   --color-tag-yellow: oklch(0.88241 0.13286 96.21894);
   --color-tag-orange: oklch(0.77615 0.14105 64.07922);
-  --color-tag-green: oklch(0.84471 0.12371 168.26445);
-  --color-tag-red: oklch(0.74255 0.1246 20.47707);
+  --color-tag-green: oklch(0.86974 0.26876 145.60518);
   --color-tag-gray: oklch(0.59684 0.01785 239.3003);
   --color-tag-cyan: oklch(0.86507 0.11535 207.07779);
   --color-tag-indigo: oklch(0.57506 0.22794 272.66227);
-  --color-tag-violet: oklch(0.81116 0.10129 293.57119);
   --color-tag-magenta: oklch(0.72527 0.17523 349.76075);
   --color-tag-lime: oklch(0.84932 0.20734 128.84974);
   --color-tag-emerald: oklch(0.77294 0.15349 163.22308);
-  --color-tag-rose: oklch(0.71919 0.16898 13.42799);
-  --color-tag-brown: oklch(0.66405 0.09568 57.06405);
+  --color-tag-red: oklch(0.71919 0.16898 13.42799);
 
   /* form */
   --color-form-input-border: var(--color-base-border);
@@ -125,4 +122,8 @@
   /* card */
   --color-card-background: var(--color-neutral-900);
   --color-card-border: var(--color-base-border);
+
+  /* system */
+  --color-system-success: var(--color-base-primary);
+  --color-system-error: var(--color-red-400);
 }
