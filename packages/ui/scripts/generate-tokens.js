@@ -1,8 +1,13 @@
-const fs = require("node:fs");
-const path = require("node:path");
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const TOKEN_PATH = path.join(__dirname, "../src/token.json");
 const OUTPUT_PATH = path.join(__dirname, "../src/token.css");
+const TAG_CONTRACT_PATH = path.resolve(__dirname, "../../contracts/src/tag.ts");
 
 /**
  * Hex 색상을 OKLCH로 변환
@@ -183,6 +188,27 @@ function processAtomicValue(value, primitiveRefMap) {
   return convertRawToCssValue(value);
 }
 
+/**
+ * TAG_COLORS 상수를 contracts 패키지로 동기화
+ */
+function syncTagColors(tokens) {
+  if (!tokens.Atomic?.tag) return;
+
+  const tagColors = Object.keys(tokens.Atomic.tag);
+
+  try {
+    let contractContent = fs.readFileSync(TAG_CONTRACT_PATH, "utf8");
+    const regex = /export const TAG_COLORS = \[\s*[\s\S]*?\s*\] as const;/;
+    const replacement = `export const TAG_COLORS = [\n${tagColors.map((color) => `  "${color}",`).join("\n")}\n] as const;`;
+
+    contractContent = contractContent.replace(regex, replacement);
+    fs.writeFileSync(TAG_CONTRACT_PATH, contractContent, "utf8");
+    console.log("✅ Successfully synchronized TAG_COLORS to contracts/tag.ts");
+  } catch (error) {
+    console.warn("⚠️ Failed to sync TAG_COLORS to contracts:", error.message);
+  }
+}
+
 function generateTokens() {
   try {
     const rawData = fs.readFileSync(TOKEN_PATH, "utf8");
@@ -239,6 +265,9 @@ function generateTokens() {
     console.log(
       `✅ Tokens generated successfully at: ${OUTPUT_PATH} (Converted to OKLCH)`,
     );
+
+    // 6. TAG_COLORS 동기화
+    syncTagColors(tokens);
   } catch (error) {
     console.error("❌ Error generating tokens:", error);
     process.exit(1);

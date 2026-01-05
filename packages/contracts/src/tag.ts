@@ -4,22 +4,18 @@ import type { Database } from "./database-generated";
 type TagRow = Database["public"]["Tables"]["tags"]["Row"];
 
 export const TAG_COLORS = [
-  "red",
-  "rose",
-  "orange",
-  "brown",
-  "yellow",
-  "lime",
-  "green",
-  "emerald",
-  "cyan",
-  "blue",
-  "indigo",
-  "violet",
   "purple",
-  "pink",
-  "magenta",
+  "blue",
+  "yellow",
+  "orange",
+  "green",
   "gray",
+  "cyan",
+  "indigo",
+  "magenta",
+  "lime",
+  "emerald",
+  "red",
 ] as const;
 
 export type TagColor = (typeof TAG_COLORS)[number];

@@ -2,6 +2,7 @@
   "name": "@pickle/ui",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "exports": {
     ".": "./src/index.tsx",
     "./src/theme.css": "./src/theme.css",
@@ -12,6 +13,7 @@
     "lint": "biome lint .",
     "format": "biome format . --write",
     "check": "biome check .",
+    "token": "node scripts/generate-tokens.js",
     "clean": "rm -rf .turbo node_modules"
   },
   "peerDependencies": {

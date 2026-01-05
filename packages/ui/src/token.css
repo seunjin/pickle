@@ -90,9 +90,7 @@
   --color-base-foreground: var(--color-neutral-200);
   --color-base-muted: var(--color-neutral-500);
   --color-base-muted-foreground: var(--color-neutral-400);
-  --color-base-primary-active-background: oklch(
-    0.95235 0.04615 172.59756 / 0.1
-  );
+  --color-base-primary-active-background: oklch(0.95235 0.04615 172.59756 / 0.1);
   --color-base-foreground-background: var(--color-neutral-850);
   --color-base-disabled: var(--color-neutral-700);
   --color-base-border-light: var(--color-neutral-700);
@@ -126,4 +124,5 @@
   /* system */
   --color-system-success: var(--color-base-primary);
   --color-system-error: var(--color-red-400);
+
 }
