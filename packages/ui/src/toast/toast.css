@@ -29,9 +29,6 @@
   justify-content: space-between !important;
   align-items: flex-start !important;
   gap: 16px !important;
-
-  /* GPU 가속을 위해 시각적 모션은 transform/opacity에 집중 */
-  /* will-change: transform, opacity; */
 }
 
 /* Sonner의 기본 스타일 무력화 및 우리 디자인 입히기 */

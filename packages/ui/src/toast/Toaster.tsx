@@ -4,7 +4,7 @@ import "./toast.css";
 export function Toaster() {
   return (
     <SonnerToaster
-      position="bottom-right"
+      position="top-center"
       toastOptions={{
         classNames: {
           title: "pickle-toast-title",

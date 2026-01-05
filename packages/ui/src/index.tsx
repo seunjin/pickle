@@ -1,7 +1,7 @@
 export * from "./button";
-export * from "./command";
 export * from "./constants/tag";
 export * from "./dialog";
+export * from "./dialog/index";
 export * from "./dropdown-menu";
 export * from "./input";
 export * from "./popover";
@@ -11,3 +11,4 @@ export * from "./spinner";
 export * from "./tag";
 export * from "./tag/TagMaker";
 export * from "./textarea";
+export * from "./toast";

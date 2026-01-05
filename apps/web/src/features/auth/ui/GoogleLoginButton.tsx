@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "@pickle/lib";
+import { toast } from "@pickle/ui";
 import { useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 

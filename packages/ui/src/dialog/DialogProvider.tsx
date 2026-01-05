@@ -41,8 +41,6 @@ export function DialogProvider({ children }: DialogProviderProps) {
  */
 export function useDialogStore() {
   const context = useContext(DialogStoreContext);
-  // SSR이나 초기 마운트 전에는 null일 수 있음을 고려하여 에러 처리를 유연하게 하거나
-  // 호출부에서 체크하도록 합니다. 여기서는 편의상 에러를 던집니다 (단, 렌더링 중 호출 주의).
   if (!context) {
     return null;
   }

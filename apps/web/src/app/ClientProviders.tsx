@@ -1,7 +1,7 @@
 "use client";
 
 import type { AppUser } from "@pickle/contracts";
-import { DialogProvider, Toaster } from "@pickle/lib";
+import { DialogProvider, Toaster } from "@pickle/ui";
 /**
  * 클라이언트 사이드 Provider들을 통합 관리합니다.
  * 계층 구조: Query -> Session -> Dialog

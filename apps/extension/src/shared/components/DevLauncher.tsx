@@ -15,7 +15,7 @@ export function DevLauncher() {
         position: "fixed",
         left: "20px",
         bottom: "20px",
-        zIndex: 9999999,
+        zIndex: 999,
         display: "flex",
         flexDirection: "column",
         gap: "8px",

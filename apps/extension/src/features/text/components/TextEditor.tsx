@@ -31,7 +31,7 @@ export function TextEditor({
   onSave,
 }: TextEditorProps) {
   const { register, handleSubmit } = useForm<TextFormValues>({
-    defaultValues: {
+    values: {
       title: note.title || "",
       text: note.text || "",
       memo: note.memo || "",

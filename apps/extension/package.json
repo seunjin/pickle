@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@pickle/contracts": "workspace:^",
-    "@pickle/lib": "workspace:^",
     "@pickle/ui": "workspace:^",
     "@supabase/supabase-js": "^2.87.1",
     "react": "19.2.3",

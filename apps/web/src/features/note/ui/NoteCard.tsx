@@ -2,13 +2,13 @@
 
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { Icon } from "@pickle/icons";
-import { useDialog } from "@pickle/lib";
 import {
   ActionButton,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  useDialog,
 } from "@pickle/ui";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";

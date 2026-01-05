@@ -39,7 +39,6 @@ export const toast = {
     id: string | number,
     patch: Partial<ToastOptions> & { title?: string; kind?: ToastKind },
   ) {
-    // Sonner's custom toast update is a bit different, typically we just call custom again with same ID
     return sonnerToast.custom(
       (id) => (
         <ToastCard

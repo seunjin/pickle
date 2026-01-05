@@ -3,7 +3,7 @@ import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
-import { Spinner } from "@pickle/ui";
+import { Confirm, Spinner, toast, useDialog } from "@pickle/ui";
 import { saveNote } from "@shared/api/note";
 import { extensionStorage } from "@shared/lib/extension-api";
 import { getNoteKey } from "@shared/storage";
@@ -26,13 +26,48 @@ export default function OverlayApp({
 }) {
   const [view, setView] = useState<ViewType>("text");
   const [note, setNote] = useState<NoteData>({});
+  const dialog = useDialog();
 
   // Storage Key: Tab ID 기반으로 분리
   const STORAGE_KEY = getNoteKey(tabId);
 
+  // State for saving
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // 0. Handle Auth Errors via Confirm Dialog
+  useEffect(() => {
+    if (!errorMessage) return;
+
+    const isAuthError =
+      errorMessage.includes("Unauthorized") ||
+      errorMessage.includes("만료") ||
+      errorMessage.includes("No Workspace");
+
+    if (isAuthError) {
+      dialog.open(() => (
+        <Confirm
+          title="로그인 필요"
+          content="서비스를 이용하려면 로그인 해주세요."
+          confirmButtonText="로그인하기"
+          onConfirm={() => {
+            const appUrl =
+              import.meta.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+            window.open(`${appUrl}/auth/sync`, "_blank");
+            setErrorMessage(null);
+          }}
+          onCancel={() => setErrorMessage(null)}
+        />
+      ));
+    }
+  }, [errorMessage, dialog]);
+
   // Event handler that reads reactive 'view' state but remains stable
   const handleStorageChange = useEffectEvent(
-    (changes: { [key: string]: any }, areaName: string) => {
+    (
+      changes: Record<string, chrome.storage.StorageChange>,
+      areaName: string,
+    ) => {
       if (areaName === "local" && changes[STORAGE_KEY]) {
         console.log("Storage changed:", changes[STORAGE_KEY]);
         const newValue = changes[STORAGE_KEY].newValue as NoteData;
@@ -66,14 +101,14 @@ export default function OverlayApp({
 
     // 🚀 Auto-Recovery Listener: Session restored via Auth Sync
     const handleSessionRecovery = (
-      changes: { [key: string]: any },
+      changes: Record<string, chrome.storage.StorageChange>,
       areaName: string,
     ) => {
       if (areaName === "local" && changes.supabaseSession?.newValue) {
         console.log("Session recovered! Clearing error...");
         setErrorMessage(null);
-        // Optional: Auto-retry save if it failed due to auth?
-        // For now, just clearing error is enough to let user click "Save" again.
+        dialog.closeAll(); // Close any login-related dialogs
+        toast.success("로그인되었습니다. 이제 저장할 수 있습니다.");
       }
     };
     extensionStorage.onChanged.addListener(handleSessionRecovery);
@@ -82,15 +117,11 @@ export default function OverlayApp({
       extensionStorage.onChanged.removeListener(handleStorageChange);
       extensionStorage.onChanged.removeListener(handleSessionRecovery);
     };
-  }, [STORAGE_KEY]); // handleStorageChange is stable thanks to useEffectEvent
+  }, [STORAGE_KEY, dialog]); // handleStorageChange is stable thanks to useEffectEvent
 
   const handleUpdateNote = (data: Partial<NoteData>) => {
     setNote((prev) => ({ ...prev, ...data }));
   };
-
-  // State for saving
-  const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSave = async () => {
     console.log("Saving note (Overlay):", note);
@@ -235,39 +266,25 @@ export default function OverlayApp({
         </div>
       )}
 
-      {errorMessage && (
-        <div className="slide-in-from-bottom-2 fade-in absolute right-4 bottom-4 left-4 z-50 flex flex-col gap-2 rounded-lg border border-red-100 bg-red-50 p-3 text-sm shadow-lg">
-          <div className="flex items-center justify-between text-red-600">
-            <span>{errorMessage}</span>
-            <button
-              type="button"
-              onClick={() => setErrorMessage(null)}
-              className="ml-2 px-2 font-bold text-red-400 hover:text-red-700"
-            >
-              ✕
-            </button>
+      {errorMessage &&
+        !(
+          errorMessage.includes("Unauthorized") ||
+          errorMessage.includes("만료") ||
+          errorMessage.includes("No Workspace")
+        ) && (
+          <div className="slide-in-from-bottom-2 fade-in absolute right-4 bottom-4 left-4 z-50 flex flex-col gap-2 rounded-lg border border-red-100 bg-red-50 p-3 text-sm shadow-lg">
+            <div className="flex items-center justify-between text-red-600">
+              <span>{errorMessage}</span>
+              <button
+                type="button"
+                onClick={() => setErrorMessage(null)}
+                className="ml-2 px-2 font-bold text-red-400 hover:text-red-700"
+              >
+                ✕
+              </button>
+            </div>
           </div>
-
-          {/* Show Connect Button for Auth/Session/Workspace Errors */}
-          {(errorMessage.includes("Unauthorized") ||
-            errorMessage.includes("만료") ||
-            errorMessage.includes("No Workspace")) && (
-            <button
-              type="button"
-              onClick={() => {
-                // Open new tab for auth sync using env var
-                const appUrl =
-                  import.meta.env.NEXT_PUBLIC_APP_URL ||
-                  "http://localhost:3000";
-                window.open(`${appUrl}/auth/sync`, "_blank");
-              }}
-              className="mt-1 w-full rounded bg-red-600 py-1.5 font-medium text-white text-xs transition-colors hover:bg-red-700"
-            >
-              계정 연결하기 (로그인)
-            </button>
-          )}
-        </div>
-      )}
+        )}
     </div>
   );
 }

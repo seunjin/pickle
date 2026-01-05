@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { DialogProvider } from "@pickle/lib";
+import { DialogProvider } from "@pickle/ui";
 import App from "./App.tsx";
 import { DevLauncher } from "./shared/components/DevLauncher";
 

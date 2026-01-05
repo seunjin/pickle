@@ -1,6 +1,5 @@
 import type { NoteWithAsset, Tag, TagColor } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
-import { useDialogController } from "@pickle/lib";
 import {
   ActionButton,
   Button,
@@ -13,6 +12,7 @@ import {
   TAG_VARIANTS,
   TagMaker,
   TextareaContainLabel,
+  useDialogController,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

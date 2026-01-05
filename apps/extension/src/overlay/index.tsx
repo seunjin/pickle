@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../index.css"; // Global Tailwind styles are Safe here!
+import { DialogProvider, Toaster } from "@pickle/ui";
 import OverlayApp from "../content/ui/OverlayApp";
 
 const root = document.getElementById("root");
@@ -19,12 +20,15 @@ if (!tabId) {
 
 createRoot(root).render(
   <StrictMode>
-    <OverlayApp
-      onClose={() => {
-        // Send close message to Parent (Content Script)
-        window.parent.postMessage({ type: "PICKLE_CLOSE_OVERLAY" }, "*");
-      }}
-      tabId={tabId}
-    />
+    <DialogProvider>
+      <OverlayApp
+        onClose={() => {
+          // Send close message to Parent (Content Script)
+          window.parent.postMessage({ type: "PICKLE_CLOSE_OVERLAY" }, "*");
+        }}
+        tabId={tabId}
+      />
+      <Toaster />
+    </DialogProvider>
   </StrictMode>,
 );
