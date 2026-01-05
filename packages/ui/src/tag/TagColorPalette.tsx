@@ -89,7 +89,7 @@ export function TagColorPalette({
           <DropdownMenuSeparator />
 
           <DropdownMenuLabel>색</DropdownMenuLabel>
-          <div className="flex w-[145px] flex-wrap gap-1 pb-1.5">
+          <div className="flex w-[190px] flex-wrap gap-1 pb-1.5">
             {TAG_COLORS.map((tag) => {
               const style = TAG_VARIANTS[tag as keyof typeof TAG_VARIANTS];
 

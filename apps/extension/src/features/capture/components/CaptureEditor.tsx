@@ -99,7 +99,7 @@ export function CaptureEditor({
                   />
                   {/* 재캡쳐 버튼 */}
                   <div className="absolute right-2 bottom-2">
-                    <Button size="h26" onClick={onRetake}>
+                    <Button size="h32" onClick={onRetake}>
                       retake
                     </Button>
                   </div>

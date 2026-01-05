@@ -45,6 +45,7 @@ const TagMaker = ({
   onDeleteTag,
 }: TagMakerProps) => {
   const [search, setSearch] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // 현재 선택된 태그 ID들 (로컬 상태로 관리)
   const [localSelectedTagIds, setLocalSelectedTagIds] =
@@ -136,12 +137,12 @@ const TagMaker = ({
         align="end"
         side="bottom"
         className={cn(
-          "z-[10000] h-auto max-h-[400px] w-[400px] p-0",
+          "z-[10000] h-auto max-h-[400px] w-[360px] p-0",
           "border border-base-border-light bg-neutral-850 shadow-standard",
         )}
       >
         <div className="flex flex-col overflow-hidden">
-          <div className="flex min-h-[36px] flex-wrap items-center gap-1 border-base-border-light border-b bg-neutral-800 px-2 py-1.5 transition-all">
+          <div className="flex min-h-[39px] flex-wrap items-center gap-1 border-base-border-light border-b bg-neutral-800 px-2 py-1.5 transition-all">
             {localSelectedTagIds.map((id) => {
               const tag = tags.find((t) => t.id === id);
               if (!tag) return null;
@@ -157,11 +158,12 @@ const TagMaker = ({
                   <span className="truncate text-[12px]">#{tag.name}</span>
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
                       setLocalSelectedTagIds((prev) =>
                         prev.filter((tid) => tid !== tag.id),
-                      )
-                    }
+                      );
+                      inputRef.current?.focus();
+                    }}
                     className="ml-0.5 flex size-4 items-center justify-center rounded-full"
                   >
                     <Icon name="delete_16" className={cn(style.buttonColor)} />
@@ -170,6 +172,7 @@ const TagMaker = ({
               );
             })}
             <Input
+              ref={inputRef}
               variant={"ghost"}
               size={"mini"}
               placeholder={
@@ -229,16 +232,12 @@ const TagMaker = ({
                     <li
                       key={tag.id}
                       className={cn(
-                        "group grid h-[30px] grid-cols-[auto_1fr] items-center gap-2 rounded-[4px] px-1 transition-colors hover:bg-neutral-700",
+                        "group flex h-[30px] items-center gap-2 rounded-[4px] px-1 transition-colors hover:bg-neutral-700",
                         (isActive || isSelected) && "bg-neutral-700",
                       )}
                     >
                       <div
-                        className={cn(
-                          "flex h-6 min-w-0 cursor-pointer items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px] transition-colors duration-200",
-                          displayStyle.tagColor,
-                          // isSelected && "border-white/40 shadow-sm",
-                        )}
+                        className="grid flex-1 cursor-pointer grid-cols-[auto_1fr] items-center gap-2"
                         role="button"
                         tabIndex={0}
                         onClick={() => {
@@ -249,6 +248,7 @@ const TagMaker = ({
                           } else {
                             setLocalSelectedTagIds((prev) => [...prev, tag.id]);
                           }
+                          inputRef.current?.focus();
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
@@ -262,21 +262,29 @@ const TagMaker = ({
                                 tag.id,
                               ]);
                             }
+                            inputRef.current?.focus();
                           }
                         }}
                       >
-                        <span className="truncate">#{tag.name}</span>
-                      </div>
-
-                      <div className="ml-auto flex shrink-0 items-center gap-2">
-                        <div className="shrink-0">
+                        <div
+                          className={cn(
+                            "flex h-6 min-w-0 cursor-pointer items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px] transition-colors duration-200",
+                            displayStyle.tagColor,
+                          )}
+                        >
+                          <span className="truncate">#{tag.name}</span>
+                        </div>
+                        <div className="ml-auto size-4">
                           {isSelected && (
                             <Icon
                               name="check_16"
-                              className="ml-auto size-3 text-base-primary"
+                              className="text-base-primary"
                             />
                           )}
                         </div>
+                      </div>
+
+                      <div className="ml-auto flex shrink-0 items-center gap-2">
                         <TagColorPalette
                           trigger={
                             <ActionButton
@@ -342,6 +350,7 @@ const TagMaker = ({
                         setLocalSelectedTagIds((prev) => [...prev, newId]);
                       }
                       setSearch("");
+                      inputRef.current?.focus();
                     }}
                     className="flex min-w-0 items-center gap-2 text-left"
                   >
