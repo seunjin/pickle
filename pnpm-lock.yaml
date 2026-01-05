@@ -47,6 +47,9 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      react-hook-form:
+        specifier: ^7.70.0
+        version: 7.70.0(react@19.2.3)
     devDependencies:
       '@crxjs/vite-plugin':
         specifier: 2.0.0-beta.33
@@ -2727,6 +2730,12 @@ packages:
     peerDependencies:
       react: ^19.2.3
 
+  react-hook-form@7.70.0:
+    resolution: {integrity: sha512-COOMajS4FI3Wuwrs3GPpi/Jeef/5W1DRR84Yl5/ShlT3dKVFUfoGiEZ/QE6Uw8P4T2/CLJdcTVYKvWBMQTEpvw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+
   react-layered-dialog@0.6.1:
     resolution: {integrity: sha512-xx8qOFshH1fPtJUN0OdTAsBp67BP9iPCosgHDmufU5XSDIltIU2WBgDWCokpD00JXigjCDjUkI4QDZbG/bVwPg==}
     peerDependencies:
@@ -5379,6 +5388,10 @@ snapshots:
     dependencies:
       react: 19.2.3
       scheduler: 0.27.0
+
+  react-hook-form@7.70.0(react@19.2.3):
+    dependencies:
+      react: 19.2.3
 
   react-layered-dialog@0.6.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:

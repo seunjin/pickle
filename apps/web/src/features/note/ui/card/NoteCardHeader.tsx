@@ -23,6 +23,7 @@ const type_per_class: Record<
 };
 
 export function NoteCardHeader({ type }: NoteCardHeaderProps) {
+  const imageType = type === "image" || type === "capture";
   return (
     <div className="mb-1.5 flex w-full items-center">
       <div className="flex w-full items-center">
@@ -31,13 +32,11 @@ export function NoteCardHeader({ type }: NoteCardHeaderProps) {
             {type === "bookmark" && (
               <img src="/type-01.svg" alt="bookmark type icon" />
             )}
-            {(type === "image" || type === "capture") && (
-              <img src="/type-02.svg" alt="img type icon" />
-            )}
+            {imageType && <img src="/type-02.svg" alt="img type icon" />}
             {type === "text" && <img src="/type-03.svg" alt="text type icon" />}
           </div>
           <span className={type_per_class[type]}>
-            {TYPE_LABELS[type] || type.toUpperCase()}
+            {imageType ? "IMAGE" : TYPE_LABELS[type] || type.toUpperCase()}
           </span>
         </div>
       </div>

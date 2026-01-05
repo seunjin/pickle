@@ -1,15 +1,15 @@
-import type * as React from "react";
+import * as React from "react";
 import { useId } from "react";
 import { cn } from "../lib/utils";
 import type { Textarea } from "./Textarea";
-export const TextareaContainLabel = ({
-  label,
-  required,
-  ...props
-}: React.ComponentProps<typeof Textarea> & {
-  label: string;
-  required?: boolean;
-}) => {
+
+export const TextareaContainLabel = React.forwardRef<
+  HTMLTextAreaElement,
+  React.ComponentProps<typeof Textarea> & {
+    label: string;
+    required?: boolean;
+  }
+>(({ label, required, className, ...props }, ref) => {
   const id = useId(); // 고유 ID 생성
   return (
     <div
@@ -26,6 +26,7 @@ export const TextareaContainLabel = ({
         "focus-within:ring-1 focus-within:ring-base-primary",
         /* 6. 선택(Selection) 스타일 */
         "selection:bg-base-muted-foreground",
+        className,
       )}
     >
       <div>
@@ -34,14 +35,13 @@ export const TextareaContainLabel = ({
             {label}
           </span>
           {required && (
-            <span className="text-[12px] text-base-primary leading-none">
-              *
-            </span>
+            <span className="text-[12px] text-base-muted leading-none">*</span>
           )}
         </label>
       </div>
       <textarea
         id={id}
+        ref={ref}
         {...props}
         className={cn(
           "field-sizing-content block min-h-[40px] w-full resize-none appearance-none border-0 bg-transparent p-0 text-sm outline-none placeholder:text-form-input-placeholder",
@@ -51,4 +51,6 @@ export const TextareaContainLabel = ({
       />
     </div>
   );
-};
+});
+
+TextareaContainLabel.displayName = "TextareaContainLabel";

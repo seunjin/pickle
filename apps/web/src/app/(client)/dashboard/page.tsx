@@ -30,7 +30,7 @@ export default async function DashboardPage() {
       <header className="flex h-[60px] items-center justify-between border-base-border border-b px-10">
         <div>
           {/* 페이지 제목 */}
-          <h1 className="font-bold text-2xl text-base-foreground leading-none">
+          <h1 className="font-bold text-[20px] text-base-foreground leading-none">
             Inbox
           </h1>
         </div>

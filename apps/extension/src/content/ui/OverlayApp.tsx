@@ -226,7 +226,12 @@ export default function OverlayApp({
       {/* Loading & Error Overlay */}
       {isSaving && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-base-dimed">
-          <Spinner className="size-6 text-base-primary" />
+          <div className="flex flex-col items-center gap-1.5">
+            <Spinner className="size-6 text-base-primary" />
+            <span className="font-medium text-[14px] text-base-primary">
+              저장중...
+            </span>
+          </div>
         </div>
       )}
 

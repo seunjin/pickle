@@ -17,8 +17,8 @@ export function Header({ title, onClose }: HeaderProps) {
     <div className="flex items-center justify-between px-5 pt-5">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <img src={pickleLogo} alt="피클 로고" />
-          <h2 className="font-semibold text-[18px] text-base-foreground">
+          <img src={pickleLogo} alt="피클 로고" className="size-6" />
+          <h2 className="font-semibold text-[16px] text-base-foreground">
             {title}
           </h2>
         </div>

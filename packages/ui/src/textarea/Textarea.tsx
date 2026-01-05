@@ -1,10 +1,10 @@
-import type * as React from "react";
+import * as React from "react";
 import { cn } from "../lib/utils";
 
-export function Textarea({
-  className,
-  ...props
-}: React.ComponentProps<"textarea">) {
+export const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.ComponentProps<"textarea">
+>(({ className, ...props }, ref) => {
   return (
     <textarea
       data-slot="textarea"
@@ -34,7 +34,10 @@ export function Textarea({
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
         className,
       )}
+      ref={ref}
       {...props}
     />
   );
-}
+});
+
+Textarea.displayName = "Textarea";

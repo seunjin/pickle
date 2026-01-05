@@ -1,6 +1,7 @@
 import { Header } from "@overlay/components/Header";
 import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import type { NoteData } from "@shared/types";
+import { useForm } from "react-hook-form";
 import { EditorContainer } from "@/content/ui/components/EditorContainer";
 
 /**
@@ -17,42 +18,67 @@ interface TextEditorProps {
   onSave?: () => void;
 }
 
+type TextFormValues = {
+  title: string;
+  text: string;
+  memo: string;
+};
+
 export function TextEditor({
   note,
   onUpdate,
   onClose,
   onSave,
 }: TextEditorProps) {
+  const { register, handleSubmit } = useForm<TextFormValues>({
+    defaultValues: {
+      title: note.title || "",
+      text: note.text || "",
+      memo: note.memo || "",
+    },
+  });
+
+  const onSubmit = (data: TextFormValues) => {
+    onUpdate(data);
+    onSave?.();
+  };
+
   return (
     <EditorContainer>
       <Header title="텍스트 저장" onClose={onClose} />
 
       <ScrollArea className="mr-2 h-full overflow-auto">
-        <div className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5">
+        <form
+          id="text-editor-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5"
+        >
           <TextareaContainLabel
             label="TITLE"
             placeholder="타이틀"
-            value={note.title || ""}
-            onChange={(e) => onUpdate({ title: e.target.value })}
-          ></TextareaContainLabel>
+            {...register("title")}
+          />
           <TextareaContainLabel
             label="TEXT"
             placeholder="텍스트"
-            value={note.text || ""}
-            onChange={(e) => onUpdate({ text: e.target.value })}
-          ></TextareaContainLabel>
+            {...register("text")}
+          />
           <TextareaContainLabel
             label="MEMO"
             placeholder="메모"
-            value={note.memo}
-            onChange={(e) => onUpdate({ memo: e.target.value })}
             autoFocus
+            {...register("memo")}
           />
-        </div>
+        </form>
       </ScrollArea>
 
       <div className="px-5 pb-5">
-        <Button className="w-full" icon="download_16" onClick={onSave}>
+        <Button
+          className="w-full"
+          icon="download_16"
+          type="submit"
+          form="text-editor-form"
+        >
           피클에 저장하기
         </Button>
       </div>
