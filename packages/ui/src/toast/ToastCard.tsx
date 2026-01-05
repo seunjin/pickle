@@ -1,13 +1,15 @@
 "use client";
+import { Icon, type IconName } from "@pickle/icons";
 import type * as React from "react";
-import { ActionButton } from "../../button";
+import { ActionButton } from "../button";
+import { Spinner } from "../spinner";
 /**
  * [중요] sonner를 직접 임포트하지 않고 index.tsx의 인스턴스를 사용합니다.
  * 1. 인스턴스 파편화 방지: 모노레포 환경에서 생성/삭제 상태(Store)를 하나로 유지하기 위함
  * 2. 순환 참조 방지: index.tsx(API) -> ToastCard(UI) -> index.tsx(Instance) 순서로 흐름을 단방향화
  */
-import { toastInstance as sonnerToast } from "../index";
-import type { ToastKind, ToastProps } from "../types";
+import { toastInstance as sonnerToast } from "./index";
+import type { ToastKind, ToastProps } from "./types";
 
 export interface ToastCardProps extends ToastProps {
   id: string | number;
@@ -38,11 +40,27 @@ export function ToastCard({
     loading: "pickle-toast-loading",
   };
 
+  const kindIcons: Record<
+    Exclude<ToastKind, "loading">,
+    { icon: IconName; className: string }
+  > = {
+    info: { icon: "info_circle_16", className: "text-base-muted" },
+    success: { icon: "check_circle_16", className: "text-system-success" },
+    error: { icon: "error_circle_16", className: "text-system-error" },
+  };
+
   return (
     <div className={`pickle-toast-card ${kindStyles[kind]}`}>
       <div className="pickle-toast-content">
         <h4 className="pickle-toast-title">
-          {kind === "loading" && <span className="pickle-toast-spinner" />}
+          {kind === "loading" ? (
+            <Spinner className="size-4" />
+          ) : (
+            <Icon
+              name={kindIcons[kind].icon}
+              className={kindIcons[kind].className}
+            />
+          )}
           {title}
         </h4>
         {description && (

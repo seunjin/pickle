@@ -8,8 +8,8 @@ import { toast as sonnerToast } from "sonner";
  */
 export { sonnerToast as toastInstance };
 
+import { ToastCard } from "./ToastCard";
 import type { ToastKind, ToastProps } from "./types";
-import { ToastCard } from "./ui/ToastCard";
 
 function createToast(kind: ToastKind, props: ToastProps) {
   /**

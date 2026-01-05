@@ -7,6 +7,28 @@ export function ToastTest() {
       <Button
         type="button"
         onClick={() =>
+          toast.success({
+            title: "토스 성공 테스트",
+            description: "토스트 성공 테스트",
+          })
+        }
+      >
+        토스트:성공
+      </Button>
+      <Button
+        type="button"
+        onClick={() =>
+          toast.error({
+            title: "토스 에러 테스트",
+            description: "토스트 에러 테스트",
+          })
+        }
+      >
+        토스트:에러
+      </Button>
+      <Button
+        type="button"
+        onClick={() =>
           toast.info({
             title: "토스 정보 테스트",
             description: "토스트 정보 테스트",
@@ -25,24 +47,6 @@ export function ToastTest() {
         }
       >
         토스트:로딩
-      </Button>
-      <Button
-        type="button"
-        onClick={() =>
-          toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 1000)),
-            {
-              loading: "로딩중",
-              success: "성공이요",
-              error: "에러입니다.",
-            },
-            {
-              description: "promise 테스트",
-            },
-          )
-        }
-      >
-        토스트:promise 테스트
       </Button>
     </div>
   );
