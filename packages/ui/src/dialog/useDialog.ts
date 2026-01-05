@@ -1,3 +1,4 @@
+"use client";
 import { useMemo } from "react";
 import type { DialogStore } from "react-layered-dialog";
 import { useDialogController as useBaseDialogController } from "react-layered-dialog";
