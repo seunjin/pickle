@@ -1,53 +1,57 @@
+"use client";
 import { toast as sonnerToast } from "sonner";
-import type { ToastKind, ToastOptions } from "./types";
+
+/**
+ * [중요] 토스트 인스턴스 단일화 (Singleton)
+ * 모노레포 및 번들링 환경에서 sonner 인스턴스가 파편화되는 것을 방지하기 위해
+ * 이 파일에서 생성된 인스턴스를 모든 곳(특히 ToastCard)에서 공유합니다.
+ */
+export { sonnerToast as toastInstance };
+
+import type { ToastKind, ToastProps } from "./types";
 import { ToastCard } from "./ui/ToastCard";
 
-function createToast(kind: ToastKind, title: string, opts?: ToastOptions) {
+function createToast(kind: ToastKind, props: ToastProps) {
+  /**
+   * [중요] 명시적 고유 ID 부여
+   * sonner의 자동 ID(숫자)는 React StrictMode나 커스텀 컴포넌트 환경에서
+   * 엔진과 컴포넌트 간의 ID 미스매치를 유발할 수 있어 crypto.randomUUID()를 사용합니다.
+   */
+  const manualId = props.dedupeKey || crypto.randomUUID();
+
   return sonnerToast.custom(
-    (id) => (
-      <ToastCard
-        id={id}
-        kind={kind}
-        title={title}
-        description={opts?.description}
-        action={opts?.action}
-        cancel={opts?.cancel}
-      />
-    ),
+    (id) => <ToastCard id={id} kind={kind} {...props} />,
     {
-      id: opts?.dedupeKey,
-      duration: opts?.durationMs,
+      id: manualId,
+      duration: props.durationMs,
     },
   );
 }
 
 export const toast = {
-  info(title: string, opts?: ToastOptions) {
-    return createToast("info", title, opts);
+  info(props: ToastProps) {
+    return createToast("info", props);
   },
-  success(title: string, opts?: ToastOptions) {
-    return createToast("success", title, opts);
+  success(props: ToastProps) {
+    return createToast("success", props);
   },
-  error(title: string, opts?: ToastOptions) {
-    return createToast("error", title, opts);
+  error(props: ToastProps) {
+    return createToast("error", props);
   },
-  loading(title: string, opts?: ToastOptions) {
-    return createToast("loading", title, opts);
+  loading(props: ToastProps) {
+    return createToast("loading", props);
   },
 
   update(
     id: string | number,
-    patch: Partial<ToastOptions> & { title?: string; kind?: ToastKind },
+    patch: Partial<ToastProps> & { kind?: ToastKind },
   ) {
     return sonnerToast.custom(
-      (id) => (
+      (_id) => (
         <ToastCard
-          id={id}
+          id={_id}
           kind={patch.kind || "info"}
-          title={patch.title || ""}
-          description={patch.description}
-          action={patch.action}
-          cancel={patch.cancel}
+          {...(patch as ToastProps)}
         />
       ),
       {
@@ -68,15 +72,16 @@ export const toast = {
   async promise<T>(
     promise: Promise<T>,
     msgs: { loading: string; success: string; error: string },
-    opts?: ToastOptions,
+    opts?: Omit<ToastProps, "title">,
   ) {
-    const id = this.loading(msgs.loading, opts);
+    const id = this.loading({ title: msgs.loading, ...opts });
     try {
       const result = await promise;
       this.update(id, {
         kind: "success",
         title: msgs.success,
         durationMs: 3000,
+        ...opts,
       });
       return result;
     } catch (err) {
@@ -84,6 +89,7 @@ export const toast = {
         kind: "error",
         title: msgs.error,
         durationMs: 5000,
+        ...opts,
       });
       throw err;
     }
@@ -96,7 +102,8 @@ export const toast = {
     onUndo: () => void | Promise<void>;
     onUndoSuccessTitle?: string;
   }) {
-    return this.info(args.title, {
+    return this.info({
+      title: args.title,
       description: args.description,
       action: {
         label: args.actionLabel ?? "실행 취소",

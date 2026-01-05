@@ -1,7 +1,6 @@
 export * from "./button";
 export * from "./constants/tag";
 export * from "./dialog";
-export * from "./dialog/index";
 export * from "./dropdown-menu";
 export * from "./input";
 export * from "./popover";

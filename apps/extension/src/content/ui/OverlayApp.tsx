@@ -108,7 +108,7 @@ export default function OverlayApp({
         console.log("Session recovered! Clearing error...");
         setErrorMessage(null);
         dialog.closeAll(); // Close any login-related dialogs
-        toast.success("로그인되었습니다. 이제 저장할 수 있습니다.");
+        toast.success({ title: "로그인되었습니다. 이제 저장할 수 있습니다." });
       }
     };
     extensionStorage.onChanged.addListener(handleSessionRecovery);

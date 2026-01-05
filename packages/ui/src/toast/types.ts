@@ -7,35 +7,23 @@ export type ToastAction = {
   onClick: () => void | Promise<void>;
 };
 
-export type ToastItem = {
-  id: string;
-  kind: ToastKind;
-  title: string;
+export type ToastOptions = {
   description?: string;
-  state: ToastState;
-
-  // UX policy
-  durationMs: number;
-  dismissible: boolean;
-  createdAt: number;
-  closeAt?: number;
-
-  // optional action(s)
+  durationMs?: number;
+  dismissible?: boolean;
   action?: ToastAction;
   cancel?: ToastAction;
-
-  // dedupe
   dedupeKey?: string;
 };
 
-export type ToastOptions = Partial<
-  Pick<
-    ToastItem,
-    | "description"
-    | "durationMs"
-    | "dismissible"
-    | "action"
-    | "cancel"
-    | "dedupeKey"
-  >
->;
+export type ToastProps = {
+  title: string;
+} & ToastOptions;
+
+export type ToastItem = {
+  id: string | number;
+  kind: ToastKind;
+  state: ToastState;
+  createdAt: number;
+  closeAt?: number;
+} & ToastProps;

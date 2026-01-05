@@ -9,6 +9,7 @@ import { getNotes } from "@/features/note/api/getNotes";
 import { noteKeys } from "@/features/note/model/noteQueries";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
+import { ToastTest } from "./ToastTest";
 
 export const metadata: Metadata = {
   title: "Dashboard | Pickle",
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ToastTest />
           <InputWithAddon
             containerClassName="group w-90"
             placeholder="검색어를 입력해 주세요."
