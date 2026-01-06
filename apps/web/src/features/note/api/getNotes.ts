@@ -6,9 +6,17 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/shared/lib/supabase/client";
 
+export interface GetNotesParams {
+  client?: SupabaseClient<Database>;
+  filter?: {
+    onlyBookmarked?: boolean;
+  };
+}
+
 export const getNotes = async (
-  client?: SupabaseClient<Database>,
+  params: GetNotesParams = {},
 ): Promise<NoteWithAsset[]> => {
+  const { client, filter } = params;
   const supabase = client ?? createClient();
   const {
     data: { user },
@@ -27,8 +35,8 @@ export const getNotes = async (
 
   if (!workspace) return [];
 
-  // 2. 노트와 연결된 에셋 및 태그 정보 함께 조회
-  const { data, error } = await supabase
+  // 2. 쿼리 빌더 생성
+  let query = supabase
     .from("notes")
     .select(`
       *,
@@ -37,16 +45,25 @@ export const getNotes = async (
         tag:tags(*)
       )
     `)
-    .eq("workspace_id", workspace.workspace_id)
-    .order("created_at", { ascending: false })
-    .limit(20);
+    .eq("workspace_id", workspace.workspace_id);
 
-  if (error) {
-    throw new Error(error.message);
+  // 3. 필터링 및 정렬 적용
+  if (filter?.onlyBookmarked) {
+    query = query
+      .not("bookmarked_at", "is", null)
+      .order("bookmarked_at", { ascending: false });
+  } else {
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data: notesData, error: notesError } = await query.limit(20);
+
+  if (notesError) {
+    throw new Error(notesError.message);
   }
 
   // 중첩된 tag 구조를 평탄화 (tag_list: [{ tag: { ... } }] -> tag_list: [{ ... }])
-  const transformedData = data?.map((note: any) => ({
+  const transformedData = notesData?.map((note: any) => ({
     ...note,
     tag_list: note.tag_list?.map((item: any) => item.tag).filter(Boolean) || [],
   }));
@@ -55,9 +72,8 @@ export const getNotes = async (
   const parsed = noteWithAssetSchema.array().safeParse(transformedData);
 
   if (!parsed.success) {
-    console.error("Notes fetch validation failed:", parsed.error);
-    // 검증 실패 시 빈 배열을 반환하거나, 에러를 던질 수 있습니다.
-    // 여기서는 안전하게 실패 로그를 남기고 빈 배열을 반환하는 정책을 따릅니다.
+    console.error("Notes fetch validation failed:", parsed.error.format());
+    console.error("Failed raw data sample:", transformedData?.[0]);
     return [];
   }
 

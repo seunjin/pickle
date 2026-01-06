@@ -12,21 +12,42 @@ import {
 } from "@pickle/ui";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
+import { useDeleteNoteMutation } from "../model/useDeleteNoteMutation";
+import { useUpdateNoteMutation } from "../model/useUpdateNoteMutation";
 import { NoteCardHeader } from "./card/NoteCardHeader";
 import { Thumbnail } from "./thumbnail/Thumbnail";
 
 interface NoteCardProps {
   note: NoteWithAsset;
-  onDelete?: (noteId: string) => void;
 }
 
-export function NoteCard({ note, onDelete }: NoteCardProps) {
+export function NoteCard({ note }: NoteCardProps) {
   const dialog = useDialog();
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { mutate: updateNote } = useUpdateNoteMutation();
+  const { mutate: deleteNote } = useDeleteNoteMutation();
+
+  const isBookmarked = !!note.bookmarked_at;
 
   const handleCardClick = () => {
     dialog.open(() => <NoteDetailDrawer note={note} />);
+  };
+
+  const handleBookmarkToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newBookmarkedAt = isBookmarked ? null : new Date().toISOString();
+
+    updateNote({
+      noteId: note.id,
+      payload: { bookmarked_at: newBookmarkedAt },
+    });
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteNote(note.id);
+    setIsMenuOpen(false);
   };
 
   return (
@@ -51,26 +72,6 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
           <div className="ellipsis line-clamp-2 pb-1 font-semibold text-[15px] text-neutral-100 leading-[1.3]">
             {note.title || "Untitled"}
           </div>
-
-          {/* TAGS */}
-          {/* <div className="mb-2 flex flex-wrap gap-1">
-            {note.tag_list?.slice(0, 3).map((tag) => (
-              <div
-                key={tag.id}
-                className={cn(
-                  "rounded-[4px] border px-1 py-0.2 text-[10px]",
-                  TAG_VARIANTS[tag.style].tagColor,
-                )}
-              >
-                #{tag.name}
-              </div>
-            ))}
-            {(note.tag_list?.length || 0) > 3 && (
-              <div className="self-center text-[10px] text-neutral-500">
-                +{(note.tag_list?.length || 0) - 3}
-              </div>
-            )}
-          </div> */}
 
           <a
             href={note.meta?.url}
@@ -99,7 +100,6 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
                   forceFocus={isMenuOpen}
                   onClick={(e) => {
                     e.stopPropagation();
-                    // TODO: Open menu
                   }}
                 />
               </DropdownMenuTrigger>
@@ -108,11 +108,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
                   <button
                     type="button"
                     className="w-full cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete?.(note.id);
-                      // setIsMenuOpen(false);
-                    }}
+                    onClick={handleDelete}
                   >
                     <Icon name="trash_16" /> 휴지통으로 이동
                   </button>
@@ -126,10 +122,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
               className={
                 isBookmarked ? "text-base-primary hover:text-base-primary" : ""
               }
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsBookmarked(!isBookmarked);
-              }}
+              onClick={handleBookmarkToggle}
             />
           </div>
         </div>

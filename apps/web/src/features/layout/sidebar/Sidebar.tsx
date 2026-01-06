@@ -1,12 +1,14 @@
 "use client";
 import { Icon } from "@pickle/icons";
 import { TAG_VARIANTS } from "@pickle/ui";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 
 export const Sidebar = () => {
+  const pathname = usePathname();
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const { isLoading } = useSessionContext();
@@ -42,14 +44,15 @@ export const Sidebar = () => {
               icon="archive_20"
               label="Inbox"
               badge={3}
-              active
+              active={pathname.includes("/dashboard")}
             />
 
             {/* 북마크 */}
             <SidebarNavItem
-              href="/favorites"
+              href="/bookmarks"
               icon="bookmark_20"
               label="북마크"
+              active={pathname.includes("/bookmarks")}
             />
           </ul>
 

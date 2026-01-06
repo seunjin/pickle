@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
 import { getNote } from "@/features/note/api/getNote";
+import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
 import { createTag as createTagApi } from "@/features/tag/api/createTag";
 import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
@@ -62,7 +63,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
   const queryClient = useQueryClient();
 
-  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+  const { mutate: updateNote } = useUpdateNoteMutation();
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
   const [isMove, setIsMove] = useState<boolean>(false);
   const [noteData, setNoteData] = useState<NoteWithAsset>(note);
@@ -237,15 +238,26 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       {TYPE_LABELS[note.type] || note.type.toUpperCase()}
                     </span>
                   </div>
+
+                  {/* 북마크 버튼 */}
                   <button
                     type="button"
-                    onClick={() => setIsBookmarked(!isBookmarked)}
+                    onClick={() => {
+                      const isBookmarked = !!currentNote.bookmarked_at;
+                      const newBookmarkedAt = isBookmarked
+                        ? null
+                        : new Date().toISOString();
+                      updateNote({
+                        noteId: currentNote.id,
+                        payload: { bookmarked_at: newBookmarkedAt },
+                      });
+                    }}
                   >
                     <Icon
                       name="bookmark_20"
                       className={cn(
                         "transition-colors group-hover:text-neutral-300",
-                        isBookmarked &&
+                        !!currentNote.bookmarked_at &&
                           "text-base-primary group-hover:text-base-primary",
                       )}
                     />

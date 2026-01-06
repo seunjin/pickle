@@ -1,4 +1,5 @@
 "use client";
+import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import {
   useMutation,
   useQueryClient,
@@ -8,27 +9,28 @@ import { deleteNote as deleteNoteApi } from "../api/deleteNote";
 import { noteKeys, noteQueries } from "../model/noteQueries";
 import { NoteCard } from "./NoteCard";
 
-export function NoteList() {
-  const queryClient = useQueryClient();
-
+export function NoteList({
+  onlyBookmarked = false,
+}: {
+  onlyBookmarked?: boolean;
+}) {
   // 1. Fetch Data (Suspense)
-  const { data: notes } = useSuspenseQuery(noteQueries.all());
-
-  // 2. Mutation (Delete)
-  const { mutate: deleteNote } = useMutation({
-    mutationFn: (id: string) => deleteNoteApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: noteKeys.all });
-    },
-  });
+  const queryOption = onlyBookmarked
+    ? noteQueries.bookmarks()
+    : noteQueries.all();
+  const { data: notes } = useSuspenseQuery<NoteWithAsset[]>(queryOption as any);
 
   if (notes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="mb-4 text-4xl">📝</div>
-        <p className="font-medium text-base-foreground">아직 노트가 없습니다</p>
+        <div className="mb-4 text-4xl">{onlyBookmarked ? "⭐️" : "📝"}</div>
+        <p className="font-medium text-base-foreground">
+          {onlyBookmarked ? "북마크된 노트가 없습니다" : "아직 노트가 없습니다"}
+        </p>
         <p className="mt-1 text-base-muted text-sm">
-          익스텐션에서 노트를 생성해 보세요!
+          {onlyBookmarked
+            ? "중요한 노트를 북마크해 보세요!"
+            : "익스텐션에서 노트를 생성해 보세요!"}
         </p>
       </div>
     );
@@ -37,11 +39,7 @@ export function NoteList() {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,295px)] gap-4">
       {notes.map((note) => (
-        <NoteCard
-          key={note.id}
-          note={note}
-          onDelete={(noteId) => deleteNote(noteId)}
-        />
+        <NoteCard key={note.id} note={note} />
       ))}
     </div>
   );

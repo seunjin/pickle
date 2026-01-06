@@ -116,6 +116,7 @@ const commonDbFields = z.object({
   // 핵심 변경: Meta를 Data와 분리하여 별도 컬럼으로 정의 (DB Schema Change Required)
   meta: commonMetaDataSchema.nullable(),
   tags: z.array(z.string()).nullable(),
+  bookmarked_at: z.string().datetime({ offset: true }).nullable(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -207,6 +208,7 @@ export const updateNoteSchema = z.object({
       image: optionalUrl,
     })
     .optional(),
+  bookmarked_at: z.string().datetime({ offset: true }).nullable().optional(),
 });
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
 
