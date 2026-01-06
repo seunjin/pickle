@@ -42,7 +42,10 @@ src/features/<feature-name>/
 ```
 
 *   **규칙**:
-    *   **캡슐화**: 다른 기능에서 이 기능을 사용할 때는 반드시 `index.ts`를 통해서만 접근해야 합니다. (`features/auth/ui/LoginForm` 직접 임포트 금지 -> `features/auth`에서 임포트)
+    *   **Deep Import 권장**: 필요한 모듈의 정확한 파일 경로를 직접 명시하여 가져옵니다. (`CONVENTIONS.md` 4.6 참조)
+      - ✅ Good: `import { getNotes } from \"@/features/note/api/getNotes\"`
+      - ❌ Bad: `import { getNotes } from \"@/features/note\"`
+    *   **Barrel File 지양**: `index.ts`를 통해 모아서 내보내는 방식을 지양합니다. (순환 참조 방지, Tree Shaking 최적화)
     *   **Supabase 접근**: 오직 `api/` 폴더 내부에서만 Supabase 클라이언트를 사용하거나 데이터를 요청해야 합니다.
 
 ### 🟦 Shared Layer (`src/shared`)

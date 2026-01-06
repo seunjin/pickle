@@ -61,15 +61,18 @@ export const getNotes = async (client?: SupabaseClient) => {
 
 ### 3. Client Component (`NoteList.tsx`)
 **역할**: UI 렌더링, 상태 구독, 이벤트 핸들링
-- `useQuery`를 사용하지만, 이미 데이터가 Hydrate되어 있어 `isLoading` 상태 없이 즉시 데이터를 표시합니다.
+- `useSuspenseQuery`를 사용하지만, 이미 데이터가 Hydrate되어 있어 `isLoading` 상태 없이 즉시 데이터를 표시합니다.
 
 ```tsx
 // features/note/ui/NoteList.tsx
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { noteQueries } from "../model/noteQueries";
+
 export function NoteList() {
-  // 이미 Prefetch된 데이터가 있어 즉시 data가 반환됨
-  const { notes } = useNote(); 
+  // Query Factory를 직접 사용 (이미 Prefetch된 데이터가 있어 즉시 data가 반환됨)
+  const { data: notes } = useSuspenseQuery(noteQueries.all());
   
   return (
     <div>
@@ -82,7 +85,9 @@ export function NoteList() {
 
 ## 🎣 Data Fetching Strategy (Query Factory Pattern)
 
-우리는 데이터 페칭 시 **Custom Hook(`useGetNotes`)으로 감싸는 것을 지양**하고, **Query Factory**를 통해 정의된 Key와 Option을 컴포넌트에서 **직접 사용**하는 것을 권장합니다.
+우리는 데이터 페칭 시 **Custom Hook(`useGetNotes`)으로 감싸는 것을 지양**하고, **Query Factory**를 통해 정의된 Key와 Option을 컴포넌트에서 **직접 사용**하는 것을 표준으로 합니다.
+
+> **⚠️ 중요**: Wrapper Hook(`useNote`, `useGetNotes` 등) 대신 Query Factory + `useSuspenseQuery`를 직접 사용하세요.
 
 ### 1. Query Factory (`queries.ts`)
 Query Key와 Fetcher 함수를 한곳에서 관리하여 Server/Client 간의 불일치를 방지합니다.
@@ -128,3 +133,4 @@ const { data } = useGetNotes();
 - [ ] Client Component 최상단에 `"use client"` 지시어가 있어야 합니다.
 - [ ] 데이터 변경(Mutation) 시에는 반드시 `invalidateQueries`나 `setQueryData`를 통해 캐시를 갱신해야 합니다.
 - [ ] 단순 조회 로직은 Custom Hook으로 감싸지 말고 `noteQueries`를 직접 사용합니다.
+- [ ] 복잡한 비즈니스 로직이 포함된 경우에만 제한적으로 Custom Hook을 사용합니다.

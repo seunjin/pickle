@@ -50,10 +50,18 @@
     → 디자인 토큰 → CSS 변수 변환 워크플로우
 12. [react_19_guidelines.md](./react_19_guidelines.md)  
     → React 19 기준 권장 패턴 및 사용 제한
-13. [CONVENTIONS.md](./CONVENTIONS.md)  
+13. [CONVENTIONS.md](../CONVENTIONS.md)  
     → 네이밍, 폴더 구조, 코드 스타일, 협업 규칙
 14. [아이콘 시스템 가이드](../packages/icons/README.md)  
     → SVG 아이콘 자동 생성, 사용법, 타입 안전성 가이드
+
+### ⑥ 심화 가이드 (Deep Dive)
+15. [toast_system.md](./toast_system.md)  
+    → Toast 알림 시스템 API 및 사용법
+16. [query_factory_pattern.md](./query_factory_pattern.md)  
+    → React Query의 Query Factory 패턴 상세 가이드
+17. [button_icon_components.md](./button_icon_components.md)  
+    → Button, ActionButton, Icon 컴포넌트 사용법
 
 ---
 
@@ -64,10 +72,11 @@
 | **로그인 / 회원가입 / 약관** | [extension_auth_flow.md](./extension_auth_flow.md), [role_state_policy.md](./role_state_policy.md) |
 | **워크스페이스 생성 / 초대** | [WORKSPACE_TECH_SPEC.md](./WORKSPACE_TECH_SPEC.md), [database_schema.md](./database_schema.md) |
 | **권한 추가 / 변경** | [role_state_policy.md](./role_state_policy.md), [database_schema.md](./database_schema.md) |
-| **데이터 fetch / mutation** | [data_access_layer.md](./data_access_layer.md) |
+| **데이터 fetch / mutation** | [data_access_layer.md](./data_access_layer.md), [query_factory_pattern.md](./query_factory_pattern.md) |
 | **Extension UI 추가** | [extension_architecture.md](./extension_architecture.md), [ui_isolation_guide.md](./ui_isolation_guide.md) |
-| **공통 UI 컴포넌트** | [design_system_tokens.md](./design_system_tokens.md), [CONVENTIONS.md](./CONVENTIONS.md) |
+| **공통 UI 컴포넌트** | [design_system_tokens.md](./design_system_tokens.md), [button_icon_components.md](./button_icon_components.md) |
 | **아이콘 추가 / 변경** | [아이콘 시스템 가이드](../packages/icons/README.md) |
+| **Toast 알림 구현** | [toast_system.md](./toast_system.md) |
 
 ---
 

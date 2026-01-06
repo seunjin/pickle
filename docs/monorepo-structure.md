@@ -12,6 +12,7 @@ root/
 │
 ├── packages/           # 공유 패키지 (Shared Libraries)
 │   ├── contracts/      # ⭐️ 공유 타입, Zod 스키마 (Domain Truth)
+│   ├── icons/          # 🎨 SVG 아이콘 시스템 (자동 생성)
 │   ├── ui/             # 🎨 디자인 시스템 (shadcn/ui 기반)
 │   └── tsconfig/       # 공용 TypeScript 설정
 │
@@ -28,11 +29,14 @@ root/
 graph TD
     Web[apps/web] --> Contracts[packages/contracts]
     Web --> UI[packages/ui]
+    Web --> Icons[packages/icons]
     
     Extension[apps/extension] --> Contracts
     Extension --> UI
+    Extension --> Icons
     
     UI --> Contracts
+    UI --> Icons
 ```
 
 ## 📦 주요 패키지 설명
@@ -52,6 +56,11 @@ graph TD
 *   TypeScript **Type**과 Zod **Schema**를 동시에 제공합니다.
 *   API 요청/응답 DTO, 도메인 모델 등이 포함됩니다.
 
-### 4. `packages/ui`
+### 4. `packages/icons`
+*   SVG 아이콘을 React 컴포넌트로 **자동 변환**하는 시스템입니다.
+*   `pnpm icon` 명령어로 아이콘 추가 및 갱신이 가능합니다.
+*   타입 안전한 `<Icon name="..." size="..." />` 컴포넌트를 제공합니다.
+
+### 5. `packages/ui`
 *   버튼, 인풋, 모달 등 **디자인 시스템** 컴포넌트 모음입니다.
 *   TailwindCSS와 Radix UI를 기반으로 합니다.
