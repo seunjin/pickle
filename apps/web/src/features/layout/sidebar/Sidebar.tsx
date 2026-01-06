@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@pickle/icons";
-import { ScrollArea, Skeleton, TAG_VARIANTS } from "@pickle/ui";
+import { ScrollArea, TAG_VARIANTS } from "@pickle/ui";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
