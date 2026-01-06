@@ -7,8 +7,8 @@ import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 
 export const Sidebar = () => {
-  const [foldersFolding, setFoldersFolding] = useState<boolean>(false);
-  const [tagsFolding, setTagsFolding] = useState<boolean>(false);
+  const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
+  const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const { isLoading } = useSessionContext();
 
   if (isLoading) {
@@ -36,6 +36,7 @@ export const Sidebar = () => {
         {/* 주요 메뉴 */}
         <div className="pb-[30px]">
           <ul className="flex flex-col gap-1 pb-[30px]">
+            {/* 인박스 */}
             <SidebarNavItem
               href="/dashboard"
               icon="archive_20"
@@ -44,10 +45,11 @@ export const Sidebar = () => {
               active
             />
 
+            {/* 북마크 */}
             <SidebarNavItem
               href="/favorites"
               icon="bookmark_20"
-              label="즐겨찾기"
+              label="북마크"
             />
           </ul>
 

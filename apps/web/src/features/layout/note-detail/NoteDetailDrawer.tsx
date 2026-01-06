@@ -368,7 +368,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                   </div>
                 </div>
                 <div className="pb-20">
-                  <div className="flex h-9 items-center justify-between">
+                  <div className="mb-[8.5px] flex h-9 items-center justify-between">
                     <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
                       DETAILS
                     </span>
@@ -377,18 +377,18 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     {(note.type === "image" || note.type === "capture") && (
                       <>
                         <dl className="flex items-center">
-                          <dt className="w-[70px] text-[12px] text-neutral-500">
+                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                             파일 종류
                           </dt>
-                          <dd className="text-[13px] text-neutral-500">
+                          <dd className="text-[13px] text-neutral-500 leading-none">
                             webp 이미지
                           </dd>
                         </dl>
                         <dl className="flex items-center">
-                          <dt className="w-[70px] text-[12px] text-neutral-500">
+                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                             파일 크기
                           </dt>
-                          <dd className="text-[13px] text-neutral-500">
+                          <dd className="text-[13px] text-neutral-500 leading-none">
                             129,344 bytes
                           </dd>
                         </dl>
@@ -396,18 +396,18 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     )}
 
                     <dl className="flex items-center">
-                      <dt className="w-[70px] text-[12px] text-neutral-500">
+                      <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                         등록일
                       </dt>
-                      <dd className="text-[13px] text-neutral-500">
+                      <dd className="text-[13px] text-neutral-500 leading-none">
                         {new Date(note.created_at).toLocaleDateString("ko-KR")}
                       </dd>
                     </dl>
                     <dl className="flex items-center">
-                      <dt className="w-[70px] text-[12px] text-neutral-500">
+                      <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                         수정일
                       </dt>
-                      <dd className="text-[13px] text-neutral-500">
+                      <dd className="text-[13px] text-neutral-500 leading-none">
                         {new Date(note.updated_at).toLocaleDateString("ko-KR")}
                       </dd>
                     </dl>
