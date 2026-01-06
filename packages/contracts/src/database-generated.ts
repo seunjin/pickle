@@ -123,6 +123,7 @@ export type Database = {
       notes: {
         Row: {
           asset_id: string | null;
+          bookmarked_at: string | null;
           created_at: string;
           data: Json;
           id: string;
@@ -138,6 +139,7 @@ export type Database = {
         };
         Insert: {
           asset_id?: string | null;
+          bookmarked_at?: string | null;
           created_at?: string;
           data?: Json;
           id?: string;
@@ -153,6 +155,7 @@ export type Database = {
         };
         Update: {
           asset_id?: string | null;
+          bookmarked_at?: string | null;
           created_at?: string;
           data?: Json;
           id?: string;

@@ -35,12 +35,6 @@ export const TAG_VARIANTS: Record<
     buttonColor: "text-tag-orange/50",
     paletteColor: "bg-tag-orange/70 border-tag-orange/70",
   },
-  pink: {
-    baseColor: "text-tag-pink",
-    tagColor: "text-tag-pink bg-tag-pink/10 border-tag-pink/20",
-    buttonColor: "text-tag-pink/50",
-    paletteColor: "bg-tag-pink/70 border-tag-pink/70",
-  },
   red: {
     baseColor: "text-tag-red",
     tagColor: "text-tag-red bg-tag-red/10 border-tag-red/20",
@@ -71,12 +65,6 @@ export const TAG_VARIANTS: Record<
     buttonColor: "text-tag-indigo/50",
     paletteColor: "bg-tag-indigo/70 border-tag-indigo/70",
   },
-  violet: {
-    baseColor: "text-tag-violet",
-    tagColor: "text-tag-violet bg-tag-violet/10 border-tag-violet/20",
-    buttonColor: "text-tag-violet/50",
-    paletteColor: "bg-tag-violet/70 border-tag-violet/70",
-  },
   magenta: {
     baseColor: "text-tag-magenta",
     tagColor: "text-tag-magenta bg-tag-magenta/10 border-tag-magenta/20",
@@ -94,17 +82,5 @@ export const TAG_VARIANTS: Record<
     tagColor: "text-tag-emerald bg-tag-emerald/10 border-tag-emerald/20",
     buttonColor: "text-tag-emerald/50",
     paletteColor: "bg-tag-emerald/70 border-tag-emerald/70",
-  },
-  rose: {
-    baseColor: "text-tag-rose",
-    tagColor: "text-tag-rose bg-tag-rose/10 border-tag-rose/20",
-    buttonColor: "text-tag-rose/50",
-    paletteColor: "bg-tag-rose/70 border-tag-rose/70",
-  },
-  brown: {
-    baseColor: "text-tag-brown",
-    tagColor: "text-tag-brown bg-tag-brown/10 border-tag-brown/20",
-    buttonColor: "text-tag-brown/50",
-    paletteColor: "bg-tag-brown/70 border-tag-brown/70",
   },
 };
