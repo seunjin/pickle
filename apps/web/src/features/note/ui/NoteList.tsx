@@ -5,20 +5,25 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { deleteNote as deleteNoteApi } from "../api/deleteNote";
-import { noteKeys, noteQueries } from "../model/noteQueries";
+import { noteQueries } from "../model/noteQueries";
 import { NoteCard } from "./NoteCard";
 
 export function NoteList({
   onlyBookmarked = false,
+  type,
 }: {
   onlyBookmarked?: boolean;
+  type?: NoteWithAsset["type"];
 }) {
   // 1. Fetch Data (Suspense)
-  const queryOption = onlyBookmarked
-    ? noteQueries.bookmarks()
-    : noteQueries.all();
-  const { data: notes } = useSuspenseQuery<NoteWithAsset[]>(queryOption as any);
+  const { data: notes } = useSuspenseQuery(
+    noteQueries.list({
+      filter: {
+        onlyBookmarked,
+        type: type === ("all" as any) ? undefined : type,
+      },
+    }),
+  );
 
   if (notes.length === 0) {
     return (

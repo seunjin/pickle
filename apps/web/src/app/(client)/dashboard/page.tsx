@@ -1,12 +1,10 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { NoteList } from "@/features/note";
-import { getNotes } from "@/features/note/api/getNotes";
-import { noteKeys } from "@/features/note/model/noteQueries";
+import { noteQueries } from "@/features/note/model/noteQueries";
+import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
-import { ContentFilter } from "./ContentFilter";
 
 export const metadata: Metadata = {
   title: "Dashboard | Pickle",
@@ -15,14 +13,12 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const supabase = await createClient();
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: noteKeys.all,
-    queryFn: () => getNotes({ client: supabase }),
-  });
+
+  // 기본 목록 프리페치 (필터 없는 상태)
+  await queryClient.prefetchQuery(noteQueries.list({ client: supabase }));
 
   return (
     <div className="flex-1 overflow-auto p-6">
-      <ContentFilter />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense
           fallback={
@@ -31,7 +27,7 @@ export default async function DashboardPage() {
             </div>
           }
         >
-          <NoteList />
+          <NoteListWithFilter />
         </Suspense>
       </HydrationBoundary>
     </div>

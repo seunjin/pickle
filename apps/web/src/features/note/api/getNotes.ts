@@ -10,6 +10,7 @@ export interface GetNotesParams {
   client?: SupabaseClient<Database>;
   filter?: {
     onlyBookmarked?: boolean;
+    type?: NoteWithAsset["type"];
   };
 }
 
@@ -49,14 +50,20 @@ export const getNotes = async (
 
   // 3. 필터링 및 정렬 적용
   if (filter?.onlyBookmarked) {
-    query = query
-      .not("bookmarked_at", "is", null)
-      .order("bookmarked_at", { ascending: false });
+    query = query.not("bookmarked_at", "is", null);
+  }
+
+  if (filter?.type) {
+    query = query.eq("type", filter.type);
+  }
+
+  if (filter?.onlyBookmarked) {
+    query = query.order("bookmarked_at", { ascending: false });
   } else {
     query = query.order("created_at", { ascending: false });
   }
 
-  const { data: notesData, error: notesError } = await query.limit(20);
+  const { data: notesData, error: notesError } = await query;
 
   if (notesError) {
     throw new Error(notesError.message);

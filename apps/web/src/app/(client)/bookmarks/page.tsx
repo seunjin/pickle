@@ -1,9 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { NoteList } from "@/features/note";
-import { getNotes } from "@/features/note/api/getNotes";
-import { noteKeys } from "@/features/note/model/noteQueries";
+import { noteQueries } from "@/features/note/model/noteQueries";
+import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
 
@@ -16,11 +15,9 @@ export default async function BookmarksPage() {
   const queryClient = getQueryClient();
 
   // Server에서 데이터 Prefetch (Bookmarks 전용)
-  await queryClient.prefetchQuery({
-    queryKey: noteKeys.bookmarks(),
-    queryFn: () =>
-      getNotes({ client: supabase, filter: { onlyBookmarked: true } }),
-  });
+  await queryClient.prefetchQuery(
+    noteQueries.list({ client: supabase, filter: { onlyBookmarked: true } }),
+  );
 
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -32,7 +29,7 @@ export default async function BookmarksPage() {
             </div>
           }
         >
-          <NoteList onlyBookmarked={true} />
+          <NoteListWithFilter onlyBookmarked={true} />
         </Suspense>
       </HydrationBoundary>
     </div>

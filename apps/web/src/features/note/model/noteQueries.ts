@@ -1,21 +1,18 @@
+import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { queryOptions } from "@tanstack/react-query";
-import { getNotes } from "../api/getNotes";
+import { type GetNotesParams, getNotes } from "../api/getNotes";
 
 export const noteKeys = {
   all: ["notes"] as const,
   lists: () => [...noteKeys.all, "list"] as const,
-  bookmarks: () => [...noteKeys.lists(), "bookmarks"] as const,
+  list: (params: GetNotesParams = {}) =>
+    [...noteKeys.lists(), params.filter] as const,
 };
 
 export const noteQueries = {
-  all: () =>
+  list: (params: GetNotesParams = {}) =>
     queryOptions({
-      queryKey: noteKeys.all,
-      queryFn: () => getNotes(),
-    }),
-  bookmarks: () =>
-    queryOptions({
-      queryKey: noteKeys.bookmarks(),
-      queryFn: () => getNotes({ filter: { onlyBookmarked: true } }),
+      queryKey: noteKeys.list(params),
+      queryFn: () => getNotes(params),
     }),
 };

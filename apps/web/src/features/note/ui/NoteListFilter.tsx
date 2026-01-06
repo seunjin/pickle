@@ -6,20 +6,29 @@ import { useState } from "react";
 
 const TYPES = [
   { value: "all", label: "All Types" },
-  { value: "bookmark", label: "Bookmark" },
-  { value: "image", label: "Image" },
   { value: "text", label: "Text" },
+  { value: "image", label: "Image" },
+  { value: "capture", label: "Capture" },
+  { value: "bookmark", label: "Bookmark" },
 ];
 
-export function ContentFilter() {
+export function NoteListFilter({
+  selectedType,
+  onTypeChange,
+  totalCount = 0,
+}: {
+  selectedType: SelectOptionValue;
+  onTypeChange: (value: SelectOptionValue) => void;
+  totalCount?: number;
+}) {
   const [listForm, setListForm] = useState<"card" | "list">("card");
-  const [selectTypes, setSelectTypes] = useState<SelectOptionValue>("all");
+
   return (
     <div className="flex items-center justify-between pb-7.5">
       <div className="flex items-center gap-2">
         <Select
-          value={selectTypes}
-          onValueChange={setSelectTypes}
+          value={selectedType}
+          onValueChange={onTypeChange}
           options={TYPES}
         />
         {/*  노트카드 레이아웃 버튼 */}
@@ -49,7 +58,9 @@ export function ContentFilter() {
         </div>
       </div>
       {/* 총 노트 수 */}
-      <span className="font-medium text-[14px] text-base-muted">총 3개</span>
+      <span className="font-medium text-[14px] text-base-muted">
+        총 {totalCount}개
+      </span>
     </div>
   );
 }
