@@ -7,6 +7,7 @@ export * from "./popover";
 export * from "./resizable";
 export * from "./scroll-area";
 export * from "./select";
+export * from "./skeleton";
 export * from "./spinner";
 export * from "./tag";
 export * from "./tag/TagMaker";

@@ -11,14 +11,13 @@ import { useEffect, useRef, useState } from "react";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 
 /**
- * NOTES 섹션 등을 위한 확장 기능(폴더 이름 변경, 편집 등)이 포함된 메뉴 아이템
+ * 폴더 리스트의 개별 아이템 컴포넌트
+ * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
 export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
   const [open, setOpen] = useState<boolean>(false);
-  /* --- [Rename Logic] --- */
-  const [changeFolderName, setChangeFolderName] = useState<string>(props.label); // 초기값 설정 수정 필요할 수 있음
+  const [changeFolderName, setChangeFolderName] = useState<string>(props.label);
   const [isEditing, setIsEditing] = useState(false);
-  const popupRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const preventFocusRestore = useRef(false);
 
@@ -46,7 +45,7 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
   };
 
   return (
-    <div className="relative">
+    <div className="group/folder relative">
       <SidebarItemBase
         forceFocus={open}
         {...props}
@@ -57,6 +56,10 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
                 variant={"subAction"}
                 icon="ellipsis_16"
                 forceFocus={open}
+                className={cn(
+                  "opacity-0 transition-opacity group-hover/folder:opacity-100",
+                  open && "opacity-100",
+                )}
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -86,7 +89,10 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <button type="button" className="w-full cursor-pointer">
+                <button
+                  type="button"
+                  className="w-full cursor-pointer text-base-danger"
+                >
                   <Icon name="trash_16" />
                   폴더 삭제
                 </button>
@@ -95,42 +101,34 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
           </DropdownMenu>
         }
       />
-
-      {/* 이름바꾸기 모달 (Overlay + Popup) */}
       {isEditing && (
         <>
+          {/* 외부 클릭 감지를 위한 투명 레이어 */}
           <button
             type="button"
-            className="fixed inset-0 z-50 cursor-default bg-transparent"
-            tabIndex={-1}
-            aria-label="Close rename popup"
+            className="fixed inset-0 z-40 cursor-default bg-transparent"
             onClick={(e) => {
               e.stopPropagation();
               handleSaveAndClose();
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === "Escape") {
-                e.stopPropagation();
-                handleSaveAndClose();
-              }
+              if (e.key === "Escape") handleSaveAndClose();
             }}
+            aria-label="닫기"
           />
-
-          <div
-            ref={popupRef}
-            className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg border border-base-border-light bg-neutral-850 px-3 shadow-md"
-          >
-            <Icon name="folder_20" />
+          <div className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg bg-neutral-850 px-3 shadow-md outline outline-base-border-light">
+            <Icon name="folder_20" className="shrink-0 text-neutral-400" />
             <Input
               ref={inputRef}
               autoFocus
-              className="flex-1"
-              type="text"
               size={"mini"}
+              // className="flex-1 border-none bg-transparent p-0 text-sm focus-visible:ring-0"
+              type="text"
               value={changeFolderName}
-              placeholder="새 이름 입력"
+              placeholder="폴더 이름"
               onChange={(e) => setChangeFolderName(e.target.value)}
               onKeyDown={handleKeyDown}
+              onBlur={handleSaveAndClose}
             />
           </div>
         </>
@@ -138,3 +136,6 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
     </div>
   );
 };
+
+// cn 사용을 위한 임포트 추가 (필요시)
+import { cn } from "@pickle/ui/lib/utils";

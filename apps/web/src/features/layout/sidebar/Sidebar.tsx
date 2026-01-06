@@ -1,16 +1,20 @@
 "use client";
 import { Icon } from "@pickle/icons";
-import { ScrollArea, TAG_VARIANTS } from "@pickle/ui";
+import { ScrollArea, Skeleton, TAG_VARIANTS } from "@pickle/ui";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
+import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
+import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 
 export const Sidebar = () => {
   const pathname = usePathname();
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
+  const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
+  const [isNewFolderPending, setIsNewFolderPending] = useState<boolean>(false);
   const { isLoading } = useSessionContext();
 
   if (isLoading) {
@@ -21,6 +25,17 @@ export const Sidebar = () => {
       </nav>
     );
   }
+
+  const handleCreateFolder = (name: string) => {
+    setIsCreatingFolder(false);
+    setIsNewFolderPending(true);
+
+    // TODO: API Call - 실제로는 useMutation의 onSuccess에서 null 처리
+    setTimeout(() => {
+      console.log("Folder created:", name);
+      setIsNewFolderPending(false);
+    }, 2000);
+  };
 
   return (
     <nav className="flex h-full flex-col bg-neutral-900">
@@ -38,7 +53,7 @@ export const Sidebar = () => {
         <div className="px-3">
           {/* 주요 메뉴 */}
           <div className="pb-[30px]">
-            <ul className="flex flex-col gap-1 pb-[30px]">
+            <div className="flex flex-col gap-1 pb-[30px]">
               {/* 인박스 */}
               <SidebarNavItem
                 href="/dashboard"
@@ -55,7 +70,7 @@ export const Sidebar = () => {
                 label="북마크"
                 active={pathname.includes("/bookmarks")}
               />
-            </ul>
+            </div>
 
             {/* FOLDERS 섹션 */}
             <div className="pb-[30px]">
@@ -75,10 +90,21 @@ export const Sidebar = () => {
                 </button>
               </div>
 
-              <ul className="flex flex-col gap-1">
+              <div className="flex min-h-[40px] flex-col gap-1">
                 {/* 폴더 아이템들 */}
                 {foldersFolding && (
                   <>
+                    {/* 새 폴더 생성 입력창 */}
+                    {isCreatingFolder && (
+                      <SidebarFolderInput
+                        onCreate={handleCreateFolder}
+                        onCancel={() => setIsCreatingFolder(false)}
+                      />
+                    )}
+
+                    {/* 생성 중인 폴더 로딩 */}
+                    {isNewFolderPending && <SidebarFolderLoading />}
+
                     <SidebarFolderItem
                       href="/dashboard"
                       icon="folder_20"
@@ -97,18 +123,21 @@ export const Sidebar = () => {
                   </>
                 )}
 
-                {/* 새 노트 버튼 */}
-                <li className="px-3 py-2">
+                {/* 새 폴더 버튼 */}
+                <div className="px-3 py-2">
                   <button
                     type="button"
                     className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground active:text-base-primary"
-                    onClick={() => setFoldersFolding(true)}
+                    onClick={() => {
+                      setFoldersFolding(true);
+                      setIsCreatingFolder(true);
+                    }}
                   >
                     <Icon name="plus_20" className="text-color-[inherit]" />
-                    <span>새 노트 생성하기</span>
+                    <span>새 폴더 생성하기</span>
                   </button>
-                </li>
-              </ul>
+                </div>
+              </div>
             </div>
             {/* TAGS 섹션 */}
             <div>
@@ -129,7 +158,7 @@ export const Sidebar = () => {
                 </button>
               </div>
               {tagsFolding && (
-                <ul>
+                <div>
                   {[
                     {
                       id: 1,
@@ -165,7 +194,7 @@ export const Sidebar = () => {
                     const style =
                       TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
                     return (
-                      <li
+                      <div
                         key={tag.id}
                         className="group flex h-9 cursor-pointer items-center gap-2 rounded-sm px-3 transition-[background-color] hover:bg-base-foreground-background"
                       >
@@ -175,10 +204,10 @@ export const Sidebar = () => {
                             {tag.name}
                           </p>
                         </div>
-                      </li>
+                      </div>
                     );
                   })}
-                </ul>
+                </div>
               )}
             </div>
           </div>
