@@ -9,6 +9,7 @@ import { getNotes } from "@/features/note/api/getNotes";
 import { noteKeys } from "@/features/note/model/noteQueries";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
+import { ContentFilter } from "./ContentFilter";
 import { ToastTest } from "./ToastTest";
 
 export const metadata: Metadata = {
@@ -64,6 +65,9 @@ export default async function DashboardPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
+        <div>
+          <ContentFilter />
+        </div>
         <HydrationBoundary state={dehydrate(queryClient)}>
           <Suspense
             fallback={
