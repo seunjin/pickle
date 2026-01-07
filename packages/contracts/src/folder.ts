@@ -1,8 +1,4 @@
 import { z } from "zod";
-import type { Database } from "./database-generated";
-
-// DB Row Type
-type FolderRow = Database["public"]["Tables"]["folders"]["Row"];
 
 // Zod Schema for Folder
 export const folderSchema = z.object({
