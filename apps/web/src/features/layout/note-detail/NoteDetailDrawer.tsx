@@ -1,9 +1,4 @@
-import type {
-  NoteWithAsset,
-  Tag,
-  TagColor,
-  UpdateNoteInput,
-} from "@pickle/contracts";
+import type { NoteWithAsset, Tag, TagColor } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import {
   ActionButton,

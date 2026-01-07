@@ -71,7 +71,6 @@ const TagMaker = ({
   );
 
   // Props가 변경될 때 로컬 상태 동기화 (패널이 열릴 때만 초기값 설정)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: 패널이 열려있는 동안 외부 변경에 의해 로컬 편집 상태가 덮어씌워지지 않도록 함
   useEffect(() => {
     if (open) {
       setLocalSelectedTagIds(selectedTagIds);
