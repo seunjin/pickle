@@ -10,12 +10,12 @@ const isExtension =
 export const extensionStorage = {
   get: (
     key: string | string[] | null,
-    callback: (items: { [key: string]: any }) => void,
+    callback: (items: Record<string, any>) => void,
   ) => {
     if (isExtension) {
-      chrome.storage.local.get(key, callback);
+      chrome.storage.local.get(key, callback as any);
     } else {
-      const result: { [key: string]: any } = {};
+      const result: Record<string, any> = {};
       if (typeof key === "string") {
         const value = localStorage.getItem(key);
         result[key] = value ? JSON.parse(value) : undefined;
@@ -37,7 +37,7 @@ export const extensionStorage = {
       callback(result);
     }
   },
-  set: (items: { [key: string]: any }, callback?: () => void) => {
+  set: <T = any>(items: Record<string, T>, callback?: () => void) => {
     if (isExtension) {
       chrome.storage.local.set(items, callback || (() => {}));
     } else {
@@ -66,25 +66,27 @@ export const extensionStorage = {
   },
   onChanged: {
     addListener: (
-      callback: (changes: { [key: string]: any }, areaName: string) => void,
+      callback: (changes: Record<string, any>, areaName: string) => void,
     ) => {
       if (isExtension) {
-        chrome.storage.onChanged.addListener(callback);
+        chrome.storage.onChanged.addListener(callback as any);
       } else {
-        const handler = (e: any) => {
+        const handler = (e: Event & { detail?: any }) => {
           callback(e.detail, "local");
         };
-        (callback as any)._handler = handler;
+        (callback as unknown as { _handler: (e: any) => void })._handler =
+          handler;
         window.addEventListener("extension-storage-changed", handler);
       }
     },
     removeListener: (
-      callback: (changes: { [key: string]: any }, areaName: string) => void,
+      callback: (changes: Record<string, any>, areaName: string) => void,
     ) => {
       if (isExtension) {
-        chrome.storage.onChanged.removeListener(callback);
+        chrome.storage.onChanged.removeListener(callback as any);
       } else {
-        const handler = (callback as any)._handler;
+        const handler = (callback as unknown as { _handler?: (e: any) => void })
+          ._handler;
         if (handler) {
           window.removeEventListener("extension-storage-changed", handler);
         }
@@ -137,14 +139,14 @@ export const extensionRuntime = {
     addListener: (
       callback: (
         message: any,
-        sender: any,
+        sender: chrome.runtime.MessageSender,
         sendResponse: (response?: any) => void,
-      ) => void | boolean,
+      ) => undefined | boolean,
     ) => {
       if (isExtension) {
         chrome.runtime.onMessage.addListener(callback);
       } else {
-        const handler = (e: any) => {
+        const handler = (e: Event & { detail?: any }) => {
           const { message, sender } = e.detail;
           callback(message, sender, (response) => {
             if (e.detail.requestId) {
@@ -159,15 +161,19 @@ export const extensionRuntime = {
             }
           });
         };
-        (callback as any)._messageHandler = handler;
+        (
+          callback as unknown as { _messageHandler: (e: any) => void }
+        )._messageHandler = handler;
         window.addEventListener("extension-on-message", handler);
       }
     },
-    removeListener: (callback: any) => {
+    removeListener: (callback: (...args: any[]) => any) => {
       if (isExtension) {
         chrome.runtime.onMessage.removeListener(callback);
       } else {
-        const handler = callback._messageHandler;
+        const handler = (
+          callback as unknown as { _messageHandler?: (e: any) => void }
+        )._messageHandler;
         if (handler) {
           window.removeEventListener("extension-on-message", handler);
         }
@@ -176,11 +182,11 @@ export const extensionRuntime = {
   },
   sendMessage: (message: any, callback?: (response: any) => void) => {
     if (isExtension) {
-      chrome.runtime.sendMessage(message, callback);
+      chrome.runtime.sendMessage(message, callback || (() => {}));
     } else {
       const requestId = Math.random().toString(36).substring(7);
       if (callback) {
-        const responseHandler = (e: any) => {
+        const responseHandler = (e: Event & { detail?: any }) => {
           callback(e.detail);
           window.removeEventListener(
             `extension-message-response-${requestId}`,

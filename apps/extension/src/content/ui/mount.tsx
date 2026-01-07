@@ -63,13 +63,14 @@ export function mountOverlay(tabId: number) {
 extensionRuntime.onMessage.addListener(
   (request: any, _sender: any, sendResponse: (response?: any) => void) => {
     if (request.action === "OPEN_OVERLAY") {
-      // Background에서 tabId를 함께 보내줘야 함
       if (request.tabId) {
         mountOverlay(request.tabId);
       } else {
         console.error("Tab ID missing in OPEN_OVERLAY request");
       }
       sendResponse({ status: "opened" });
+      return true;
     }
+    return undefined;
   },
 );
