@@ -13,6 +13,7 @@
     "@pickle/contracts": "workspace:^",
     "@pickle/ui": "workspace:^",
     "@supabase/supabase-js": "^2.87.1",
+    "motion": "^12.23.26",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.70.0"

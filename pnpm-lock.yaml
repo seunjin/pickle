@@ -38,6 +38,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.87.1
         version: 2.87.1
+      motion:
+        specifier: ^12.23.26
+        version: 12.23.26(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react:
         specifier: 19.2.3
         version: 19.2.3

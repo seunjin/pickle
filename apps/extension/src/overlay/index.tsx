@@ -28,7 +28,6 @@ createRoot(root).render(
         }}
         tabId={tabId}
       />
-      <Toaster />
     </DialogProvider>
   </StrictMode>,
 );

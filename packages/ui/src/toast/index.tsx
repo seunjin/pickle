@@ -24,6 +24,11 @@ function createToast(kind: ToastKind, props: ToastProps) {
     {
       id: manualId,
       duration: props.durationMs,
+      position: props.position,
+      className: props.className,
+      style: props.style,
+      onDismiss: props.onDismiss,
+      onAutoClose: props.onAutoClose,
     },
   );
 }
@@ -57,6 +62,11 @@ export const toast = {
       {
         id,
         duration: patch.durationMs,
+        position: patch.position,
+        className: patch.className,
+        style: patch.style,
+        onDismiss: patch.onDismiss,
+        onAutoClose: patch.onAutoClose,
       },
     );
   },
@@ -126,5 +136,6 @@ export function useToast() {
   return toast;
 }
 
+export { ToastCard, type ToastCardProps } from "./ToastCard";
 export { Toaster } from "./Toaster";
 export type * from "./types";

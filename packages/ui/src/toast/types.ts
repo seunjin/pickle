@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 export type ToastKind = "info" | "success" | "error" | "loading";
 
 export type ToastState = "entering" | "visible" | "leaving";
@@ -14,6 +16,17 @@ export type ToastOptions = {
   action?: ToastAction;
   cancel?: ToastAction;
   dedupeKey?: string;
+  position?:
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | "top-center"
+    | "bottom-center";
+  className?: string;
+  style?: CSSProperties;
+  onDismiss?: (toast: any) => void;
+  onAutoClose?: (toast: any) => void;
 };
 
 export type ToastProps = {

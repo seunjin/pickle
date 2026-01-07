@@ -14,6 +14,7 @@ import type { ToastKind, ToastProps } from "./types";
 export interface ToastCardProps extends ToastProps {
   id: string | number;
   kind: ToastKind;
+  onClose?: () => void;
 }
 
 export function ToastCard({
@@ -24,13 +25,21 @@ export function ToastCard({
   action,
   cancel,
   dismissible = true,
+  className,
+  style,
+  onClose,
 }: ToastCardProps) {
   const handleClose = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    sonnerToast.dismiss(id);
+
+    if (onClose) {
+      onClose();
+    } else {
+      sonnerToast.dismiss(id);
+    }
   };
 
   const kindStyles: Record<ToastKind, string> = {
@@ -50,7 +59,10 @@ export function ToastCard({
   };
 
   return (
-    <div className={`pickle-toast-card ${kindStyles[kind]}`}>
+    <div
+      className={`pickle-toast-card ${kindStyles[kind]} ${className || ""}`}
+      style={style}
+    >
       <div className="pickle-toast-content">
         <h4 className="pickle-toast-title">
           {kind === "loading" ? (
@@ -96,11 +108,9 @@ export function ToastCard({
         )}
       </div>
       {dismissible && (
-        <ActionButton
-          icon="delete_16"
-          onClick={handleClose}
-          aria-label="Close"
-        />
+        <button type="button" onClick={handleClose} aria-label="Close">
+          <Icon name="delete_16" />
+        </button>
       )}
     </div>
   );

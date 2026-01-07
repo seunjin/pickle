@@ -3,11 +3,13 @@ import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
-import { Confirm, Spinner, toast, useDialog } from "@pickle/ui";
+import { Confirm, Spinner, type ToastKind, toast, useDialog } from "@pickle/ui";
 import { saveNote } from "@shared/api/note";
+import { OverlayToast } from "@shared/components/OverlayToast";
 import { extensionStorage } from "@shared/lib/extension-api";
 import { getNoteKey } from "@shared/storage";
 import type { NoteData, ViewType } from "@shared/types";
+import { AnimatePresence } from "motion/react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 /**
@@ -26,6 +28,11 @@ export default function OverlayApp({
 }) {
   const [view, setView] = useState<ViewType>("text");
   const [note, setNote] = useState<NoteData>({});
+  const [toastState, setToastState] = useState<{
+    title: string;
+    kind: ToastKind;
+    durationMs?: number;
+  } | null>(null);
   const dialog = useDialog();
 
   // Storage Key: Tab ID 기반으로 분리
@@ -35,7 +42,7 @@ export default function OverlayApp({
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // 0. Handle Auth Errors via Confirm Dialog
+  // 0. Handle Errors (Auth via Dialog, others via Toast)
   useEffect(() => {
     if (!errorMessage) return;
 
@@ -59,6 +66,13 @@ export default function OverlayApp({
           onCancel={() => setErrorMessage(null)}
         />
       ));
+    } else {
+      setToastState({
+        title: errorMessage,
+        kind: "error",
+        durationMs: 4000,
+      });
+      setErrorMessage(null);
     }
   }, [errorMessage, dialog]);
 
@@ -108,7 +122,11 @@ export default function OverlayApp({
         console.log("Session recovered! Clearing error...");
         setErrorMessage(null);
         dialog.closeAll(); // Close any login-related dialogs
-        toast.success({ title: "로그인되었습니다. 이제 저장할 수 있습니다." });
+        setToastState({
+          title: "로그인이 완료되었습니다.",
+          kind: "success",
+          durationMs: 4000,
+        });
       }
     };
     extensionStorage.onChanged.addListener(handleSessionRecovery);
@@ -219,7 +237,7 @@ export default function OverlayApp({
   };
 
   return (
-    <div className="h-full">
+    <div className="relative h-full overflow-hidden">
       {view === "text" && (
         <TextEditor
           note={note}
@@ -253,8 +271,14 @@ export default function OverlayApp({
           onSave={handleSave}
         />
       )}
+      {/* Local Overlay Toast */}
+      <AnimatePresence>
+        {toastState && (
+          <OverlayToast {...toastState} onClose={() => setToastState(null)} />
+        )}
+      </AnimatePresence>
 
-      {/* Loading & Error Overlay */}
+      {/* Loading Overlay */}
       {isSaving && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-base-dimed">
           <div className="flex flex-col items-center gap-1.5">
@@ -265,26 +289,6 @@ export default function OverlayApp({
           </div>
         </div>
       )}
-
-      {errorMessage &&
-        !(
-          errorMessage.includes("Unauthorized") ||
-          errorMessage.includes("만료") ||
-          errorMessage.includes("No Workspace")
-        ) && (
-          <div className="slide-in-from-bottom-2 fade-in absolute right-4 bottom-4 left-4 z-50 flex flex-col gap-2 rounded-lg border border-red-100 bg-red-50 p-3 text-sm shadow-lg">
-            <div className="flex items-center justify-between text-red-600">
-              <span>{errorMessage}</span>
-              <button
-                type="button"
-                onClick={() => setErrorMessage(null)}
-                className="ml-2 px-2 font-bold text-red-400 hover:text-red-700"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
     </div>
   );
 }
