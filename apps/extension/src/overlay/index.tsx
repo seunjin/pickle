@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../index.css"; // Global Tailwind styles are Safe here!
-import { DialogProvider, Toaster } from "@pickle/ui";
+import { DialogProvider } from "@pickle/ui";
 import OverlayApp from "../content/ui/OverlayApp";
 
 const root = document.getElementById("root");

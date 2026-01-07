@@ -1,4 +1,3 @@
-import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { queryOptions } from "@tanstack/react-query";
 import { type GetNotesParams, getNotes } from "../api/getNotes";
 
@@ -14,5 +13,6 @@ export const noteQueries = {
     queryOptions({
       queryKey: noteKeys.list(params),
       queryFn: () => getNotes(params),
+      staleTime: 0,
     }),
 };

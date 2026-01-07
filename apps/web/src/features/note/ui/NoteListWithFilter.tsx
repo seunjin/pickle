@@ -6,6 +6,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { noteQueries } from "../model/noteQueries";
+import { useSyncNoteList } from "../model/useSyncNoteList";
 import { NoteList } from "./NoteList";
 import { NoteListFilter } from "./NoteListFilter";
 
@@ -22,6 +23,9 @@ export function NoteListWithFilter({
 }: NoteListWithFilterProps) {
   const client = createClient();
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
+
+  // 실시간 동기화 구독 시작 (BroadcastChannel)
+  useSyncNoteList();
 
   // 1. Fetch "Context All" Data (Suspense)
   // 현재 폴더/태그 상태의 모든 노트를 가져옴 (타입 필터 제외)

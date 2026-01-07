@@ -1,7 +1,7 @@
 "use client";
 import { Icon, type IconName } from "@pickle/icons";
 import type * as React from "react";
-import { ActionButton } from "../button";
+
 import { Spinner } from "../spinner";
 /**
  * [중요] sonner를 직접 임포트하지 않고 index.tsx의 인스턴스를 사용합니다.

@@ -3,7 +3,7 @@ import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
-import { Confirm, Spinner, type ToastKind, toast, useDialog } from "@pickle/ui";
+import { Confirm, Spinner, type ToastKind, useDialog } from "@pickle/ui";
 import { saveNote } from "@shared/api/note";
 import { OverlayToast } from "@shared/components/OverlayToast";
 import { extensionStorage } from "@shared/lib/extension-api";
@@ -216,6 +216,10 @@ export default function OverlayApp({
       await saveNote(input);
 
       // Success
+      new BroadcastChannel("pickle_sync").postMessage({
+        type: "PICKLE_NOTE_SAVED",
+      });
+
       onClose();
       // Optional: Send success message to background to show notification?
     } catch (e: unknown) {

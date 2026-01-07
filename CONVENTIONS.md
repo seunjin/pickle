@@ -172,3 +172,14 @@ export const ExampleComponent = ({ title }: Props) => {
 - **예시**:
   - `api/getNotes.ts`: `supabase.from('notes').select(...)` (순수 데이터 로직)
   - `model/useNote.ts`: `useQuery({ queryFn: getNotes })` (상태 관리 로직)
+
+## 5. 데이터 동기화 컨벤션 (Data Sync Conventions)
+
+### 5.1 크로스 탭 실시간 동기화 (BroadcastChannel)
+익스텐션과 웹 앱, 또는 웹 앱의 여러 탭 간의 실시간 데이터 일관성을 위해 `BroadcastChannel`을 사용합니다.
+
+1. **채널 이름**: `pickle_sync`로 통일합니다.
+2. **이벤트 타입**: `type: "PICKLE_NOTE_SAVED"` 등 대문자 스네이크 케이스를 사용합니다.
+3. **동작**: 익스텐션 또는 특정 탭에서 데이터 변경(CUD) 발생 시 신호를 전송하고, 수신 측에서는 React Query의 `invalidateQueries`를 통해 데이터를 최신화합니다.
+4. **대안 (StaleTime 0)**: 탭이 꺼져있거나 신호를 놓친 경우를 대비하여, 중요한 목록 쿼리는 `staleTime: 0`을 설정해 윈도우 포커스 시점에 항상 리프레시되도록 보장합니다.
+

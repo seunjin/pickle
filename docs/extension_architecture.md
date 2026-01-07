@@ -37,3 +37,16 @@
 3. **메타데이터 추출**: `GET_METADATA` 메시지를 Content Script로 전송하여 현재 페이지의 정보를 긁어옵니다. (기존에는 캡처 시 URL만 저장되는 문제가 있었으나 수정됨)
 4. **통합 저장**: 이미지 정보(`data`)와 페이지 정보(`pageMeta`)를 합쳐 `notes` 테이블에 저장합니다.
 
+
+## 4. 데이터 실시간 동기화 (Data Sync)
+익스텐션에서 저장한 데이터가 이미 열려 있는 웹 앱 탭에 즉시 반영되도록 `BroadcastChannel` 기반의 동기화 시스템을 사용합니다.
+
+### 동작 흐름
+1. **신호 발송 (`OverlayApp.tsx`)**: 데이터 저장 성공 시 `pickle_sync` 채널로 메시지를 보냅니다.
+   ```typescript
+   new BroadcastChannel("pickle_sync").postMessage({ type: "PICKLE_NOTE_SAVED" });
+   ```
+2. **신호 수신 (`useSyncNoteList.ts`)**: 웹 앱의 활성화된 모든 탭이 메시지를 수신합니다.
+3. **데이터 갱신**: 메시지 수신 시 React Query의 관련 키를 무효화(`invalidateQueries`)하여 서버에서 최신 데이터를 즉시 가져옵니다.
+
+> **장점**: 동일 브라우저 내에서는 Supabase Realtime 없이도 "앱 같은" 실시간 UX를 제공하며 서버 비용을 절감합니다. 
