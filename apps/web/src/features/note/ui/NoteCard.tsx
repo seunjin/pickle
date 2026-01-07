@@ -73,15 +73,10 @@ export function NoteCard({ note }: NoteCardProps) {
             {note.title || "Untitled"}
           </div>
 
-          <a
-            href={note.meta?.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[13px] text-neutral-650 underline-offset-3 transition-[color,underline] hover:text-neutral-600 hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="truncate"> {note.meta?.url}</p>
-          </a>
+          <p className="truncate text-[13px] text-neutral-650">
+            {" "}
+            {note.meta?.url}
+          </p>
         </div>
 
         {/* footer */}

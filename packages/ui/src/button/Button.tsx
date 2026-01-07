@@ -9,19 +9,24 @@ import { Spinner } from "../spinner";
 // Button Variants (action 제외)
 // ============================================================
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         primary: cn(
-          "bg-base-primary text-neutral-950",
+          "bg-base-primary font-semibold text-neutral-950",
           "hover:bg-green-200",
           "disabled:bg-green-300/50 disabled:text-base-disabled",
         ),
         secondary: cn(
-          "bg-neutral-700 text-neutral-400",
+          "bg-neutral-700 font-medium text-neutral-400",
           "hover:bg-neutral-650",
           "disabled:bg-neutral-700 disabled:text-neutral-600",
+        ),
+        secondary_line: cn(
+          "border border-neutral-700 bg-neutral-800 font-medium text-neutral-400",
+          "hover:border-neutral-650",
+          "disabled:bg-neutral-800 disabled:text-neutral-600",
         ),
         icon: cn(
           "!px-0 aspect-square",

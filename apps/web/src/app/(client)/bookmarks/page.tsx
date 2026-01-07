@@ -20,7 +20,7 @@ export default async function BookmarksPage() {
   );
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="h-full p-10">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense
           fallback={

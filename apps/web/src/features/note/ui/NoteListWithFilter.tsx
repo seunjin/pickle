@@ -47,7 +47,7 @@ export function NoteListWithFilter({
       : allNotes.filter((note: NoteWithAsset) => note.type === selectedType);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <NoteListFilter
         selectedType={selectedType}
         onTypeChange={setSelectedType}
