@@ -38,7 +38,9 @@ export const SidebarItemBase = ({
           "flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm transition-colors",
         )}
       >
-        <div className={cn("flex min-w-0 flex-1 items-center gap-2")}>
+        <div
+          className={cn("grid flex-1 grid-cols-[auto_1fr] items-center gap-2")}
+        >
           <Icon
             name={icon}
             className={cn(

@@ -1,49 +1,23 @@
-"use client";
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { createClient } from "@/shared/lib/supabase/client";
-import { noteQueries } from "../model/noteQueries";
 import { NoteCard } from "./NoteCard";
 
 export function NoteList({
-  onlyBookmarked = false,
-  folderId,
-  type,
+  notes,
+  emptyMessage = "아직 노트가 없습니다",
+  emptyDescription = "익스텐션에서 노트를 생성해 보세요!",
+  emptyIcon = "📝",
 }: {
-  onlyBookmarked?: boolean;
-  folderId?: string | null;
-  type?: NoteWithAsset["type"];
+  notes: NoteWithAsset[];
+  emptyMessage?: string;
+  emptyDescription?: string;
+  emptyIcon?: string;
 }) {
-  const client = createClient();
-
-  // 1. Fetch Data (Suspense)
-  const { data: notes } = useSuspenseQuery(
-    noteQueries.list({
-      client,
-      filter: {
-        onlyBookmarked,
-        folderId,
-        type: type === ("all" as any) ? undefined : type,
-      },
-    }),
-  );
-
   if (notes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="mb-4 text-4xl">{onlyBookmarked ? "⭐️" : "📝"}</div>
-        <p className="font-medium text-base-foreground">
-          {onlyBookmarked ? "북마크된 노트가 없습니다" : "아직 노트가 없습니다"}
-        </p>
-        <p className="mt-1 text-base-muted text-sm">
-          {onlyBookmarked
-            ? "중요한 노트를 북마크해 보세요!"
-            : "익스텐션에서 노트를 생성해 보세요!"}
-        </p>
+        <div className="mb-4 text-4xl">{emptyIcon}</div>
+        <p className="font-medium text-base-foreground">{emptyMessage}</p>
+        <p className="mt-1 text-base-muted text-sm">{emptyDescription}</p>
       </div>
     );
   }

@@ -8,11 +8,12 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
 import { folderQueries, useCreateFolder } from "@/features/folder";
+import { noteQueries } from "@/features/note/model/noteQueries";
+import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
 import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
-import { SidebarItemBase } from "./components/SidebarItemBase";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 
 export const Sidebar = () => {
@@ -29,6 +30,14 @@ export const Sidebar = () => {
 
   // 폴더 생성 mutation
   const createFolderMutation = useCreateFolder(workspace?.id ?? "");
+
+  // 태그 목록 조회
+  const { data: tags = [] } = useSuspenseQuery(tagQueries.list());
+
+  // Inbox 노트 목록 조회 (뱃지용)
+  const { data: inboxNotes = [] } = useSuspenseQuery(
+    noteQueries.list({ filter: { folderId: null } }),
+  );
 
   const handleCreateFolder = (name: string) => {
     setIsCreatingFolder(false);
@@ -56,7 +65,7 @@ export const Sidebar = () => {
       </div>
 
       {/* 메뉴 섹션 */}
-      <ScrollArea className="flex flex-1 flex-col overflow-y-auto">
+      <ScrollArea className="">
         <div className="px-3">
           {/* 주요 메뉴 */}
           <div className="pb-[30px]">
@@ -66,9 +75,11 @@ export const Sidebar = () => {
                 href="/dashboard"
                 icon="archive_20"
                 label="Inbox"
-                badge={3}
+                badge={inboxNotes.length}
                 active={
-                  pathname === "/dashboard" && !searchParams.get("folderId")
+                  pathname === "/dashboard" &&
+                  !searchParams.get("folderId") &&
+                  !searchParams.get("tagId")
                 }
               />
 
@@ -166,53 +177,29 @@ export const Sidebar = () => {
                 </button>
               </div>
               {tagsFolding && (
-                <div>
-                  {[
-                    {
-                      id: 1,
-                      style: "purple",
-                      name: "design",
-                    },
-                    {
-                      id: 2,
-                      style: "emerald",
-                      name: "dev",
-                    },
-                    {
-                      id: 3,
-                      style: "green",
-                      name: "ideation",
-                    },
-                    {
-                      id: 4,
-                      style: "orange",
-                      name: "planning",
-                    },
-                    {
-                      id: 5,
-                      style: "yellow",
-                      name: "inspiration",
-                    },
-                    {
-                      id: 6,
-                      style: "blue",
-                      name: "strategy",
-                    },
-                  ].map((tag) => {
+                <div className="flex flex-col gap-1">
+                  {tags.map((tag) => {
                     const style =
                       TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
+                    const active =
+                      pathname === "/dashboard" &&
+                      searchParams.get("tagId") === tag.id;
                     return (
-                      <div
+                      <Link
                         key={tag.id}
-                        className="group flex h-9 cursor-pointer items-center gap-2 rounded-sm px-3 transition-[background-color] hover:bg-base-foreground-background"
+                        href={`/dashboard?tagId=${tag.id}`}
+                        className={cn(
+                          "group grid h-9 cursor-pointer grid-cols-[auto_1fr] items-center gap-2 rounded-sm px-3 text-muted-foreground transition-[color,background-color] hover:bg-base-foreground-background hover:text-base-foreground",
+                          active &&
+                            "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
+                        )}
                       >
-                        <Icon name="tag_20" className={style.baseColor} />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-muted-foreground transition-colors group-hover:text-base-foreground">
-                            {tag.name}
-                          </p>
-                        </div>
-                      </div>
+                        <Icon
+                          name="tag_20"
+                          className={cn(style.baseColor, "shrink-0")}
+                        />
+                        <p className="truncate">{tag.name}</p>
+                      </Link>
                     );
                   })}
                 </div>

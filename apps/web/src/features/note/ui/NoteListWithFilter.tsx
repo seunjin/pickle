@@ -2,7 +2,7 @@
 
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import type { SelectOptionValue } from "@pickle/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { noteQueries } from "../model/noteQueries";
@@ -21,30 +21,40 @@ export function NoteListWithFilter({
   const client = createClient();
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
 
-  const filter = {
-    onlyBookmarked,
-    folderId, // ✅ 폴더 ID 필터
-    type:
-      selectedType === "all"
-        ? undefined
-        : (selectedType as NoteWithAsset["type"]),
-  };
+  // 1. Fetch "Context All" Data (Suspense)
+  // 현재 폴더/북마크 상태의 모든 노트를 한 번에 가져옴 (타입 필터 없이)
+  const { data: allNotes = [] } = useSuspenseQuery(
+    noteQueries.list({
+      client,
+      filter: { onlyBookmarked, folderId },
+    }),
+  );
 
-  // 1. Fetch Data (Client Side for counting and filtering)
-  // Suspense를 사용하면 부모에서 data에 접근하기 어려우므로 useQuery 사용
-  const { data: notes = [] } = useQuery(noteQueries.list({ client, filter }));
+  // 2. Client-side Filtering
+  const filteredNotes =
+    selectedType === "all"
+      ? allNotes
+      : allNotes.filter((note: NoteWithAsset) => note.type === selectedType);
 
   return (
     <div className="flex flex-col gap-6">
       <NoteListFilter
         selectedType={selectedType}
         onTypeChange={setSelectedType}
-        totalCount={notes.length}
+        totalCount={allNotes.length}
+        filteredCount={filteredNotes.length}
       />
       <NoteList
-        onlyBookmarked={onlyBookmarked}
-        folderId={folderId}
-        type={filter.type}
+        notes={filteredNotes}
+        emptyIcon={onlyBookmarked ? "⭐️" : "📝"}
+        emptyMessage={
+          onlyBookmarked ? "북마크된 노트가 없습니다" : "아직 노트가 없습니다"
+        }
+        emptyDescription={
+          onlyBookmarked
+            ? "중요한 노트를 북마크해 보세요!"
+            : "익스텐션에서 노트를 생성해 보세요!"
+        }
       />
     </div>
   );

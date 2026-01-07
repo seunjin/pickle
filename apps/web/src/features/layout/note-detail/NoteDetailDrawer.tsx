@@ -31,9 +31,9 @@ import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutati
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
 import { createTag as createTagApi } from "@/features/tag/api/createTag";
 import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
-import { getTags } from "@/features/tag/api/getTags";
 import { setNoteTags } from "@/features/tag/api/noteTags";
 import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
+import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
 
 interface NoteDetailDrawerProps {
@@ -144,18 +144,16 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   };
 
   // 2. 전체 태그 목록 조회 (Workspace 기준)
-  const { data: allTags = [] } = useQuery({
-    queryKey: ["tags", note.workspace_id],
-    queryFn: () => getTags(note.workspace_id),
-    enabled: !!note.workspace_id,
-  });
+  const { data: allTags = [] } = useQuery(tagQueries.list());
 
   // 3. 태그 조작 Mutations
   const createTagMutation = useMutation({
     mutationFn: (input: { name: string; style: TagColor }) =>
       createTagApi({ ...input, workspace_id: note.workspace_id }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
+      queryClient.invalidateQueries({
+        queryKey: tagQueries.list().queryKey,
+      });
     },
   });
 
@@ -168,7 +166,9 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
       updates: Partial<Tag>;
     }) => updateTagApi(tagId, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
+      queryClient.invalidateQueries({
+        queryKey: tagQueries.list().queryKey,
+      });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["notes", note.id] });
     },
@@ -177,7 +177,9 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const deleteTagMutation = useMutation({
     mutationFn: (tagId: string) => deleteTagApi(tagId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tags", note.workspace_id] });
+      queryClient.invalidateQueries({
+        queryKey: tagQueries.list().queryKey,
+      });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["notes", note.id] });
     },

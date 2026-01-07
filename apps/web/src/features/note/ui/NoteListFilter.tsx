@@ -4,7 +4,7 @@ import { Select, type SelectOptionValue } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useState } from "react";
 
-const TYPES = [
+export const NOTE_FILTER_TYPES = [
   { value: "all", label: "All Types" },
   { value: "text", label: "Text" },
   { value: "image", label: "Image" },
@@ -16,12 +16,18 @@ export function NoteListFilter({
   selectedType,
   onTypeChange,
   totalCount = 0,
+  filteredCount = 0,
 }: {
   selectedType: SelectOptionValue;
   onTypeChange: (value: SelectOptionValue) => void;
   totalCount?: number;
+  filteredCount?: number;
 }) {
   const [listForm, setListForm] = useState<"card" | "list">("card");
+
+  const selectedLabel = NOTE_FILTER_TYPES.find(
+    (t) => t.value === selectedType,
+  )?.label;
 
   return (
     <div className="flex items-center justify-between pb-7.5">
@@ -29,7 +35,7 @@ export function NoteListFilter({
         <Select
           value={selectedType}
           onValueChange={onTypeChange}
-          options={TYPES}
+          options={NOTE_FILTER_TYPES}
         />
         {/*  노트카드 레이아웃 버튼 */}
         <div className="flex h-9 items-center rounded-lg border border-base-border-light px-[2px]">
@@ -57,10 +63,17 @@ export function NoteListFilter({
           </button>
         </div>
       </div>
-      {/* 총 노트 수 */}
-      <span className="font-medium text-[14px] text-base-muted">
-        총 {totalCount}개
-      </span>
+      <div>
+        {/* 총 노트 수 및 필터링 상세 */}
+        <span className="font-medium text-[14px] text-base-muted">
+          총 {totalCount}개
+          {selectedType !== "all" && (
+            <span className="ml-1 text-base-muted-foreground">
+              ({selectedLabel} {filteredCount}개)
+            </span>
+          )}
+        </span>
+      </div>
     </div>
   );
 }
