@@ -70,3 +70,19 @@ import type { StoredNoteData } from "@pickle/contracts/src/note";
 let storedData: StoredNoteData = { ...note.data };
 ```
 이를 통해 불필요한 필드나 타입 불일치로 인한 DB 에러를 사전에 방지합니다.
+
+## 5. 세션 유지 기간 및 갱신 정책 (Session Lifetime)
+
+### 5.1. 현재 정책 (L1: Access Token Only)
+현재 익스텐션은 보안과 구현 단순화를 위해 **Access Token 전용 방식**을 사용합니다.
+- **유효 기간**: 약 1시간 (Supabase 기본 JWT 설정에 따름).
+- **만료 시 현상**: API 호출 시 `JWT expired` 에러가 발생하며, 익스텐션 UI가 자동으로 "계정 연결" 모드로 전환됩니다.
+- **갱신 방법**: 유저가 "계정 연결" 클릭 시, 웹 앱의 활성 세션을 다시 긁어오는 브릿지 과정을 거칩니다 (브라우저 로그인 유지 시 1~2초 소요).
+
+### 5.2. 향후 개선 로직 (L2: Refresh Token Auto-Refresh)
+사용자 이탈률을 더 낮추기 위해 아래와 같은 자동 갱신 로직 도입을 검토 중입니다.
+1. **토큰 확장**: `access_token`과 함께 `refresh_token`을 익스텐션 스토리지에 저장.
+2. **백그라운드 갱신**: Service Worker에서 토큰 만료를 감지하거나 주기적으로 `supabase.auth.refreshSession()`을 호출.
+3. **결과**: 유저의 명시적 클릭 없이도 30일 이상의 장기 로그인 상태 유지 가능.
+
+> **참고**: 현재의 웹 브릿지 방식은 개발 비용이 저렴하고 보안상 안전(익스텐션에 장기 토큰을 저장하지 않음) 하나, 빈번한 재연결 클릭이 불편하다는 피드백이 있을 경우 L2 방식으로 업그레이드할 예정입니다.
