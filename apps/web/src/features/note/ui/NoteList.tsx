@@ -11,9 +11,11 @@ import { NoteCard } from "./NoteCard";
 
 export function NoteList({
   onlyBookmarked = false,
+  folderId,
   type,
 }: {
   onlyBookmarked?: boolean;
+  folderId?: string | null;
   type?: NoteWithAsset["type"];
 }) {
   const client = createClient();
@@ -24,6 +26,7 @@ export function NoteList({
       client,
       filter: {
         onlyBookmarked,
+        folderId,
         type: type === ("all" as any) ? undefined : type,
       },
     }),

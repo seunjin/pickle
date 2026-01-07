@@ -116,7 +116,7 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
             }}
             aria-label="닫기"
           />
-          <div className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg bg-neutral-850 px-3 shadow-md outline outline-base-border-light">
+          <div className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg bg-neutral-850 px-3 shadow-standard outline outline-base-border-light">
             <Icon name="folder_20" className="shrink-0 text-neutral-400" />
             <Input
               ref={inputRef}

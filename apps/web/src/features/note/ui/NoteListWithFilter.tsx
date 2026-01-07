@@ -11,16 +11,19 @@ import { NoteListFilter } from "./NoteListFilter";
 
 interface NoteListWithFilterProps {
   onlyBookmarked?: boolean;
+  folderId?: string | null; // ✅ 폴더 필터 추가
 }
 
 export function NoteListWithFilter({
   onlyBookmarked = false,
+  folderId,
 }: NoteListWithFilterProps) {
   const client = createClient();
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
 
   const filter = {
     onlyBookmarked,
+    folderId, // ✅ 폴더 ID 필터
     type:
       selectedType === "all"
         ? undefined
@@ -38,7 +41,11 @@ export function NoteListWithFilter({
         onTypeChange={setSelectedType}
         totalCount={notes.length}
       />
-      <NoteList onlyBookmarked={onlyBookmarked} type={filter.type} />
+      <NoteList
+        onlyBookmarked={onlyBookmarked}
+        folderId={folderId}
+        type={filter.type}
+      />
     </div>
   );
 }

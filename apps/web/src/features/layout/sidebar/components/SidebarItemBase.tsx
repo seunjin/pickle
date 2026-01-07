@@ -42,17 +42,22 @@ export const SidebarItemBase = ({
           <Icon
             name={icon}
             className={cn(
-              "w-5 shrink-0 transition-colors",
+              "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
               active && "text-base-primary group-hover:text-base-primary",
-              "group-hover:text-neutral-300",
-              forceFocus && "text-neutral-300",
+              !active && forceFocus && "text-neutral-300",
+              active &&
+                forceFocus &&
+                "text-base-primary group-hover:text-base-primary",
             )}
           />
           <span
             className={cn(
               "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-foreground",
               active && "text-base-primary group-hover:text-base-primary",
-              forceFocus && "text-base-foreground",
+              !active && forceFocus && "text-base-foreground",
+              active &&
+                forceFocus &&
+                "text-base-primary group-hover:text-base-primary",
             )}
           >
             {label}

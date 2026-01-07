@@ -1,8 +1,10 @@
 "use client";
 import { Icon } from "@pickle/icons";
 import { ScrollArea, TAG_VARIANTS } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
 import { folderQueries, useCreateFolder } from "@/features/folder";
@@ -10,10 +12,12 @@ import { createClient } from "@/shared/lib/supabase/client";
 import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
+import { SidebarItemBase } from "./components/SidebarItemBase";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
@@ -63,7 +67,9 @@ export const Sidebar = () => {
                 icon="archive_20"
                 label="Inbox"
                 badge={3}
-                active={pathname.includes("/dashboard")}
+                active={
+                  pathname === "/dashboard" && !searchParams.get("folderId")
+                }
               />
 
               {/* 북마크 */}
@@ -108,15 +114,20 @@ export const Sidebar = () => {
                     {/* 생성 중인 폴더 로딩 */}
                     {createFolderMutation.isPending && <SidebarFolderLoading />}
 
-                    {/* 실제 폴더 목록 */}
-                    {folders.map((folder) => (
-                      <SidebarFolderItem
-                        key={folder.id}
-                        href="/dashboard"
-                        icon="folder_20"
-                        label={folder.name}
-                      />
-                    ))}
+                    <div className="flex flex-col gap-1">
+                      {folders.map((folder) => (
+                        <SidebarFolderItem
+                          key={folder.id}
+                          href={`/dashboard?folderId=${folder.id}`}
+                          icon="folder_20"
+                          label={folder.name}
+                          active={
+                            pathname === "/dashboard" &&
+                            searchParams.get("folderId") === folder.id
+                          }
+                        />
+                      ))}
+                    </div>
                   </>
                 )}
 
@@ -124,7 +135,7 @@ export const Sidebar = () => {
                 <div className="px-3 py-2">
                   <button
                     type="button"
-                    className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground active:text-base-primary"
+                    className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground"
                     onClick={() => {
                       setFoldersFolding(true);
                       setIsCreatingFolder(true);

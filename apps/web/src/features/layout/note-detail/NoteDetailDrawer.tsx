@@ -15,9 +15,15 @@ import {
   useDialogController,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { type HTMLAttributes, useState } from "react";
+import { folderQueries } from "@/features/folder";
 import { getNote } from "@/features/note/api/getNote";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
@@ -26,6 +32,7 @@ import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
 import { getTags } from "@/features/tag/api/getTags";
 import { setNoteTags } from "@/features/tag/api/noteTags";
 import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
+import { createClient } from "@/shared/lib/supabase/client";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
@@ -62,11 +69,24 @@ const type_per_icon: Record<
 export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
   const queryClient = useQueryClient();
+  const client = createClient();
 
   const { mutate: updateNote } = useUpdateNoteMutation();
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
   const [isMove, setIsMove] = useState<boolean>(false);
   const [noteData, setNoteData] = useState<NoteWithAsset>(note);
+
+  // ✅ Sidebar prefetch 재사용 (추가 API 호출 없음!)
+  const { data: folders = [] } = useSuspenseQuery(folderQueries.list(client));
+
+  // 노트를 폴더로 이동
+  const handleMoveToFolder = async (folderId: string | null) => {
+    updateNote({
+      noteId: note.id,
+      payload: { folder_id: folderId },
+    });
+    setIsMove(false);
+  };
 
   // 1. 개별 노트 정보 조회 (실시간 동기화용)
   const { data: currentNote = note } = useQuery({
@@ -174,35 +194,27 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                 >
                   <ScrollArea className="h-auto max-h-[148px] *:data-radix-scroll-area-viewport:max-h-[148px]">
                     <DropdownMenuLabel>이동할 폴더 선택</DropdownMenuLabel>
-                    {[
-                      "폴더1",
-                      "폴더2",
-                      "폴더3",
-                      "폴더4",
-                      "폴더5",
-                      "폴더6",
-                      "폴더7",
-                      "폴더8",
-                      "폴더9",
-                      "폴더10",
-                      "폴더11",
-                      "폴더12",
-                      "폴더13",
-                      "폴더14",
-                      "폴더15",
-                      "폴더16",
-                      "폴더17",
-                      "폴더18",
-                      "폴더19",
-                      "폴더20",
-                    ].map((folder) => (
-                      <DropdownMenuItem asChild key={folder}>
+                    {/* Inbox (folder_id = null) */}
+                    <DropdownMenuItem asChild>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveToFolder(null)}
+                        className="grid w-full grid-cols-[auto_1fr] items-center gap-2 text-left"
+                      >
+                        <Icon name="archive_20" className="shrink-0" />
+                        <span className="w-full truncate">Inbox</span>
+                      </button>
+                    </DropdownMenuItem>
+                    {/* 실제 폴더 목록 */}
+                    {folders.map((folder) => (
+                      <DropdownMenuItem asChild key={folder.id}>
                         <button
                           type="button"
+                          onClick={() => handleMoveToFolder(folder.id)}
                           className="grid w-full grid-cols-[auto_1fr] items-center gap-2 text-left"
                         >
                           <Icon name="folder_20" className="shrink-0" />
-                          <span className="w-full truncate">{folder}</span>
+                          <span className="w-full truncate">{folder.name}</span>
                         </button>
                       </DropdownMenuItem>
                     ))}

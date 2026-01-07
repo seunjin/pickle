@@ -10,6 +10,7 @@ export interface GetNotesParams {
   client?: SupabaseClient<Database>;
   filter?: {
     onlyBookmarked?: boolean;
+    folderId?: string | null; // ✅ 폴더 필터
     type?: NoteWithAsset["type"];
   };
 }
@@ -50,6 +51,17 @@ export const getNotes = async (
 
   if (filter?.type) {
     query = query.eq("type", filter.type);
+  }
+
+  // ✅ 폴더 필터링
+  if (filter?.folderId !== undefined) {
+    if (filter.folderId === null) {
+      // Inbox: folder_id가 null인 노트
+      query = query.is("folder_id", null);
+    } else {
+      // 특정 폴더의 노트
+      query = query.eq("folder_id", filter.folderId);
+    }
   }
 
   if (filter?.onlyBookmarked) {

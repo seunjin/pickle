@@ -2,6 +2,7 @@
 
 import { Icon } from "@pickle/icons";
 import { Input } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 interface SidebarFolderInputProps {
@@ -57,7 +58,12 @@ export const SidebarFolderInput = ({
       />
 
       <div className="relative h-9">
-        <div className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg bg-neutral-850 px-3 shadow-md outline outline-base-border-light">
+        <div
+          className={cn(
+            "absolute top-[50%] left-[50%] z-50 flex h-full w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg px-3",
+            // "h-[46px] bg-neutral-850 shadow-md outline outline-base-border-light"
+          )}
+        >
           <Icon name="folder_20" className="shrink-0" />
           <Input
             ref={inputRef}

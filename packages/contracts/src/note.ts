@@ -110,6 +110,7 @@ const commonDbFields = z.object({
   workspace_id: z.string().uuid(),
   user_id: z.string().uuid(),
   asset_id: z.string().uuid().nullable(),
+  folder_id: z.string().uuid().nullable(), // ✅ 폴더 참조
   title: z.string().nullable(), // [Refactor] Top-level Title
   memo: z.string().nullable(),
   url: z.string().url(), // DB 데이터 무결성 체크
@@ -197,18 +198,10 @@ export type Note = z.infer<typeof strictNoteSchema>;
 export const updateNoteSchema = z.object({
   title: z.string().optional(),
   memo: z.string().optional(),
+  meta: commonMetaDataSchema.optional(),
   tags: z.array(z.string()).optional(),
-  meta: z
-    .object({
-      url: z.string().url().optional(),
-      favicon: optionalUrl,
-      site_name: z.string().optional(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      image: optionalUrl,
-    })
-    .optional(),
   bookmarked_at: z.string().datetime({ offset: true }).nullable().optional(),
+  folder_id: z.string().uuid().nullable().optional(), // ✅ 폴더 이동 기능
 });
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
 
