@@ -206,9 +206,19 @@ export const Sidebar = () => {
 
           <div className="mt-auto">
             {/* 설정 */}
-            <SidebarNavItem href="/trash" icon="setting_20" label="설정" />
+            <SidebarNavItem
+              href="/settings"
+              icon="setting_20"
+              label="설정"
+              active={pathname === "/settings"}
+            />
             {/* 휴지통 */}
-            <SidebarNavItem href="/trash" icon="trash_20" label="휴지통" />
+            <SidebarNavItem
+              href="/trash"
+              icon="trash_20"
+              label="휴지통"
+              active={pathname === "/trash"}
+            />
           </div>
         </div>
       </ScrollArea>

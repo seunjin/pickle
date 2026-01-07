@@ -28,6 +28,11 @@ const ROUTE_CONFIG: Record<
     placeholder: "휴지통 검색...",
     icon: "trash_20",
   },
+  "/settings": {
+    title: "Settings",
+    placeholder: "설정 검색...",
+    icon: "setting_20",
+  },
 };
 
 export function AppHeader() {
