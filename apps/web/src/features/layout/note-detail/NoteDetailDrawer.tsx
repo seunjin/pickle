@@ -15,6 +15,7 @@ import {
   TextareaContainLabel,
   useDialog,
   useDialogController,
+  useToast,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import {
@@ -73,8 +74,10 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const dialog = useDialog();
   const queryClient = useQueryClient();
   const client = createClient();
+  const toast = useToast();
 
-  const { mutateAsync: updateNote } = useUpdateNoteMutation();
+  const updateNoteMutation = useUpdateNoteMutation();
+  const { mutateAsync: updateNote } = updateNoteMutation;
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
   const [isMove, setIsMove] = useState<boolean>(false);
 
@@ -116,32 +119,6 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
 
     setHasChanges(isChanged);
   }, [localNote, currentNote]);
-
-  // 닫기 핸들러 (변경사항 확인)
-  const handleClose = () => {
-    if (hasChanges) {
-      dialog.open(() => (
-        <Confirm
-          title="변경사항이 있습니다"
-          content={`저장하지 않은 변경사항이 사라집니다.\n정말 닫으시겠습니까?`}
-          confirmButtonText="무시하고 닫기"
-          cancelButtonText="취소"
-          onConfirm={() => {
-            close();
-            dialog.close();
-          }}
-        />
-      ));
-    } else {
-      dialog.close();
-    }
-  };
-
-  // 노트를 폴더로 이동 (로컬 상태만 업데이트)
-  const handleMoveToFolder = (folderId: string | null) => {
-    setLocalNote((prev) => ({ ...prev, folder_id: folderId }));
-    setIsMove(false);
-  };
 
   // 2. 전체 태그 목록 조회 (Workspace 기준)
   const { data: allTags = [] } = useQuery(tagQueries.list());
@@ -192,6 +169,56 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
       queryClient.invalidateQueries({ queryKey: ["notes", note.id] });
     },
   });
+
+  const isSavePending =
+    updateNoteMutation.isPending || setTagsMutation.isPending;
+
+  // ✅ 저장 중 혹은 변경사항 있을 때 새로고침 방지
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges || isSavePending) {
+        e.preventDefault();
+        e.returnValue = ""; // 현대 브라우저에서는 이 값이 있어야 경고창이 뜹니다.
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasChanges, isSavePending]);
+
+  // 닫기 핸들러 (변경사항 확인)
+  const handleClose = () => {
+    if (isSavePending) {
+      toast.error({
+        title: "저장 중에는 닫을 수 없습니다.",
+        description: "잠시만 기다려 주세요.",
+      });
+      return;
+    }
+
+    if (hasChanges) {
+      dialog.open(() => (
+        <Confirm
+          title="변경사항이 있습니다"
+          content={`저장하지 않은 변경사항이 사라집니다.\n정말 닫으시겠습니까?`}
+          confirmButtonText="무시하고 닫기"
+          cancelButtonText="취소"
+          onConfirm={() => {
+            close();
+            dialog.close();
+          }}
+        />
+      ));
+    } else {
+      dialog.close();
+    }
+  };
+
+  // 노트를 폴더로 이동 (로컬 상태만 업데이트)
+  const handleMoveToFolder = (folderId: string | null) => {
+    setLocalNote((prev) => ({ ...prev, folder_id: folderId }));
+    setIsMove(false);
+  };
 
   // 저장 핸들러
   const handleSave = async () => {
@@ -246,16 +273,25 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             transition={{ duration: 0.2 }}
           >
             {/* drawer header */}
-            <header className="flex justify-between px-5 pb-5">
-              <span className="inline-flex items-center gap-2 font-semibold text-[18px] text-base-foreground">
-                <Icon name="archive_20" className="text-inherit" /> Inbox
-              </span>
+            <header className="flex justify-between gap-2 px-5 pb-5">
+              <div className="grid grid-cols-[auto_1fr] items-center gap-2">
+                <Icon
+                  name={localNote.folder_id ? "folder_20" : "archive_20"}
+                  className="text-inherit"
+                />
+                <p className="truncate font-semibold text-[18px] text-base-foreground">
+                  {localNote.folder_id
+                    ? folders.find((f) => f.id === localNote.folder_id)?.name ||
+                      "Folder"
+                    : "Inbox"}
+                </p>
+              </div>
               <DropdownMenu open={isMove} onOpenChange={setIsMove}>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
                     className={cn(
-                      "flex items-center gap-0.5 rounded-[6px] border border-base-border-light bg-neutral-800 px-1.5 text-[12px] text-base-muted-foreground transition-colors hover:text-base-foreground",
+                      "flex shrink-0 items-center gap-0.5 rounded-[6px] border border-base-border-light bg-neutral-800 px-1.5 text-[12px] text-base-muted-foreground transition-colors hover:text-base-foreground",
                       isMove && "text-base-foreground",
                     )}
                   >
@@ -507,7 +543,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         {new Date(note.updated_at).toLocaleDateString("ko-KR")}
                       </dd>
                     </dl>
-                    {localNote.folder_id && (
+                    {/* {localNote.folder_id && (
                       <dl className="flex items-center">
                         <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                           폴더
@@ -517,7 +553,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                             ?.name || "알 수 없음"}
                         </dd>
                       </dl>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
@@ -528,6 +564,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
               <Button variant="icon" icon="trash_20" />
               <Button
                 className="flex-1"
+                isPending={isSavePending}
                 disabled={!hasChanges}
                 onClick={handleSave}
               >

@@ -11,6 +11,7 @@ export interface GetNotesParams {
   filter?: {
     onlyBookmarked?: boolean;
     folderId?: string | null; // ✅ 폴더 필터
+    tagId?: string; // ✅ 태그 필터 추가
     type?: NoteWithAsset["type"];
   };
 }
@@ -22,29 +23,38 @@ export const getNotes = async (
   const supabase = client ?? createClient();
 
   // ✅ RLS 패턴: workspace_members 조회로 인증 상태 확인
-  // user_id = auth.uid() RLS 정책이 자동으로 현재 사용자만 필터링
   const { data: workspace } = await supabase
     .from("workspace_members")
     .select("workspace_id")
     .limit(1)
     .single();
 
-  // 인증되지 않았거나 워크스페이스 없으면 빈 배열
   if (!workspace) return [];
+
+  // 1. SELECT 절 구성 (태그 필터링 여부에 따라 동적 변경)
+  // !inner 조인을 사용하면 해당 관계가 존재하는 행만 남습니다.
+  const selectQuery = `
+    *,
+    assets(*),
+    note_tags${filter?.tagId ? "!inner" : ""}(
+      tag_id
+    ),
+    tag_list:note_tags(
+      tag:tags(*)
+    )
+  `;
 
   // 2. 쿼리 빌더 생성
   let query = supabase
     .from("notes")
-    .select(`
-      *,
-      assets(*),
-      tag_list:note_tags(
-        tag:tags(*)
-      )
-    `)
+    .select(selectQuery)
     .eq("workspace_id", workspace.workspace_id);
 
   // 3. 필터링 및 정렬 적용
+  if (filter?.tagId) {
+    query = query.eq("note_tags.tag_id", filter.tagId);
+  }
+
   if (filter?.onlyBookmarked) {
     query = query.not("bookmarked_at", "is", null);
   }
@@ -56,10 +66,8 @@ export const getNotes = async (
   // ✅ 폴더 필터링
   if (filter?.folderId !== undefined) {
     if (filter.folderId === null) {
-      // Inbox: folder_id가 null인 노트
       query = query.is("folder_id", null);
     } else {
-      // 특정 폴더의 노트
       query = query.eq("folder_id", filter.folderId);
     }
   }

@@ -7,6 +7,7 @@ import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
 export default function DashboardPage() {
   const searchParams = useSearchParams();
   const folderId = searchParams.get("folderId");
+  const tagId = searchParams.get("tagId");
 
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -17,7 +18,7 @@ export default function DashboardPage() {
           </div>
         }
       >
-        <NoteListWithFilter folderId={folderId} />
+        <NoteListWithFilter folderId={folderId} tagId={tagId} />
       </Suspense>
     </div>
   );

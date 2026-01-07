@@ -1,45 +1,84 @@
 "use client";
 
-import { Icon } from "@pickle/icons";
+import { Icon, type IconName } from "@pickle/icons";
 import { InputWithAddon } from "@pickle/ui";
-import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useUser } from "@/features/auth/model/useUser";
+import { folderQueries } from "@/features/folder";
+import { tagQueries } from "@/features/tag/model/tagQueries";
+import { createClient } from "@/shared/lib/supabase/client";
 
-const ROUTE_CONFIG: Record<string, { title: string; placeholder: string }> = {
+const ROUTE_CONFIG: Record<
+  string,
+  { title: string; placeholder: string; icon: IconName }
+> = {
   "/dashboard": {
     title: "Inbox",
     placeholder: "검색어를 입력해 주세요.",
+    icon: "archive_20",
   },
   "/bookmarks": {
     title: "Bookmarks",
     placeholder: "북마크 검색...",
+    icon: "bookmark_20",
   },
   "/trash": {
     title: "Trash",
     placeholder: "휴지통 검색...",
+    icon: "trash_20",
   },
 };
 
 export function AppHeader() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { appUser } = useUser();
+  const client = createClient();
 
-  // 현재 경로에 맞는 설정 찾기 (기본값 Inbox)
-  const config = ROUTE_CONFIG[pathname] || ROUTE_CONFIG["/dashboard"];
+  const folderId = searchParams.get("folderId");
+  const tagId = searchParams.get("tagId");
+
+  // 데이터 조회 (캐시 활용)
+  const { data: folders = [] } = useQuery(folderQueries.list(client));
+  const { data: tags = [] } = useQuery(tagQueries.list());
+
+  // 현재 컨텍스트에 따른 타이틀 및 아이콘 결정
+  let displayTitle =
+    ROUTE_CONFIG[pathname]?.title || ROUTE_CONFIG["/dashboard"].title;
+  let displayIcon =
+    ROUTE_CONFIG[pathname]?.icon || ROUTE_CONFIG["/dashboard"].icon;
+  const placeholder =
+    ROUTE_CONFIG[pathname]?.placeholder ||
+    ROUTE_CONFIG["/dashboard"].placeholder;
+
+  if (pathname === "/dashboard") {
+    if (tagId) {
+      const tag = tags.find((t) => t.id === tagId);
+      displayTitle = tag ? tag.name : "Tag";
+      displayIcon = "tag_20";
+    } else if (folderId) {
+      const folder = folders.find((f) => f.id === folderId);
+      displayTitle = folder ? folder.name : "Folder";
+      displayIcon = "folder_20";
+    }
+  }
+
   const avatar_url = appUser?.avatar_url;
 
   return (
     <header className="flex h-[60px] shrink-0 items-center justify-between border-base-border border-b bg-base-background px-10">
-      <div>
+      <div className="flex items-center gap-1">
+        <Icon name={displayIcon} className="text-base-foreground" />
         <h1 className="font-bold text-[20px] text-base-foreground leading-none">
-          {config.title}
+          {displayTitle}
         </h1>
       </div>
 
       <div className="flex items-center gap-3">
         <InputWithAddon
           containerClassName="group w-90"
-          placeholder={config.placeholder}
+          placeholder={placeholder}
           startAddon={
             <Icon
               name="search_20"

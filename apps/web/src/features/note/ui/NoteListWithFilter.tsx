@@ -11,26 +11,32 @@ import { NoteListFilter } from "./NoteListFilter";
 
 interface NoteListWithFilterProps {
   onlyBookmarked?: boolean;
-  folderId?: string | null; // ✅ 폴더 필터 추가
+  folderId?: string | null;
+  tagId?: string | null; // ✅ 태그 필터 추가
 }
 
 export function NoteListWithFilter({
   onlyBookmarked = false,
   folderId,
+  tagId,
 }: NoteListWithFilterProps) {
   const client = createClient();
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
 
   // 1. Fetch "Context All" Data (Suspense)
-  // 현재 폴더/북마크 상태의 모든 노트를 한 번에 가져옴 (타입 필터 없이)
+  // 현재 폴더/태그 상태의 모든 노트를 가져옴 (타입 필터 제외)
   const { data: allNotes = [] } = useSuspenseQuery(
     noteQueries.list({
       client,
-      filter: { onlyBookmarked, folderId },
+      filter: {
+        onlyBookmarked,
+        folderId,
+        tagId: tagId || undefined,
+      },
     }),
   );
 
-  // 2. Client-side Filtering
+  // 2. Client-side Filtering (Type filter only)
   const filteredNotes =
     selectedType === "all"
       ? allNotes

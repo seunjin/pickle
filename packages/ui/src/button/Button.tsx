@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef } from "react";
 import { cn } from "../lib/utils";
+import { Spinner } from "../spinner";
 
 // ============================================================
 // Button Variants (action 제외)
@@ -50,6 +51,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     asChild?: boolean;
     icon?: IconName;
     iconSide?: "left" | "right";
+    isPending?: boolean;
   };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
@@ -60,6 +62,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     asChild = false,
     iconSide = "right",
     icon,
+    isPending,
+    disabled: disabledProp,
     children,
     ...rest
   } = props;
@@ -71,15 +75,27 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     return <Icon name={icon} className="text-inherit" />;
   };
 
+  const isDisabled = isPending || disabledProp;
+
   return (
     <Comp
       ref={ref}
       className={cn(buttonVariants({ variant, size }), className)}
       {...rest}
+      disabled={isDisabled}
     >
-      {renderIcon("left")}
-      {children}
-      {renderIcon("right")}
+      {isPending ? (
+        <>
+          <Spinner className="mr-1" />
+          {children}
+        </>
+      ) : (
+        <>
+          {renderIcon("left")}
+          {children}
+          {renderIcon("right")}
+        </>
+      )}
     </Comp>
   );
 });
