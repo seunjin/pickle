@@ -31,6 +31,9 @@ interface TagMakerProps {
   onCreateTag: (name: string, style: TagColor) => Promise<string | undefined>;
   onUpdateTag: (tagId: string, updates: Partial<Tag>) => void;
   onDeleteTag: (tagId: string) => void;
+
+  // 설정
+  autoSave?: boolean;
 }
 
 const TagMaker = ({
@@ -43,6 +46,7 @@ const TagMaker = ({
   onCreateTag,
   onUpdateTag,
   onDeleteTag,
+  autoSave = true,
 }: TagMakerProps) => {
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,7 +76,7 @@ const TagMaker = ({
     if (open) {
       setLocalSelectedTagIds(selectedTagIds);
     }
-  }, [open]);
+  }, [open, selectedTagIds]); // selectedTagIds 의존성 추가
 
   // 검색 필터링된 태그 목록
   const filteredTags = tags.filter((tag) =>
@@ -118,8 +122,8 @@ const TagMaker = ({
 
   const handleOpenChange = (isOpen: boolean) => {
     onOpenChange?.(isOpen);
-    if (!isOpen) {
-      // 닫힐 때 변경 사항 확인 후 업데이트
+    if (!isOpen && autoSave) {
+      // 닫힐 때 변경 사항 확인 후 업데이트 (autoSave가 true일 때만)
       const isChanged =
         localSelectedTagIds.length !== selectedTagIds.length ||
         localSelectedTagIds.some((id) => !selectedTagIds.includes(id));

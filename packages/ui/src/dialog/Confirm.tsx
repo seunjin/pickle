@@ -64,7 +64,7 @@ export function Confirm({
                   {title}
                 </h3>
               )}
-              <p className="pb-4 text-center text-[14px] text-base-muted-foreground leading-[1.3]">
+              <p className="whitespace-pre-line pb-4 text-center text-[14px] text-base-muted-foreground leading-[1.4]">
                 {content}
               </p>
               <div className="flex gap-2">

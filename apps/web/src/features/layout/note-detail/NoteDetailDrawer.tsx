@@ -1,8 +1,14 @@
-import type { NoteWithAsset, Tag, TagColor } from "@pickle/contracts";
+import type {
+  NoteWithAsset,
+  Tag,
+  TagColor,
+  UpdateNoteInput,
+} from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import {
   ActionButton,
   Button,
+  Confirm,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -12,6 +18,7 @@ import {
   TAG_VARIANTS,
   TagMaker,
   TextareaContainLabel,
+  useDialog,
   useDialogController,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
@@ -22,7 +29,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { type HTMLAttributes, useState } from "react";
+import { type HTMLAttributes, useEffect, useState } from "react";
 import { folderQueries } from "@/features/folder";
 import { getNote } from "@/features/note/api/getNote";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
@@ -68,25 +75,16 @@ const type_per_icon: Record<
 
 export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
+  const dialog = useDialog();
   const queryClient = useQueryClient();
   const client = createClient();
 
-  const { mutate: updateNote } = useUpdateNoteMutation();
+  const { mutateAsync: updateNote } = useUpdateNoteMutation();
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
   const [isMove, setIsMove] = useState<boolean>(false);
-  const [noteData, setNoteData] = useState<NoteWithAsset>(note);
 
   // ✅ Sidebar prefetch 재사용 (추가 API 호출 없음!)
   const { data: folders = [] } = useSuspenseQuery(folderQueries.list(client));
-
-  // 노트를 폴더로 이동
-  const handleMoveToFolder = async (folderId: string | null) => {
-    updateNote({
-      noteId: note.id,
-      payload: { folder_id: folderId },
-    });
-    setIsMove(false);
-  };
 
   // 1. 개별 노트 정보 조회 (실시간 동기화용)
   const { data: currentNote = note } = useQuery({
@@ -94,6 +92,61 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
     queryFn: () => getNote(note.id),
     initialData: note,
   });
+
+  // ✅ 로컬 상태 관리 (수동 저장) - meta는 피드백에 따라 제외
+  const [localNote, setLocalNote] = useState({
+    title: currentNote.title || "",
+    memo: currentNote.memo || "",
+    url: currentNote.url || "",
+    text: currentNote.type === "text" ? currentNote.data.text : "",
+    tags: currentNote.tag_list?.map((t) => t.id) || [],
+    folder_id: currentNote.folder_id,
+  });
+
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // ✅ 변경 감지
+  useEffect(() => {
+    const isChanged =
+      localNote.title !== (currentNote.title || "") ||
+      localNote.memo !== (currentNote.memo || "") ||
+      localNote.url !== (currentNote.url || "") ||
+      localNote.text !==
+        (currentNote.type === "text" ? currentNote.data.text : "") ||
+      localNote.folder_id !== currentNote.folder_id ||
+      JSON.stringify([...(localNote.tags || [])].sort()) !==
+        JSON.stringify(
+          [...(currentNote.tag_list?.map((t) => t.id) || [])].sort(),
+        );
+
+    setHasChanges(isChanged);
+  }, [localNote, currentNote]);
+
+  // 닫기 핸들러 (변경사항 확인)
+  const handleClose = () => {
+    if (hasChanges) {
+      dialog.open(() => (
+        <Confirm
+          title="변경사항이 있습니다"
+          content={`저장하지 않은 변경사항이 사라집니다.\n정말 닫으시겠습니까?`}
+          confirmButtonText="무시하고 닫기"
+          cancelButtonText="취소"
+          onConfirm={() => {
+            close();
+            dialog.close();
+          }}
+        />
+      ));
+    } else {
+      dialog.close();
+    }
+  };
+
+  // 노트를 폴더로 이동 (로컬 상태만 업데이트)
+  const handleMoveToFolder = (folderId: string | null) => {
+    setLocalNote((prev) => ({ ...prev, folder_id: folderId }));
+    setIsMove(false);
+  };
 
   // 2. 전체 태그 목록 조회 (Workspace 기준)
   const { data: allTags = [] } = useQuery({
@@ -143,8 +196,33 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
     },
   });
 
-  // 현재 노트의 태그 ID들 (실시간 데이터 기준)
-  const selectedTagIds = currentNote.tag_list?.map((t) => t.id) || [];
+  // 저장 핸들러
+  const handleSave = async () => {
+    try {
+      // 1. 기본 정보 업데이트
+      await updateNote({
+        noteId: note.id,
+        payload: {
+          title: localNote.title,
+          memo: localNote.memo,
+          url: localNote.url,
+          data:
+            currentNote.type === "text" ? { text: localNote.text } : undefined,
+          folder_id: localNote.folder_id,
+        },
+      });
+
+      // 2. 태그 업데이트
+      if (localNote.tags) {
+        await setTagsMutation.mutateAsync(localNote.tags);
+      }
+
+      setHasChanges(false);
+    } catch (error) {
+      console.error("Failed to save note:", error);
+    }
+  };
+
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -159,7 +237,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={close}
+            onClick={handleClose}
           />
 
           {/* drawer */}
@@ -227,11 +305,11 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             <ScrollArea className="h-full overflow-auto">
               <div className="px-5">
                 {/* type : image | capture | bookmark 일때 썸네일 */}
-
                 <Thumbnail
                   note={note}
                   className="mb-5 h-[200px] overflow-clip rounded-xl"
                 />
+
                 {/* 라벨 및 북마크 버튼 */}
                 <div className="flex items-center justify-between pb-3">
                   <div className="flex items-center gap-1.5">
@@ -251,7 +329,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     </span>
                   </div>
 
-                  {/* 북마크 버튼 */}
+                  {/* 북마크 버튼 - 즉시 저장 유지 */}
                   <button
                     type="button"
                     onClick={() => {
@@ -259,6 +337,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       const newBookmarkedAt = isBookmarked
                         ? null
                         : new Date().toISOString();
+                      // 북마크는 updateNoteAsync를 기다리지 않고 낙관적으로 처리될 수 있음
                       updateNote({
                         noteId: currentNote.id,
                         payload: { bookmarked_at: newBookmarkedAt },
@@ -268,9 +347,10 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     <Icon
                       name="bookmark_20"
                       className={cn(
-                        "transition-colors group-hover:text-neutral-300",
-                        !!currentNote.bookmarked_at &&
-                          "text-base-primary group-hover:text-base-primary",
+                        "transition-colors",
+                        currentNote.bookmarked_at
+                          ? "text-base-primary"
+                          : "text-neutral-500",
                       )}
                     />
                   </button>
@@ -281,48 +361,59 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                   {/* TITLE */}
                   <TextareaContainLabel
                     label="TITLE"
-                    value={noteData.title || ""}
+                    value={localNote.title || ""}
                     onChange={(e) =>
-                      setNoteData({ ...noteData, title: e.target.value })
+                      setLocalNote((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
                     }
                     required
                   />
 
-                  {/* CONTENT */}
-                  {noteData.type === "text" && (
+                  {currentNote.type === "text" && (
                     <TextareaContainLabel
-                      label="CONTENT"
-                      value={noteData.data.text || ""}
+                      label="TEXT"
+                      value={localNote.text || ""}
                       onChange={(e) =>
-                        setNoteData({
-                          ...noteData,
-                          data: { ...noteData.data, text: e.target.value },
-                        })
+                        setLocalNote((prev) => ({
+                          ...prev,
+                          text: e.target.value,
+                        }))
                       }
                       required
+                      readOnly
                     />
                   )}
-                  {/* URL */}
+
                   <TextareaContainLabel
                     label="URL"
-                    value={noteData.meta?.url || ""}
+                    value={localNote.url || ""}
                     onChange={(e) =>
-                      setNoteData({
-                        ...noteData,
-                        meta: { ...noteData.meta, url: e.target.value },
-                      })
+                      setLocalNote((prev) => ({
+                        ...prev,
+                        url: e.target.value,
+                      }))
                     }
                     required
+                    readOnly
                   />
+
+                  {/* CONTENT (현재는 읽기 전용 느낌이지만 일단 memo로 관리) */}
                   {/* MEMO */}
                   <TextareaContainLabel
                     label="MEMO"
-                    value={noteData.memo || ""}
+                    value={localNote.memo || ""}
                     onChange={(e) =>
-                      setNoteData({ ...noteData, memo: e.target.value })
+                      setLocalNote((prev) => ({
+                        ...prev,
+                        memo: e.target.value,
+                      }))
                     }
                   />
                 </div>
+
+                {/* TAGS */}
                 <div className="mb-5 border-base-border-light border-b pb-3">
                   <div className="flex h-9 items-center justify-between">
                     <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
@@ -332,8 +423,11 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       open={isTagMakerOpen}
                       onOpenChange={setIsTagMakerOpen}
                       tags={allTags}
-                      selectedTagIds={selectedTagIds}
-                      onSetTags={(tagIds) => setTagsMutation.mutate(tagIds)}
+                      selectedTagIds={localNote.tags || []} // 로컬 상태 연결
+                      onSetTags={(tagIds) =>
+                        setLocalNote((prev) => ({ ...prev, tags: tagIds }))
+                      } // 로컬 상태 업데이트
+                      autoSave={false} // 자동 저장 비활성화
                       onCreateTag={async (name, style) => {
                         const newTag = await createTagMutation.mutateAsync({
                           name,
@@ -355,7 +449,9 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {currentNote.tag_list?.map((tag) => {
+                    {localNote.tags?.map((tagId) => {
+                      const tag = allTags.find((t) => t.id === tagId);
+                      if (!tag) return null;
                       const style = TAG_VARIANTS[tag.style];
                       return (
                         <div
@@ -374,16 +470,15 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                               "ml-0.5 flex size-4 items-center justify-center rounded-full transition-colors hover:bg-black/10",
                             )}
                             onClick={() =>
-                              setTagsMutation.mutate(
-                                selectedTagIds.filter((id) => id !== tag.id),
-                              )
+                              setLocalNote((prev) => ({
+                                ...prev,
+                                tags: prev.tags?.filter((id) => id !== tag.id),
+                              }))
                             }
                           >
                             <Icon
                               name="delete_16"
-                              className={cn(
-                                TAG_VARIANTS[tag.style].buttonColor,
-                              )}
+                              className={cn(style.buttonColor)}
                             />
                           </button>
                         </div>
@@ -391,6 +486,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     })}
                   </div>
                 </div>
+
                 <div className="pb-20">
                   <div className="mb-[8.5px] flex h-9 items-center justify-between">
                     <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
@@ -398,27 +494,6 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     </span>
                   </div>
                   <div className="flex flex-col gap-2">
-                    {(note.type === "image" || note.type === "capture") && (
-                      <>
-                        <dl className="flex items-center">
-                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                            파일 종류
-                          </dt>
-                          <dd className="text-[13px] text-neutral-500 leading-none">
-                            webp 이미지
-                          </dd>
-                        </dl>
-                        <dl className="flex items-center">
-                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                            파일 크기
-                          </dt>
-                          <dd className="text-[13px] text-neutral-500 leading-none">
-                            129,344 bytes
-                          </dd>
-                        </dl>
-                      </>
-                    )}
-
                     <dl className="flex items-center">
                       <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                         등록일
@@ -435,6 +510,17 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         {new Date(note.updated_at).toLocaleDateString("ko-KR")}
                       </dd>
                     </dl>
+                    {localNote.folder_id && (
+                      <dl className="flex items-center">
+                        <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                          폴더
+                        </dt>
+                        <dd className="text-[13px] text-neutral-500 leading-none">
+                          {folders.find((f) => f.id === localNote.folder_id)
+                            ?.name || "알 수 없음"}
+                        </dd>
+                      </dl>
+                    )}
                   </div>
                 </div>
               </div>
@@ -443,7 +529,13 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
             {/* drawer footer */}
             <div className="flex gap-2 border-base-border-light border-t px-5 pt-5">
               <Button variant="icon" icon="trash_20" />
-              <Button className="flex-1">저장하기</Button>
+              <Button
+                className="flex-1"
+                disabled={!hasChanges}
+                onClick={handleSave}
+              >
+                저장하기
+              </Button>
             </div>
           </motion.div>
         </motion.div>

@@ -198,6 +198,8 @@ export type Note = z.infer<typeof strictNoteSchema>;
 export const updateNoteSchema = z.object({
   title: z.string().optional(),
   memo: z.string().optional(),
+  url: z.string().url().optional(), // ✅ 최상위 URL 업데이트 지원
+  data: z.any().optional(), // ✅ 타입별 데이터(예: text) 업데이트 지원
   meta: commonMetaDataSchema.optional(),
   tags: z.array(z.string()).optional(),
   bookmarked_at: z.string().datetime({ offset: true }).nullable().optional(),
