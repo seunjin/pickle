@@ -40,7 +40,7 @@ export function Alert({
 
           {/* Dialog Content */}
           <motion.div
-            className="relative z-10 flex flex-col items-center gap-4 rounded-[16px] border border-base-border-light bg-base-foreground-background px-4 pt-5 pb-4 shadow-2xl"
+            className="relative z-10 flex flex-col items-center gap-4 rounded-[16px] border border-base-border-light bg-base-foreground-background px-3 pt-5 pb-3 shadow-standard"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

@@ -53,7 +53,7 @@ export function Confirm({
 
           {/* Dialog Content */}
           <motion.div
-            className="relative z-10 flex flex-col items-center gap-4 rounded-[16px] border border-base-border-light bg-base-foreground-background px-4 pt-5 pb-4 shadow-2xl"
+            className="relative z-10 flex flex-col items-center gap-4 rounded-[16px] border border-base-border-light bg-base-foreground-background px-3 pt-5 pb-3 shadow-standard"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -67,7 +67,7 @@ export function Confirm({
               <p className="whitespace-pre-line pb-4 text-center text-[14px] text-base-muted-foreground leading-[1.4]">
                 {content}
               </p>
-              <div className="flex gap-2">
+              <div className="flex w-full gap-2">
                 <Button
                   className="flex-1"
                   variant={"secondary"}
