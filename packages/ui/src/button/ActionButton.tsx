@@ -8,7 +8,7 @@ import { cn } from "../lib/utils";
 // ActionButton Variants (compoundVariants 패턴)
 // ============================================================
 const actionButtonVariants = cva(
-  "!px-0 inline-flex aspect-square h-[26px] cursor-pointer items-center justify-center rounded-[4px] transition-[color,background-color,opacity] [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "!px-0 inline-flex aspect-square cursor-pointer items-center justify-center rounded-[4px] transition-[color,background-color,opacity] [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {

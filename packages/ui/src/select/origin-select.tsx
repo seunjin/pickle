@@ -47,7 +47,7 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         // 레이아웃 및 크기
-        "flex h-9 w-fit items-center justify-between gap-2 whitespace-nowrap px-3 py-2 text-sm shadow-xs",
+        "grid h-9 w-fit grid-cols-[1fr_auto] items-center justify-between gap-2 whitespace-nowrap px-3 py-2 text-sm shadow-xs",
         "data-[size=sm]:h-8",
 
         // 배경 및 테두리
@@ -71,7 +71,7 @@ function SelectTrigger({
       )}
       {...props}
     >
-      {children}
+      <span className="truncate text-left">{children}</span>
       <SelectPrimitive.Icon asChild>
         <ChevronDownIcon className="size-4 opacity-50" />
       </SelectPrimitive.Icon>
@@ -95,7 +95,7 @@ function SelectContent({
         data-slot="select-content"
         className={cn(
           // 레이아웃 및 위치
-          "relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md shadow-standard",
+          "relative z-1000 max-h-(--radix-select-content-available-height) min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md shadow-standard",
           "origin-(--radix-select-content-transform-origin) p-[5px]",
 
           // 배경 및 테두리
@@ -109,6 +109,7 @@ function SelectContent({
 
           // Popper 전용 스타일
           position === "popper" && [
+            "w-[var(--radix-select-trigger-width)]",
             "data-[side=bottom]:translate-y-1",
             "data-[side=left]:-translate-x-1",
             "data-[side=right]:translate-x-1",
@@ -125,7 +126,7 @@ function SelectContent({
         <SelectPrimitive.Viewport
           className={cn(
             position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1",
+              "h-full w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1",
           )}
         >
           {children}
@@ -165,7 +166,7 @@ function SelectItem({
       data-slot="select-item"
       className={cn(
         // 레이아웃
-        "relative flex h-[26px] w-full cursor-default items-center gap-2 px-2",
+        "relative grid h-[26px] w-full cursor-default grid-cols-[1fr_auto] items-center gap-2 px-2",
         "select-none rounded-[4px] text-[13px] text-base-muted-foreground outline-hidden",
 
         // 상태 (포커스, 비활성화)
@@ -181,15 +182,17 @@ function SelectItem({
       )}
       {...props}
     >
+      <span className="truncate">
+        <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      </span>
       <span
         data-slot="select-item-indicator"
-        className="absolute right-2 flex size-3.5 items-center justify-center"
+        className="flex size-3.5 shrink-0 items-center justify-center"
       >
         <SelectPrimitive.ItemIndicator>
           <CheckIcon className="size-4 text-base-primary" />
         </SelectPrimitive.ItemIndicator>
       </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   );
 }

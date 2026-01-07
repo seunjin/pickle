@@ -46,7 +46,7 @@ export function Select({
       >
         <SelectTrigger
           className={cn(
-            "w-[180px]",
+            "w-full bg-form-input-background",
             open && "outline outline-base-primary [&_svg]:rotate-180",
           )}
         >

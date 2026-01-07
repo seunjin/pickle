@@ -18,8 +18,8 @@ export const Icon = ({ name, className, ...props }: IconProps) => {
     return null;
   }
 
-  // 아이콘 이름에서 사이즈 추출 (예: bookmark_16 → 16)
-  const sizeMatch = name.match(/_(\d+)$/);
+  // 아이콘 이름에서 마지막 숫자 추출 (예: link-12 → 12, bookmark_16 → 16)
+  const sizeMatch = name.match(/[_-](\d+)$/);
   const size = sizeMatch ? Number(sizeMatch[1]) : 20;
 
   return (

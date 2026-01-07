@@ -19,6 +19,7 @@ import IconInfoCircle16 from "./react/IconInfoCircle16";
 import IconLayout20 from "./react/IconLayout20";
 import IconLayoutCard16 from "./react/IconLayoutCard16";
 import IconLayoutList16 from "./react/IconLayoutList16";
+import IconLink12 from "./react/IconLink12";
 import IconLogout16 from "./react/IconLogout16";
 import IconMove16 from "./react/IconMove16";
 import IconNoteEmpty20 from "./react/IconNoteEmpty20";
@@ -56,6 +57,7 @@ export {
   IconLayout20,
   IconLayoutCard16,
   IconLayoutList16,
+  IconLink12,
   IconLogout16,
   IconMove16,
   IconNoteEmpty20,
@@ -94,6 +96,7 @@ export const ICON_PALETTE = {
   layout_20: IconLayout20,
   layout_card_16: IconLayoutCard16,
   layout_list_16: IconLayoutList16,
+  link_12: IconLink12,
   logout_16: IconLogout16,
   move_16: IconMove16,
   note_empty_20: IconNoteEmpty20,

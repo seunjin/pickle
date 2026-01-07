@@ -47,7 +47,7 @@ export function NoteListFilter({
           options={NOTE_FILTER_TYPES}
         />
         {/*  노트카드 레이아웃 버튼 */}
-        <div className="flex h-9 items-center gap-0.5 rounded-lg border border-base-border-light px-[2px]">
+        <div className="flex h-9 items-center gap-0.5 rounded-lg border border-base-border-light bg-form-input-background px-[2px]">
           <button
             type="button"
             className={cn(
@@ -74,7 +74,7 @@ export function NoteListFilter({
           </button>
         </div>
         {/* retry */}
-        <div className="flex size-9 items-center justify-center rounded-lg border border-base-border-light px-[2px]">
+        <div className="flex size-9 items-center justify-center rounded-lg border border-base-border-light bg-form-input-background px-[2px]">
           <button
             type="button"
             className="group inline-flex size-7.5 items-center justify-center rounded-md text-base-muted transition-all hover:bg-base-foreground-background hover:text-neutral-300 active:scale-95"
