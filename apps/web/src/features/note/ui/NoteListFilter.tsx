@@ -2,7 +2,9 @@
 import { Icon } from "@pickle/icons";
 import { Select, type SelectOptionValue } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { noteKeys } from "../model/noteQueries";
 
 export const NOTE_FILTER_TYPES = [
   { value: "all", label: "All Types" },
@@ -23,7 +25,14 @@ export function NoteListFilter({
   totalCount?: number;
   filteredCount?: number;
 }) {
+  const queryClient = useQueryClient();
   const [listForm, setListForm] = useState<"card" | "list">("card");
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({
+      queryKey: noteKeys.all,
+    });
+  };
 
   const selectedLabel = NOTE_FILTER_TYPES.find(
     (t) => t.value === selectedType,
@@ -38,13 +47,14 @@ export function NoteListFilter({
           options={NOTE_FILTER_TYPES}
         />
         {/*  노트카드 레이아웃 버튼 */}
-        <div className="flex h-9 items-center rounded-lg border border-base-border-light px-[2px]">
+        <div className="flex h-9 items-center gap-0.5 rounded-lg border border-base-border-light px-[2px]">
           <button
             type="button"
             className={cn(
-              "inline-flex size-7.5 items-center justify-center rounded-md text-base-muted",
+              "inline-flex size-7.5 items-center justify-center rounded-md text-base-muted transition-colors active:scale-95",
+              "hover:bg-base-foreground-background hover:text-neutral-300",
               listForm === "card" &&
-                "bg-base-primary-active-background text-base-primary",
+                "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
             )}
             onClick={() => setListForm("card")}
           >
@@ -53,13 +63,24 @@ export function NoteListFilter({
           <button
             type="button"
             className={cn(
-              "inline-flex size-7.5 items-center justify-center rounded-md text-base-muted",
+              "inline-flex size-7.5 items-center justify-center rounded-md text-base-muted transition-colors active:scale-95",
+              "hover:bg-base-foreground-background hover:text-neutral-300",
               listForm === "list" &&
-                "bg-base-primary-active-background text-base-primary",
+                "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
             )}
             onClick={() => setListForm("list")}
           >
             <Icon name="layout_list_16" className="text-inherit" />
+          </button>
+        </div>
+        {/* retry */}
+        <div className="flex size-9 items-center justify-center rounded-lg border border-base-border-light px-[2px]">
+          <button
+            type="button"
+            className="group inline-flex size-7.5 items-center justify-center rounded-md text-base-muted transition-all hover:bg-base-foreground-background hover:text-neutral-300 active:scale-95"
+            onClick={handleRefresh}
+          >
+            <Icon name="refresh_16" className="text-inherit" />
           </button>
         </div>
       </div>
