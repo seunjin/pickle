@@ -5,7 +5,7 @@ import { folderQueries } from "@/features/folder";
 import { SidebarWrapper } from "@/features/layout/sidebar/SidebarWrapper";
 import { AppHeader } from "@/features/layout/ui/AppHeader";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
-import { getSupabaseServerClient } from "@/shared/lib/supabase/serverSingleton";
+import { createClient } from "@/shared/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ export default async function AppClientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

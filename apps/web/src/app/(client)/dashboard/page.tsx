@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
-import { getSupabaseServerClient } from "@/shared/lib/supabase/serverSingleton";
+import { createClient } from "@/shared/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Dashboard | Pickle",
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await createClient();
   const queryClient = getQueryClient();
 
   // ✅ Dashboard 페이지 특화 데이터 prefetch
