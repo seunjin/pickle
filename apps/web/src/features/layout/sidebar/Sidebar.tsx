@@ -58,10 +58,7 @@ export const Sidebar = () => {
       {/* 상단: 로고 영역 */}
       <div className="flex items-center justify-between px-3 py-[30px] pb-10">
         {/* 로고 placeholder */}
-        <div className="flex items-center gap-1.5">
-          <div className="h-6 w-6 rounded bg-base-primary" />
-          <span className="font-bold text-lg text-neutral-200">pickle</span>
-        </div>
+        <img src="/pickle-with-logo.svg" alt="pickle with logo" />
       </div>
 
       {/* 메뉴 섹션 */}

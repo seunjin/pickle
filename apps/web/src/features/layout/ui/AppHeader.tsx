@@ -67,10 +67,10 @@ export function AppHeader() {
   const avatar_url = appUser?.avatar_url;
 
   return (
-    <header className="flex h-[60px] shrink-0 items-center justify-between border-base-border border-b bg-base-background px-10">
-      <div className="flex items-center gap-1">
-        <Icon name={displayIcon} className="text-base-foreground" />
-        <h1 className="font-bold text-[20px] text-base-foreground leading-none">
+    <header className="flex h-[60px] shrink-0 items-center justify-between gap-2 border-base-border border-b bg-base-background px-10">
+      <div className="grid grid-cols-[auto_1fr] items-center gap-1">
+        <Icon name={displayIcon} className="shrink-0 text-base-foreground" />
+        <h1 className="truncate font-bold text-[20px] text-base-foreground leading-none">
           {displayTitle}
         </h1>
       </div>
