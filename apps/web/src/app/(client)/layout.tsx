@@ -31,11 +31,11 @@ export default async function AppClientLayout({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <AuthGuard>
-        <div className="flex h-screen bg-base-background text-base-foreground">
+        <div className="flex h-dvh bg-base-background text-base-foreground">
           <aside className="h-full w-75 shrink-0 border-base-border border-r">
             <SidebarWrapper />
           </aside>
-          <div className="flex flex-1 flex-col">
+          <div className="flex-1">
             <AppHeader />
             <main className="flex-1 overflow-auto">{children}</main>
           </div>

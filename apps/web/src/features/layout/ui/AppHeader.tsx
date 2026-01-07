@@ -2,6 +2,7 @@
 
 import { Icon, type IconName } from "@pickle/icons";
 import { InputWithAddon } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useUser } from "@/features/auth/model/useUser";
@@ -9,29 +10,18 @@ import { folderQueries } from "@/features/folder";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
 
-const ROUTE_CONFIG: Record<
-  string,
-  { title: string; placeholder: string; icon: IconName }
-> = {
+const ROUTE_CONFIG: Record<string, { title: string }> = {
   "/dashboard": {
     title: "Inbox",
-    placeholder: "검색어를 입력해 주세요.",
-    icon: "archive_20",
   },
   "/bookmarks": {
-    title: "Bookmarks",
-    placeholder: "북마크 검색...",
-    icon: "bookmark_20",
+    title: "북마크",
   },
   "/trash": {
-    title: "Trash",
-    placeholder: "휴지통 검색...",
-    icon: "trash_20",
+    title: "휴지통",
   },
   "/settings": {
-    title: "Settings",
-    placeholder: "설정 검색...",
-    icon: "setting_20",
+    title: "설정",
   },
 };
 
@@ -51,39 +41,50 @@ export function AppHeader() {
   // 현재 컨텍스트에 따른 타이틀 및 아이콘 결정
   let displayTitle =
     ROUTE_CONFIG[pathname]?.title || ROUTE_CONFIG["/dashboard"].title;
-  let displayIcon =
-    ROUTE_CONFIG[pathname]?.icon || ROUTE_CONFIG["/dashboard"].icon;
-  const placeholder =
-    ROUTE_CONFIG[pathname]?.placeholder ||
-    ROUTE_CONFIG["/dashboard"].placeholder;
+
+  let category: "FOLDERS" | "TAGS" | null = null;
 
   if (pathname === "/dashboard") {
     if (tagId) {
       const tag = tags.find((t) => t.id === tagId);
       displayTitle = tag ? tag.name : "Tag";
-      displayIcon = "tag_20";
+      category = "TAGS";
     } else if (folderId) {
       const folder = folders.find((f) => f.id === folderId);
       displayTitle = folder ? folder.name : "Folder";
-      displayIcon = "folder_20";
+      category = "FOLDERS";
     }
   }
 
   const avatar_url = appUser?.avatar_url;
 
   return (
-    <header className="flex h-[60px] shrink-0 items-center justify-between gap-2 border-base-border border-b bg-base-background px-10">
-      <div className="grid grid-cols-[auto_1fr] items-center gap-1">
-        <Icon name={displayIcon} className="shrink-0 text-base-foreground" />
+    <header className="flex h-[60px] shrink-0 items-center justify-between gap-8 border-base-border border-b bg-base-background px-10">
+      <div
+        className={cn(
+          "grid",
+          category ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr]",
+          "items-center gap-1",
+        )}
+      >
         <h1 className="truncate font-bold text-[20px] text-base-foreground leading-none">
           {displayTitle}
         </h1>
+
+        {category && (
+          <div className="shrink-0 font-medium text-[13px] text-neutral-650">
+            <span className="inline-flex size-4 items-center justify-center">
+              /
+            </span>
+            <span>{category}</span>
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex w-100 shrink-0 items-center gap-3">
         <InputWithAddon
-          containerClassName="group w-90"
-          placeholder={placeholder}
+          containerClassName="group w-full"
+          placeholder="검색어를 입력해 주세요."
           startAddon={
             <Icon
               name="search_20"
