@@ -7,16 +7,22 @@ import {
   DropdownMenuTrigger,
   Input,
 } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { useFolderNameInput } from "../hooks/useFolderNameInput";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
-
 /**
  * 폴더 리스트의 개별 아이템 컴포넌트
  * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
 export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [changeFolderName, setChangeFolderName] = useState<string>(props.label);
+  const {
+    name: changeFolderName,
+    handleChange,
+    maxLength,
+  } = useFolderNameInput({ initialValue: props.label });
+
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const preventFocusRestore = useRef(false);
@@ -120,13 +126,12 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
             <Icon name="folder_20" className="shrink-0 text-neutral-400" />
             <Input
               ref={inputRef}
-              autoFocus
               size={"mini"}
-              // className="flex-1 border-none bg-transparent p-0 text-sm focus-visible:ring-0"
               type="text"
               value={changeFolderName}
-              placeholder="폴더 이름"
-              onChange={(e) => setChangeFolderName(e.target.value)}
+              placeholder="폴더명은 30자로 제한됩니다."
+              maxLength={maxLength}
+              onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleSaveAndClose}
             />
@@ -136,6 +141,3 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
     </div>
   );
 };
-
-// cn 사용을 위한 임포트 추가 (필요시)
-import { cn } from "@pickle/ui/lib/utils";

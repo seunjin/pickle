@@ -3,7 +3,7 @@
 import { Icon } from "@pickle/icons";
 import { Input } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useFolderNameInput } from "../hooks/useFolderNameInput";
 
 interface SidebarFolderInputProps {
   onCreate: (name: string) => void;
@@ -17,16 +17,11 @@ export const SidebarFolderInput = ({
   onCreate,
   onCancel,
 }: SidebarFolderInputProps) => {
-  const [name, setName] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  const { name, handleChange, maxLength } = useFolderNameInput();
 
   const handleSubmit = () => {
-    if (name.trim()) {
-      onCreate(name.trim());
+    if (name) {
+      onCreate(name);
     } else {
       onCancel();
     }
@@ -66,12 +61,13 @@ export const SidebarFolderInput = ({
         >
           <Icon name="folder_20" className="shrink-0" />
           <Input
-            ref={inputRef}
+            autoFocus
             type="text"
             size={"mini"}
             value={name}
-            placeholder="폴더 이름 입력..."
-            onChange={(e) => setName(e.target.value)}
+            placeholder="폴더명은 30자로 제한됩니다."
+            maxLength={maxLength}
+            onChange={handleChange}
             onKeyDown={handleKeyDown}
           />
         </div>
