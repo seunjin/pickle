@@ -5,6 +5,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { createClient } from "@/shared/lib/supabase/client";
 import { noteQueries } from "../model/noteQueries";
 import { NoteCard } from "./NoteCard";
 
@@ -15,9 +16,12 @@ export function NoteList({
   onlyBookmarked?: boolean;
   type?: NoteWithAsset["type"];
 }) {
+  const client = createClient();
+
   // 1. Fetch Data (Suspense)
   const { data: notes } = useSuspenseQuery(
     noteQueries.list({
+      client,
       filter: {
         onlyBookmarked,
         type: type === ("all" as any) ? undefined : type,

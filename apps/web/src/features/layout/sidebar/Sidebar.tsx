@@ -1,9 +1,12 @@
 "use client";
 import { Icon } from "@pickle/icons";
 import { ScrollArea, TAG_VARIANTS } from "@pickle/ui";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
+import { folderQueries, useCreateFolder } from "@/features/folder";
+import { createClient } from "@/shared/lib/supabase/client";
 import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
@@ -14,27 +17,27 @@ export const Sidebar = () => {
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
-  const [isNewFolderPending, setIsNewFolderPending] = useState<boolean>(false);
-  const { isLoading } = useSessionContext();
+  const { workspace } = useSessionContext();
+  const client = createClient();
 
-  if (isLoading) {
-    return (
-      <nav className="flex h-full flex-col gap-4 p-4">
-        <div className="h-8 w-3/4 animate-pulse rounded bg-neutral-800" />
-        <div className="h-4 w-1/2 animate-pulse rounded bg-neutral-800" />
-      </nav>
-    );
-  }
+  // 폴더 목록 조회
+  const { data: folders } = useSuspenseQuery(folderQueries.list(client));
+
+  // 폴더 생성 mutation
+  const createFolderMutation = useCreateFolder(workspace?.id ?? "");
 
   const handleCreateFolder = (name: string) => {
     setIsCreatingFolder(false);
-    setIsNewFolderPending(true);
 
-    // TODO: API Call - 실제로는 useMutation의 onSuccess에서 null 처리
-    setTimeout(() => {
-      console.log("Folder created:", name);
-      setIsNewFolderPending(false);
-    }, 2000);
+    createFolderMutation.mutate(
+      { name },
+      {
+        onError: (error) => {
+          console.error("Failed to create folder:", error);
+          // TODO: Toast 에러 메시지 표시
+        },
+      },
+    );
   };
 
   return (
@@ -103,23 +106,17 @@ export const Sidebar = () => {
                     )}
 
                     {/* 생성 중인 폴더 로딩 */}
-                    {isNewFolderPending && <SidebarFolderLoading />}
+                    {createFolderMutation.isPending && <SidebarFolderLoading />}
 
-                    <SidebarFolderItem
-                      href="/dashboard"
-                      icon="folder_20"
-                      label={"제목없음1"}
-                    />
-                    <SidebarFolderItem
-                      href="/dashboard"
-                      icon="folder_20"
-                      label={"제목없음2"}
-                    />
-                    <SidebarFolderItem
-                      href="/dashboard"
-                      icon="folder_20"
-                      label={"제목없음3"}
-                    />
+                    {/* 실제 폴더 목록 */}
+                    {folders.map((folder) => (
+                      <SidebarFolderItem
+                        key={folder.id}
+                        href="/dashboard"
+                        icon="folder_20"
+                        label={folder.name}
+                      />
+                    ))}
                   </>
                 )}
 

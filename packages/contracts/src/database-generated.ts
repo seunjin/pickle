@@ -87,6 +87,41 @@ export type Database = {
           },
         ];
       };
+      folders: {
+        Row: {
+          color: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          color?: string | null;
+          created_at?: string;
+          id?: string;
+          name: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          color?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "folders_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       note_tags: {
         Row: {
           created_at: string;
@@ -126,6 +161,7 @@ export type Database = {
           bookmarked_at: string | null;
           created_at: string;
           data: Json;
+          folder_id: string | null;
           id: string;
           memo: string | null;
           meta: Json | null;
@@ -142,6 +178,7 @@ export type Database = {
           bookmarked_at?: string | null;
           created_at?: string;
           data?: Json;
+          folder_id?: string | null;
           id?: string;
           memo?: string | null;
           meta?: Json | null;
@@ -158,6 +195,7 @@ export type Database = {
           bookmarked_at?: string | null;
           created_at?: string;
           data?: Json;
+          folder_id?: string | null;
           id?: string;
           memo?: string | null;
           meta?: Json | null;
@@ -175,6 +213,13 @@ export type Database = {
             columns: ["asset_id"];
             isOneToOne: false;
             referencedRelation: "assets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notes_folder_id_fkey";
+            columns: ["folder_id"];
+            isOneToOne: false;
+            referencedRelation: "folders";
             referencedColumns: ["id"];
           },
           {

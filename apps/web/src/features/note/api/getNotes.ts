@@ -19,21 +19,16 @@ export const getNotes = async (
 ): Promise<NoteWithAsset[]> => {
   const { client, filter } = params;
   const supabase = client ?? createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) throw new Error("Unauthorized");
-
-  // 1. 사용자의 워크스페이스 정보 조회
-  // TODO: 다중 워크스페이스 지원 필요 (현재는 첫 번째 워크스페이스만 가져옴)
+  // ✅ RLS 패턴: workspace_members 조회로 인증 상태 확인
+  // user_id = auth.uid() RLS 정책이 자동으로 현재 사용자만 필터링
   const { data: workspace } = await supabase
     .from("workspace_members")
     .select("workspace_id")
-    .eq("user_id", user.id)
     .limit(1)
     .single();
 
+  // 인증되지 않았거나 워크스페이스 없으면 빈 배열
   if (!workspace) return [];
 
   // 2. 쿼리 빌더 생성

@@ -1,7 +1,9 @@
 export * from "./asset";
 export * from "./auth";
 export * from "./common";
-export * from "./database";
+export type { Database } from "./database";
+export * from "./database-generated";
+export * from "./folder";
 export * from "./note";
 export * from "./tag";
 export * from "./user";

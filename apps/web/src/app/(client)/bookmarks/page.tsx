@@ -4,14 +4,14 @@ import { Suspense } from "react";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
-import { createClient } from "@/shared/lib/supabase/server";
+import { getSupabaseServerClient } from "@/shared/lib/supabase/serverSingleton";
 
 export const metadata: Metadata = {
   title: "Bookmarks | Pickle",
 };
 
 export default async function BookmarksPage() {
-  const supabase = await createClient();
+  const supabase = await getSupabaseServerClient();
   const queryClient = getQueryClient();
 
   // Server에서 데이터 Prefetch (Bookmarks 전용)
