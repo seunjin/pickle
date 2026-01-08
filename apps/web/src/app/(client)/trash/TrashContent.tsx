@@ -2,12 +2,16 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
+import { useSessionContext } from "@/features/auth";
 import { NoteList } from "@/features/note";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import EmptyTrashButton from "./EmptyTrashButton";
 
 export function TrashContent() {
-  const { data: trashNotes = [] } = useQuery(noteQueries.trash());
+  const { workspace } = useSessionContext();
+  const { data: trashNotes = [] } = useQuery(
+    noteQueries.trash(undefined, workspace?.id),
+  );
 
   return (
     <div className="h-full p-10">

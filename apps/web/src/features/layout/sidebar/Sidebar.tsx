@@ -36,7 +36,10 @@ export const Sidebar = () => {
 
   // Inbox 노트 목록 조회 (뱃지용)
   const { data: inboxNotes = [] } = useSuspenseQuery(
-    noteQueries.list({ filter: { folderId: null } }),
+    noteQueries.list({
+      workspaceId: workspace?.id,
+      filter: { folderId: null },
+    }),
   );
 
   const handleCreateFolder = (name: string) => {

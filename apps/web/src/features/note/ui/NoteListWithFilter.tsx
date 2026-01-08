@@ -4,6 +4,7 @@ import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import type { SelectOptionValue } from "@pickle/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useSessionContext } from "@/features/auth";
 import { createClient } from "@/shared/lib/supabase/client";
 import { noteQueries } from "../model/noteQueries";
 import { useSyncNoteList } from "../model/useSyncNoteList";
@@ -22,6 +23,7 @@ export function NoteListWithFilter({
   tagId,
 }: NoteListWithFilterProps) {
   const client = createClient();
+  const { workspace } = useSessionContext();
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
 
   // 실시간 동기화 구독 시작 (BroadcastChannel)
@@ -32,6 +34,7 @@ export function NoteListWithFilter({
   const { data: allNotes = [] } = useSuspenseQuery(
     noteQueries.list({
       client,
+      workspaceId: workspace?.id, // ✅ 중복 조회 방지
       filter: {
         onlyBookmarked,
         folderId,
