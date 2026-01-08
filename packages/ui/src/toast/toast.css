@@ -14,7 +14,7 @@
 .pickle-toast-card {
   width: fit-content;
   pointer-events: auto;
-  min-width: 320px;
+  min-width: 360px;
   max-width: calc(100% - 32px);
   padding: 16px !important;
   background-color: var(--color-neutral-700) !important;

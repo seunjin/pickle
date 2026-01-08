@@ -8,7 +8,10 @@ export async function restoreNote(noteId: string) {
 
   const { error } = await supabase
     .from("notes")
-    .update({ deleted_at: null })
+    .update({
+      deleted_at: null,
+      folder_id: null, // ✅ 복원 시 무조건 Inbox로 이동
+    })
     .eq("id", noteId);
 
   if (error) {

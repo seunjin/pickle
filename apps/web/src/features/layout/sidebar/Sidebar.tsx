@@ -126,6 +126,7 @@ export const Sidebar = () => {
                       {folders.map((folder) => (
                         <SidebarFolderItem
                           key={folder.id}
+                          folderId={folder.id}
                           href={`/dashboard?folderId=${folder.id}`}
                           icon="folder_20"
                           label={folder.name}

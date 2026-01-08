@@ -1,22 +1,41 @@
 import { Icon } from "@pickle/icons";
 import {
   ActionButton,
+  Confirm,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   Input,
+  useDialog,
+  useToast,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+  useDeleteFolder,
+  useUpdateFolder,
+} from "@/features/folder/model/folderMutations";
 import { useFolderNameInput } from "../hooks/useFolderNameInput";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
+
+interface SidebarFolderItemProps extends SidebarItemBaseProps {
+  folderId: string;
+}
 /**
  * 폴더 리스트의 개별 아이템 컴포넌트
  * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
-export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
+export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
+  const { folderId, ...baseProps } = props;
   const [open, setOpen] = useState<boolean>(false);
+  const router = useRouter();
+  const dialog = useDialog();
+  const toast = useToast();
+
+  const updateFolderMutation = useUpdateFolder();
+  const deleteFolderMutation = useDeleteFolder();
   const {
     name: changeFolderName,
     handleChange,
@@ -37,8 +56,44 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
   }, [isEditing]);
 
   const handleSaveAndClose = () => {
-    console.log("Renaming (Optimistic) to:", changeFolderName); // TODO: API Call
+    if (changeFolderName.trim() && changeFolderName !== props.label) {
+      updateFolderMutation.mutate({
+        folderId,
+        input: { name: changeFolderName.trim() },
+      });
+    }
     setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    dialog.open(() => (
+      <Confirm
+        title="폴더 삭제"
+        content={`폴더 안의 모든 데이터는 휴지통으로\n이동됩니다.`}
+        isPending={deleteFolderMutation.isPending}
+        confirmButtonText="삭제"
+        onConfirm={async () => {
+          try {
+            await deleteFolderMutation.mutateAsync(folderId);
+            toast.success({
+              title: "폴더가 휴지통으로 이동되었습니다.",
+            });
+            dialog.close();
+            // 현재 보고 있는 폴더가 삭제된 폴더인 경우 Inbox(dashboard)로 이동
+            if (window.location.search.includes(`folderId=${folderId}`)) {
+              router.push("/dashboard");
+            }
+          } catch (error) {
+            console.error("Failed to delete folder:", error);
+            toast.error({
+              title: "폴더 삭제에 실패했습니다.",
+            });
+            dialog.close();
+          }
+        }}
+      />
+    ));
+    setOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -54,7 +109,7 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
     <div className="group/folder relative">
       <SidebarItemBase
         forceFocus={open}
-        {...props}
+        {...baseProps}
         rightSection={
           <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
@@ -98,6 +153,10 @@ export const SidebarFolderItem = (props: SidebarItemBaseProps) => {
                 <button
                   type="button"
                   className="w-full cursor-pointer text-base-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete();
+                  }}
                 >
                   <Icon name="trash_16" />
                   폴더 삭제
