@@ -2,13 +2,13 @@ import {
   type NoteWithAsset,
   noteWithAssetSchema,
 } from "@pickle/contracts/src/note";
-import { createClient } from "@/shared/lib/supabase/client";
+import { createClient as createBrowserClient } from "@/shared/lib/supabase/client";
 
 /**
  * 휴지통에 있는 (deleted_at 이 존재하는) 노트 목록을 가져옵니다.
  */
-export async function getTrashNotes(): Promise<NoteWithAsset[]> {
-  const supabase = createClient();
+export async function getTrashNotes(client?: any): Promise<NoteWithAsset[]> {
+  const supabase = client ?? createBrowserClient();
 
   // ✅ RLS 패턴: workspace_members 조회로 인증 상태 확인
   const { data: workspace } = await supabase

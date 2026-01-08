@@ -7,8 +7,6 @@ import { AppHeader } from "@/features/layout/ui/AppHeader";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
-
 export default async function AppClientLayout({
   children,
 }: {
@@ -25,8 +23,6 @@ export default async function AppClientLayout({
   }
 
   const queryClient = getQueryClient();
-
-  await queryClient.prefetchQuery(folderQueries.list(supabase));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
