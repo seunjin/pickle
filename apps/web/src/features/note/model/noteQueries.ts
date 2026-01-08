@@ -7,7 +7,7 @@ export const noteKeys = {
   all: ["notes"] as const,
   lists: () => [...noteKeys.all, "list"] as const,
   list: (params: GetNotesParams = {}) =>
-    [...noteKeys.lists(), params.filter] as const,
+    [...noteKeys.lists(), params.workspaceId, params.filter] as const,
 };
 
 export const noteQueries = {

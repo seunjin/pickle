@@ -2,7 +2,7 @@
 
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import type { SelectOptionValue } from "@pickle/ui";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -14,7 +14,7 @@ import { NoteListFilter } from "./NoteListFilter";
 interface NoteListWithFilterProps {
   onlyBookmarked?: boolean;
   folderId?: string | null;
-  tagId?: string | null; // ✅ 태그 필터 추가
+  tagId?: string | null;
 }
 
 export function NoteListWithFilter({
@@ -24,24 +24,25 @@ export function NoteListWithFilter({
 }: NoteListWithFilterProps) {
   const client = createClient();
   const { workspace } = useSessionContext();
+  const workspaceId = workspace?.id;
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
 
   // 실시간 동기화 구독 시작 (BroadcastChannel)
   useSyncNoteList();
 
-  // 1. Fetch "Context All" Data (Suspense)
-  // 현재 폴더/태그 상태의 모든 노트를 가져옴 (타입 필터 제외)
-  const { data: allNotes = [] } = useSuspenseQuery(
-    noteQueries.list({
+  // 1. Fetch "Context All" Data (workspace 로드 후에만 실행)
+  const { data: allNotes = [] } = useQuery({
+    ...noteQueries.list({
       client,
-      workspaceId: workspace?.id, // ✅ 중복 조회 방지
+      workspaceId,
       filter: {
         onlyBookmarked,
         folderId,
         tagId: tagId || undefined,
       },
     }),
-  );
+    enabled: !!workspaceId,
+  });
 
   // 2. Client-side Filtering (Type filter only)
   const filteredNotes =

@@ -2,7 +2,7 @@
 import { Icon } from "@pickle/icons";
 import { ScrollArea, TAG_VARIANTS } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -22,25 +22,32 @@ export const Sidebar = () => {
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
-  const { workspace } = useSessionContext();
+  const { workspace, isLoading } = useSessionContext();
   const client = createClient();
 
+  // ✅ workspace가 로드될 때까지 쿼리 실행 지연
+  const workspaceId = workspace?.id;
+
   // 폴더 목록 조회
-  const { data: folders } = useSuspenseQuery(folderQueries.list(client));
+  const { data: folders = [] } = useSuspenseQuery(folderQueries.list(client));
 
   // 폴더 생성 mutation
-  const createFolderMutation = useCreateFolder(workspace?.id ?? "");
+  const createFolderMutation = useCreateFolder(workspaceId ?? "");
 
-  // 태그 목록 조회
-  const { data: tags = [] } = useSuspenseQuery(tagQueries.list());
+  // 태그 목록 조회 (workspace 로드 후에만 실행)
+  const { data: tags = [] } = useQuery({
+    ...tagQueries.list({ workspaceId }),
+    enabled: !!workspaceId,
+  });
 
-  // Inbox 노트 목록 조회 (뱃지용)
-  const { data: inboxNotes = [] } = useSuspenseQuery(
-    noteQueries.list({
-      workspaceId: workspace?.id,
+  // Inbox 노트 목록 조회 (뱃지용, workspace 로드 후에만 실행)
+  const { data: inboxNotes = [] } = useQuery({
+    ...noteQueries.list({
+      workspaceId,
       filter: { folderId: null },
     }),
-  );
+    enabled: !!workspaceId,
+  });
 
   const handleCreateFolder = (name: string) => {
     setIsCreatingFolder(false);
