@@ -34,21 +34,12 @@ import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
 import { setNoteTags } from "@/features/tag/api/noteTags";
 import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
 import { tagQueries } from "@/features/tag/model/tagQueries";
+import { formatDate } from "@/shared/lib/date";
 import { createClient } from "@/shared/lib/supabase/client";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
 }
-
-const formatDate = (date: string | Date) => {
-  const d = new Date(date);
-  const Y = d.getFullYear();
-  const M = String(d.getMonth() + 1).padStart(2, "0");
-  const D = String(d.getDate()).padStart(2, "0");
-  const h = String(d.getHours()).padStart(2, "0");
-  const m = String(d.getMinutes()).padStart(2, "0");
-  return `${Y}-${M}-${D} ${h}:${m}`;
-};
 
 const TYPE_LABELS: Record<string, string> = {
   text: "TEXT",
@@ -519,7 +510,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         등록일
                       </dt>
                       <dd className="text-[13px] text-neutral-500 leading-none">
-                        {formatDate(note.created_at)}
+                        {formatDate(note.created_at, "datetime")}
                       </dd>
                     </dl>
                     <dl className="flex items-center">
@@ -527,7 +518,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         수정일
                       </dt>
                       <dd className="text-[13px] text-neutral-500 leading-none">
-                        {formatDate(note.updated_at)}
+                        {formatDate(note.updated_at, "datetime")}
                       </dd>
                     </dl>
                   </div>

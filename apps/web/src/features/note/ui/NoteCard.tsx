@@ -12,6 +12,7 @@ import {
 } from "@pickle/ui";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
+import { formatDate } from "@/shared/lib/date";
 import { useDeleteNoteMutation } from "../model/useDeleteNoteMutation";
 import { useUpdateNoteMutation } from "../model/useUpdateNoteMutation";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -83,7 +84,7 @@ export function NoteCard({ note }: NoteCardProps) {
         <div className="mt-auto flex items-center justify-between gap-2">
           {/* 날짜 */}
           <span className="text-[13px] text-neutral-500 leading-none">
-            {new Date(note.created_at).toLocaleDateString("ko-KR")}
+            {formatDate(note.created_at)}
           </span>
           <div className="flex gap-1">
             {/* 메뉴 버튼 */}
