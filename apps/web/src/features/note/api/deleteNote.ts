@@ -11,27 +11,14 @@ import { createClient } from "@/shared/lib/supabase/client";
 export async function deleteNote(noteId: string) {
   const supabase = createClient();
 
-  // 1. 먼저 노트와 연관된 asset 정보 조회
-  const { data: note } = await supabase
+  // 3. 노트 소프트 딜리트 (휴지통으로 이동)
+  const { error } = await supabase
     .from("notes")
-    .select("asset_id, assets(full_path)")
-    .eq("id", noteId)
-    .single();
-
-  // 2. Storage 파일 삭제 (asset이 있는 경우)
-  if (note?.assets?.full_path) {
-    const { error: storageError } = await supabase.storage
-      .from("bitmaps")
-      .remove([note.assets.full_path]);
-
-    if (storageError) {
-      console.error("Failed to delete storage file:", storageError);
-      // Storage 삭제 실패해도 DB 삭제는 진행 (파일만 고아 상태로 남음)
-    }
-  }
-
-  // 3. 노트 삭제 (assets는 DB 트리거 `on_note_deleted`에서 자동 삭제)
-  const { error } = await supabase.from("notes").delete().eq("id", noteId);
+    .update({
+      deleted_at: new Date().toISOString(),
+      bookmarked_at: null, // ✅ 휴지통 이동 시 북마크 해제
+    })
+    .eq("id", noteId);
 
   if (error) {
     throw new Error(error.message);

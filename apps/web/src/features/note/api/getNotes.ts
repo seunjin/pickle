@@ -48,7 +48,8 @@ export const getNotes = async (
   let query = supabase
     .from("notes")
     .select(selectQuery)
-    .eq("workspace_id", workspace.workspace_id);
+    .eq("workspace_id", workspace.workspace_id)
+    .is("deleted_at", null); // ✅ 소프트 딜리트된 항목 제외
 
   // 3. 필터링 및 정렬 적용
   if (filter?.tagId) {
@@ -60,7 +61,11 @@ export const getNotes = async (
   }
 
   if (filter?.type) {
-    query = query.eq("type", filter.type);
+    if (filter.type === "image") {
+      query = query.in("type", ["image", "capture"]);
+    } else {
+      query = query.eq("type", filter.type);
+    }
   }
 
   // ✅ 폴더 필터링

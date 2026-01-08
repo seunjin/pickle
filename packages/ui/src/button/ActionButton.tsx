@@ -34,7 +34,7 @@ const actionButtonVariants = cva(
         variant: "action",
         forceFocus: false,
         className:
-          "text-base-muted hover:bg-neutral-800 hover:text-neutral-300",
+          "text-base-muted hover:bg-neutral-800 hover:text-neutral-300 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-base-disabled",
       },
       // action + forceFocus:true
       {

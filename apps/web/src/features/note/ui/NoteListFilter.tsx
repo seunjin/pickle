@@ -10,7 +10,6 @@ export const NOTE_FILTER_TYPES = [
   { value: "all", label: "All Types" },
   { value: "text", label: "Text" },
   { value: "image", label: "Image" },
-  { value: "capture", label: "Capture" },
   { value: "bookmark", label: "Bookmark" },
 ];
 

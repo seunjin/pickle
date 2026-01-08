@@ -6,11 +6,13 @@ export function NoteList({
   emptyMessage = "아직 노트가 없습니다",
   emptyDescription = "익스텐션에서 노트를 생성해 보세요!",
   emptyIcon = "📝",
+  readonly = false,
 }: {
   notes: NoteWithAsset[];
   emptyMessage?: string;
   emptyDescription?: string;
   emptyIcon?: string;
+  readonly?: boolean;
 }) {
   if (notes.length === 0) {
     return (
@@ -25,7 +27,7 @@ export function NoteList({
   return (
     <div className="grid grid-cols-[repeat(auto-fit,295px)] gap-4">
       {notes.map((note) => (
-        <NoteCard key={note.id} note={note} />
+        <NoteCard key={note.id} note={note} readonly={readonly} />
       ))}
     </div>
   );

@@ -11,6 +11,7 @@ interface ConfirmProps {
   onConfirm?: () => void;
   cancelButtonText?: string;
   confirmButtonText?: string;
+  isPending?: boolean;
 }
 
 export function Confirm({
@@ -20,6 +21,7 @@ export function Confirm({
   onConfirm,
   cancelButtonText = "취소",
   confirmButtonText = "확인",
+  isPending,
 }: ConfirmProps) {
   const { zIndex, isOpen, close, unmount } = useDialogController();
   const handleCancel = () => {
@@ -64,7 +66,7 @@ export function Confirm({
                   {title}
                 </h3>
               )}
-              <p className="whitespace-pre-line pb-4 text-center text-[14px] text-base-muted-foreground leading-[1.4]">
+              <p className="whitespace-pre-line whitespace-pre-line pb-4 text-center text-[14px] text-base-muted-foreground leading-[1.4]">
                 {content}
               </p>
               <div className="flex w-full gap-2">
@@ -76,7 +78,13 @@ export function Confirm({
                 >
                   {cancelButtonText}
                 </Button>
-                <Button className="flex-1" size={"h32"} onClick={handleConfirm}>
+                <Button
+                  className="flex-1"
+                  size={"h32"}
+                  isPending={isPending}
+                  disabled={isPending}
+                  onClick={handleConfirm}
+                >
                   {confirmButtonText}
                 </Button>
               </div>

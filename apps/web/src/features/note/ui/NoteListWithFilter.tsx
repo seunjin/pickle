@@ -44,7 +44,12 @@ export function NoteListWithFilter({
   const filteredNotes =
     selectedType === "all"
       ? allNotes
-      : allNotes.filter((note: NoteWithAsset) => note.type === selectedType);
+      : allNotes.filter((note: NoteWithAsset) => {
+          if (selectedType === "image") {
+            return note.type === "image" || note.type === "capture";
+          }
+          return note.type === selectedType;
+        });
 
   return (
     <div className="flex flex-col">

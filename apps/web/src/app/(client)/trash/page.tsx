@@ -1,41 +1,59 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Trash | Pickle",
-};
+"use client";
+import { Icon } from "@pickle/icons";
+import { Button, Confirm, useDialog } from "@pickle/ui";
+import { useQuery } from "@tanstack/react-query";
+import { Suspense } from "react";
+import { NoteList } from "@/features/note";
+import { getTrashNotes } from "@/features/note/api/getTrashNotes";
+import { useEmptyTrashMutation } from "@/features/note/model/useEmptyTrashMutation";
 
 export default function TrashPage() {
+  const dialog = useDialog();
+  const { mutate: emptyTrash, isPending } = useEmptyTrashMutation();
+
+  const { data: trashNotes = [] } = useQuery({
+    queryKey: ["notes", "trash"],
+    queryFn: () => getTrashNotes(),
+  });
+
+  const handleEmptyTrash = () => {
+    dialog.open(() => (
+      <Confirm
+        title="휴지통 비우기"
+        content={`휴지통의 모든 노트가 영구적으로 삭제됩니다.\n계속하시겠습니까?`}
+        confirmButtonText="휴지통 비우기"
+        isPending={isPending}
+        onConfirm={() => {
+          emptyTrash();
+        }}
+      />
+    ));
+  };
+
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 text-base-muted">
-      <div className="mb-4 rounded-full bg-neutral-800 p-6">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-neutral-500"
-          role="img"
-          aria-label="Trash icon"
-        >
-          <title>Trash icon</title>
-          <path d="M3 6h18" />
-          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-        </svg>
-      </div>
-      <h2 className="mb-2 font-bold text-2xl text-base-foreground">
-        휴지통 서비스 준비 중
-      </h2>
-      <p className="text-center">
-        삭제된 노트를 관리하는 기능이 곧 추가될 예정입니다.
-        <br />
-        잠시만 기다려 주세요!
-      </p>
+    <div className="h-full p-10">
+      {trashNotes.length > 0 && (
+        <div className="pb-7.5">
+          <Button variant="secondary_line" onClick={handleEmptyTrash}>
+            휴지통 비우기 <Icon name="trash_16" />
+          </Button>
+        </div>
+      )}
+
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center py-16 text-base-muted">
+            Loading notes...
+          </div>
+        }
+      >
+        <NoteList
+          notes={trashNotes}
+          readonly
+          emptyMessage="휴지통이 비어 있습니다"
+          emptyDescription="삭제된 노트가 여기에 표시됩니다."
+        />
+      </Suspense>
     </div>
   );
 }

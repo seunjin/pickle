@@ -91,6 +91,7 @@ export type Database = {
         Row: {
           color: string | null;
           created_at: string;
+          deleted_at: string | null;
           id: string;
           name: string;
           updated_at: string;
@@ -99,6 +100,7 @@ export type Database = {
         Insert: {
           color?: string | null;
           created_at?: string;
+          deleted_at?: string | null;
           id?: string;
           name: string;
           updated_at?: string;
@@ -107,6 +109,7 @@ export type Database = {
         Update: {
           color?: string | null;
           created_at?: string;
+          deleted_at?: string | null;
           id?: string;
           name?: string;
           updated_at?: string;
@@ -161,6 +164,7 @@ export type Database = {
           bookmarked_at: string | null;
           created_at: string;
           data: Json;
+          deleted_at: string | null;
           folder_id: string | null;
           id: string;
           memo: string | null;
@@ -178,6 +182,7 @@ export type Database = {
           bookmarked_at?: string | null;
           created_at?: string;
           data?: Json;
+          deleted_at?: string | null;
           folder_id?: string | null;
           id?: string;
           memo?: string | null;
@@ -195,6 +200,7 @@ export type Database = {
           bookmarked_at?: string | null;
           created_at?: string;
           data?: Json;
+          deleted_at?: string | null;
           folder_id?: string | null;
           id?: string;
           memo?: string | null;

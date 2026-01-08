@@ -4,6 +4,7 @@ import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { Icon } from "@pickle/icons";
 import {
   ActionButton,
+  Confirm,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -14,20 +15,25 @@ import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
 import { formatDate } from "@/shared/lib/date";
 import { useDeleteNoteMutation } from "../model/useDeleteNoteMutation";
+import { usePermanentlyDeleteNoteMutation } from "../model/usePermanentlyDeleteNoteMutation";
+import { useRestoreNoteMutation } from "../model/useRestoreNoteMutation";
 import { useUpdateNoteMutation } from "../model/useUpdateNoteMutation";
 import { NoteCardHeader } from "./card/NoteCardHeader";
 import { Thumbnail } from "./thumbnail/Thumbnail";
 
 interface NoteCardProps {
   note: NoteWithAsset;
+  readonly?: boolean;
 }
 
-export function NoteCard({ note }: NoteCardProps) {
+export function NoteCard({ note, readonly }: NoteCardProps) {
   const dialog = useDialog();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { mutate: updateNote } = useUpdateNoteMutation();
   const { mutate: deleteNote } = useDeleteNoteMutation();
+  const { mutate: restoreNote } = useRestoreNoteMutation();
+  const { mutate: permanentlyDeleteNote } = usePermanentlyDeleteNoteMutation();
 
   const isBookmarked = !!note.bookmarked_at;
 
@@ -49,6 +55,26 @@ export function NoteCard({ note }: NoteCardProps) {
     e.stopPropagation();
     deleteNote(note.id);
     setIsMenuOpen(false);
+  };
+
+  const handleRestore = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    restoreNote(note.id);
+    setIsMenuOpen(false);
+  };
+
+  const handlePermanentDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    dialog.open(() => (
+      <Confirm
+        title="영구 삭제"
+        content="이 노트는 복구할 수 없습니다. 정말 영구 삭제하시겠습니까?"
+        onConfirm={() => {
+          permanentlyDeleteNote(note.id);
+          setIsMenuOpen(false);
+        }}
+      />
+    ));
   };
 
   return (
@@ -75,7 +101,6 @@ export function NoteCard({ note }: NoteCardProps) {
           </div>
 
           <p className="truncate text-[13px] text-neutral-650">
-            {" "}
             {note.meta?.url}
           </p>
         </div>
@@ -100,21 +125,34 @@ export function NoteCard({ note }: NoteCardProps) {
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="bottom" sideOffset={5}>
-                <DropdownMenuItem asChild>
-                  <button
-                    type="button"
-                    className="w-full cursor-pointer"
-                    onClick={handleDelete}
-                  >
-                    <Icon name="trash_16" /> 휴지통으로 이동
-                  </button>
-                </DropdownMenuItem>
+                {readonly ? (
+                  <DropdownMenuItem asChild>
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer"
+                      onClick={handleRestore}
+                    >
+                      <Icon name="refresh_16" /> 복원하기
+                    </button>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer"
+                      onClick={handleDelete}
+                    >
+                      <Icon name="trash_16" /> 휴지통으로 이동
+                    </button>
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
             {/* 북마크 버튼 */}
             <ActionButton
               icon={"bookmark_16"}
               variant="action"
+              disabled={readonly}
               className={
                 isBookmarked ? "text-base-primary hover:text-base-primary" : ""
               }

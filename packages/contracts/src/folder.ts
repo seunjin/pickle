@@ -6,6 +6,7 @@ export const folderSchema = z.object({
   workspace_id: z.string().uuid(),
   name: z.string().min(1).max(100),
   color: z.string().default("gray"),
+  deleted_at: z.string().datetime({ offset: true }).nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -24,6 +25,7 @@ export const updateFolderSchema = folderSchema
   .pick({
     name: true,
     color: true,
+    deleted_at: true,
   })
   .partial();
 

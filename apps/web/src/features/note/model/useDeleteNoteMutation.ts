@@ -13,7 +13,7 @@ export function useDeleteNoteMutation() {
     mutationFn: (noteId: string) => deleteNote(noteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: noteKeys.all });
-      toast.success({ title: "노트가 삭제되었습니다." });
+      toast.success({ title: "노트가 휴지통으로 이동되었습니다." });
     },
     onError: (error) => {
       toast.error({

@@ -10,6 +10,7 @@ export async function getFolders({
   const { data, error } = await client
     .from("folders")
     .select("*")
+    .is("deleted_at", null) // ✅ 삭제된 폴더 제외
     .order("created_at", { ascending: false });
 
   if (error) throw error;

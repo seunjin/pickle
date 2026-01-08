@@ -118,6 +118,7 @@ const commonDbFields = z.object({
   meta: commonMetaDataSchema.nullable(),
   tags: z.array(z.string()).nullable(),
   bookmarked_at: z.string().datetime({ offset: true }).nullable(),
+  deleted_at: z.string().datetime({ offset: true }).nullable(), // ✅ Soft Delete
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -203,6 +204,7 @@ export const updateNoteSchema = z.object({
   meta: commonMetaDataSchema.optional(),
   tags: z.array(z.string()).optional(),
   bookmarked_at: z.string().datetime({ offset: true }).nullable().optional(),
+  deleted_at: z.string().datetime({ offset: true }).nullable().optional(), // ✅ 복원/삭제 지원
   folder_id: z.string().uuid().nullable().optional(), // ✅ 폴더 이동 기능
 });
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
