@@ -186,6 +186,7 @@ export const Sidebar = () => {
                       <Link
                         key={tag.id}
                         href={`/dashboard?tagId=${tag.id}`}
+                        prefetch={false}
                         className={cn(
                           "group grid h-9 cursor-pointer grid-cols-[auto_1fr] items-center gap-2 rounded-sm px-3 text-muted-foreground transition-[color,background-color] hover:bg-base-foreground-background hover:text-base-foreground",
                           active &&

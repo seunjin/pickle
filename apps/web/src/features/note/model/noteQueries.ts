@@ -17,10 +17,10 @@ export const noteQueries = {
       queryFn: () => getNotes(params),
       staleTime: 0,
     }),
-  trash: (client?: any) =>
+  trash: (client?: any, workspaceId?: string) =>
     queryOptions({
-      queryKey: ["notes", "trash"],
-      queryFn: () => getTrashNotes(client),
+      queryKey: ["notes", "trash", workspaceId],
+      queryFn: () => getTrashNotes(client, workspaceId),
       staleTime: 0,
     }),
 };

@@ -7,17 +7,25 @@ import { createClient as createBrowserClient } from "@/shared/lib/supabase/clien
 /**
  * 휴지통에 있는 (deleted_at 이 존재하는) 노트 목록을 가져옵니다.
  */
-export async function getTrashNotes(client?: any): Promise<NoteWithAsset[]> {
+export async function getTrashNotes(
+  client?: any,
+  workspaceId?: string,
+): Promise<NoteWithAsset[]> {
   const supabase = client ?? createBrowserClient();
 
-  // ✅ RLS 패턴: workspace_members 조회로 인증 상태 확인
-  const { data: workspace } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .limit(1)
-    .single();
+  // ✅ workspaceId가 주입된 경우 중복 조회 방지
+  let currentWorkspaceId = workspaceId;
 
-  if (!workspace) return [];
+  if (!currentWorkspaceId) {
+    const { data: workspace } = await supabase
+      .from("workspace_members")
+      .select("workspace_id")
+      .limit(1)
+      .single();
+
+    if (!workspace) return [];
+    currentWorkspaceId = workspace.workspace_id;
+  }
 
   const selectQuery = `
     *,
@@ -30,7 +38,7 @@ export async function getTrashNotes(client?: any): Promise<NoteWithAsset[]> {
   const { data, error } = await supabase
     .from("notes")
     .select(selectQuery)
-    .eq("workspace_id", workspace.workspace_id)
+    .eq("workspace_id", currentWorkspaceId)
     .not("deleted_at", "is", null) // ✅ 휴지통 필터
     .order("deleted_at", { ascending: false });
 

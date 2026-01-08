@@ -8,6 +8,7 @@ import { createClient } from "@/shared/lib/supabase/client";
 
 export interface GetNotesParams {
   client?: SupabaseClient<Database>;
+  workspaceId?: string; // ✅ 중복 조회 방지용
   filter?: {
     onlyBookmarked?: boolean;
     folderId?: string | null; // ✅ 폴더 필터
@@ -22,14 +23,19 @@ export const getNotes = async (
   const { client, filter } = params;
   const supabase = client ?? createClient();
 
-  // ✅ RLS 패턴: workspace_members 조회로 인증 상태 확인
-  const { data: workspace } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .limit(1)
-    .single();
+  // ✅ workspaceId가 주입된 경우 중복 조회 방지
+  let currentWorkspaceId = params.workspaceId;
 
-  if (!workspace) return [];
+  if (!currentWorkspaceId) {
+    const { data: workspace } = await supabase
+      .from("workspace_members")
+      .select("workspace_id")
+      .limit(1)
+      .single();
+
+    if (!workspace) return [];
+    currentWorkspaceId = workspace.workspace_id;
+  }
 
   // 1. SELECT 절 구성 (태그 필터링 여부에 따라 동적 변경)
   // !inner 조인을 사용하면 해당 관계가 존재하는 행만 남습니다.
@@ -48,7 +54,7 @@ export const getNotes = async (
   let query = supabase
     .from("notes")
     .select(selectQuery)
-    .eq("workspace_id", workspace.workspace_id)
+    .eq("workspace_id", currentWorkspaceId)
     .is("deleted_at", null); // ✅ 소프트 딜리트된 항목 제외
 
   // 3. 필터링 및 정렬 적용
