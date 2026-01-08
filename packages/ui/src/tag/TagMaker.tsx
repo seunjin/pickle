@@ -16,6 +16,7 @@ import { Input } from "../input";
 import { cn } from "../lib/utils";
 import { ScrollArea } from "../scroll-area";
 import { TagColorPalette } from "./TagColorPalette";
+import { MAX_TAG_NAME_LENGTH } from "./tag.constants";
 
 interface TagMakerProps {
   open: boolean;
@@ -184,7 +185,12 @@ const TagMaker = ({
                   : ""
               }
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              maxLength={MAX_TAG_NAME_LENGTH}
+              onChange={(e) => {
+                if (e.target.value.length <= MAX_TAG_NAME_LENGTH) {
+                  setSearch(e.target.value);
+                }
+              }}
               onKeyDown={handleKeyDown}
               className="h-5 min-w-[60px] flex-1 border-none bg-transparent p-0 text-[13px] focus-visible:ring-0"
               autoFocus
@@ -302,11 +308,12 @@ const TagMaker = ({
                           }
                           name={isEditing ? editingTag.name : tag.name}
                           color={isEditing ? editingTag.style : tag.style}
-                          onNameChange={(newName) =>
+                          onNameChange={(newName) => {
+                            if (newName.length > MAX_TAG_NAME_LENGTH) return;
                             setEditingTag((prev) =>
                               prev ? { ...prev, name: newName } : null,
-                            )
-                          }
+                            );
+                          }}
                           onColorChange={(newColor) =>
                             setEditingTag((prev) =>
                               prev ? { ...prev, style: newColor } : null,
@@ -341,7 +348,7 @@ const TagMaker = ({
             <>
               <DropdownMenuSeparator />
               <div className="p-1">
-                <div className="flex h-[30px] min-w-0 items-center rounded-[4px] bg-neutral-700 px-[8px_4px]">
+                <div className="flex h-[30px] min-w-0 items-center rounded-[4px] bg-neutral-700 px-[8px]">
                   <button
                     type="button"
                     onClick={async () => {
@@ -355,19 +362,28 @@ const TagMaker = ({
                       setSearch("");
                       inputRef.current?.focus();
                     }}
-                    className="flex min-w-0 items-center gap-2 text-left"
+                    className="grid w-full min-w-0 grid-cols-[auto_1fr_25px] items-center gap-2 text-left"
                   >
                     <span className="shrink-0 text-[12px] text-neutral-300">
                       생성
                     </span>{" "}
-                    <p
+                    <div
                       className={cn(
                         TAG_VARIANTS[randomColor].tagColor,
-                        "h-6 truncate rounded-[4px] border px-1.5 text-[13px] leading-[22px] transition-colors duration-200",
+                        "h-6 truncate rounded-[4px] border px-1.5",
                       )}
                     >
-                      #{search}
-                    </p>
+                      <p
+                        className={cn(
+                          "truncate text-[13px] leading-[22px] transition-colors duration-200",
+                        )}
+                      >
+                        #{search}
+                      </p>
+                    </div>
+                    <span className="text-right text-[10px] text-base-muted">
+                      {search.length}/30
+                    </span>
                   </button>
                 </div>
               </div>

@@ -12,6 +12,7 @@ import {
 } from "../dropdown-menu";
 import { Input } from "../input";
 import { cn } from "../lib/utils";
+import { MAX_TAG_NAME_LENGTH } from "./tag.constants";
 
 interface TagColorPaletteProps {
   trigger: React.ReactNode;
@@ -66,6 +67,7 @@ export function TagColorPalette({
               ref={inputRef}
               size={"mini"}
               value={name}
+              maxLength={MAX_TAG_NAME_LENGTH}
               onChange={(e) => onNameChange(e.target.value)}
               onKeyDown={(e) => {
                 e.stopPropagation();
