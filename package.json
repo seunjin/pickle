@@ -17,7 +17,7 @@
     "icon": "pnpm --filter @pickle/icons build",
     "token": "node packages/ui/scripts/generate-tokens.js",
     "types:local": "npx -y supabase gen types typescript --local > packages/contracts/src/database-generated.ts",
-    "types:remote": "npx -y supabase gen types typescript --project-id \"<PROJECT_ID>\" --schema public > packages/contracts/src/database-generated.ts"
+    "types:remote": "npx -y supabase gen types typescript --project-id mnawnkblralzdherhdbb --schema public > packages/contracts/src/database-generated.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
