@@ -21,17 +21,25 @@ export const SessionProvider = ({
   children,
   initialUser = null,
   initialAppUser = null,
+  initialWorkspace = null,
 }: {
   children: React.ReactNode;
   initialUser?: User | null;
   initialAppUser?: AppUser | null;
+  initialWorkspace?: Workspace | null;
 }) => {
   const [user, setUser] = useState<User | null>(initialUser);
   const [appUser, setAppUser] = useState<AppUser | null>(initialAppUser);
-  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [workspace, setWorkspace] = useState<Workspace | null>(
+    initialWorkspace,
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const [supabase] = useState(() => createClient());
+
+  // ✅ 초기값 존재 여부를 ref로 캡처 (의존성 배열 문제 해결)
+  const hasInitialAppUser = Boolean(initialAppUser);
+  const hasInitialWorkspace = Boolean(initialWorkspace);
 
   useEffect(() => {
     let mounted = true;
@@ -63,22 +71,38 @@ export const SessionProvider = ({
       setUser(currentUser);
 
       if (currentUser) {
-        // Fetch App User & Workspaces in parallel
-        Promise.all([
-          fetchAppUser(currentUser),
-          getUserWorkspaces(supabase, currentUser.id).then((workspaces) => {
-            if (mounted && workspaces.length > 0) {
-              console.log(
-                "[SessionContext] Workspaces fetched:",
-                workspaces.length,
-              );
-              // Default to the first workspace for now (Logic can be improved later to store 'last_used')
-              setWorkspace(workspaces[0]);
-            }
-          }),
-        ]).finally(() => {
+        // ✅ 서버에서 전달받은 초기값이 있으면 API 호출 건너뛰기
+        const shouldFetchAppUser = !hasInitialAppUser;
+        const shouldFetchWorkspace = !hasInitialWorkspace;
+
+        const fetchPromises: Promise<void>[] = [];
+
+        if (shouldFetchAppUser) {
+          fetchPromises.push(fetchAppUser(currentUser));
+        }
+
+        if (shouldFetchWorkspace) {
+          fetchPromises.push(
+            getUserWorkspaces(supabase, currentUser.id).then((workspaces) => {
+              if (mounted && workspaces.length > 0) {
+                console.log(
+                  "[SessionContext] Workspaces fetched:",
+                  workspaces.length,
+                );
+                setWorkspace(workspaces[0]);
+              }
+            }),
+          );
+        }
+
+        if (fetchPromises.length > 0) {
+          Promise.all(fetchPromises).finally(() => {
+            if (mounted) setIsLoading(false);
+          });
+        } else {
+          // 이미 모든 초기값이 있으면 로딩 완료
           if (mounted) setIsLoading(false);
-        });
+        }
       } else {
         setAppUser(null);
         setWorkspace(null);
@@ -90,7 +114,7 @@ export const SessionProvider = ({
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, hasInitialAppUser, hasInitialWorkspace]);
 
   const refreshAppUser = async () => {
     if (user) {

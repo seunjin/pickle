@@ -1,6 +1,6 @@
 "use client";
 
-import type { AppUser } from "@pickle/contracts";
+import type { AppUser, Workspace } from "@pickle/contracts";
 import { DialogProvider, Toaster } from "@pickle/ui";
 /**
  * 클라이언트 사이드 Provider들을 통합 관리합니다.
@@ -16,18 +16,21 @@ interface ClientProvidersProps {
   children: ReactNode;
   initialUser?: User | null;
   initialAppUser?: AppUser | null;
+  initialWorkspace?: Workspace | null;
 }
 
 export function ClientProviders({
   children,
   initialUser,
   initialAppUser,
+  initialWorkspace,
 }: ClientProvidersProps) {
   return (
     <QueryProvider>
       <SessionProvider
         initialUser={initialUser}
         initialAppUser={initialAppUser}
+        initialWorkspace={initialWorkspace}
       >
         <DialogProvider>
           {children}

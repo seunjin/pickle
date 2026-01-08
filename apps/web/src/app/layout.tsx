@@ -13,12 +13,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user, appUser } = await getServerAuth();
+  const { user, appUser, workspace } = await getServerAuth();
 
   return (
     <html lang="ko">
       <body className="">
-        <ClientProviders initialUser={user} initialAppUser={appUser}>
+        <ClientProviders
+          initialUser={user}
+          initialAppUser={appUser}
+          initialWorkspace={workspace}
+        >
           {children}
         </ClientProviders>
       </body>
