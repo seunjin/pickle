@@ -35,6 +35,7 @@ import { setNoteTags } from "@/features/tag/api/noteTags";
 import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { formatDate } from "@/shared/lib/date";
+import { formatBytes } from "@/shared/lib/file";
 import { createClient } from "@/shared/lib/supabase/client";
 
 interface NoteDetailDrawerProps {
@@ -421,7 +422,6 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       onSetTags={(tagIds) =>
                         setLocalNote((prev) => ({ ...prev, tags: tagIds }))
                       } // 로컬 상태 업데이트
-                      autoSave={false} // 자동 저장 비활성화
                       onCreateTag={async (name, style) => {
                         const newTag = await createTagMutation.mutateAsync({
                           name,
@@ -489,22 +489,28 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     </span>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <dl className="flex items-center">
-                      <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                        파일 종류
-                      </dt>
-                      <dd className="text-[13px] text-neutral-500 leading-none">
-                        webp 이미지
-                      </dd>
-                    </dl>
-                    <dl className="flex items-center">
-                      <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                        파일 크기
-                      </dt>
-                      <dd className="text-[13px] text-neutral-500 leading-none">
-                        123,9344 bytes
-                      </dd>
-                    </dl>
+                    {(note.type === "image" || note.type === "capture") && (
+                      <>
+                        <dl className="flex items-center">
+                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                            파일 종류
+                          </dt>
+                          <dd className="text-[13px] text-neutral-500 leading-none">
+                            webp 이미지
+                          </dd>
+                        </dl>
+                        <dl className="flex items-center">
+                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                            파일 크기
+                          </dt>
+                          <dd className="text-[13px] text-neutral-500 leading-none">
+                            {note.assets?.full_size_bytes
+                              ? formatBytes(note.assets.full_size_bytes)
+                              : "-"}
+                          </dd>
+                        </dl>
+                      </>
+                    )}
                     <dl className="flex items-center">
                       <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
                         등록일

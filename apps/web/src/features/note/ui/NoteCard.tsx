@@ -4,18 +4,17 @@ import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { Icon } from "@pickle/icons";
 import {
   ActionButton,
-  Confirm,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   useDialog,
 } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useState } from "react";
 import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
 import { formatDate } from "@/shared/lib/date";
 import { useDeleteNoteMutation } from "../model/useDeleteNoteMutation";
-import { usePermanentlyDeleteNoteMutation } from "../model/usePermanentlyDeleteNoteMutation";
 import { useRestoreNoteMutation } from "../model/useRestoreNoteMutation";
 import { useUpdateNoteMutation } from "../model/useUpdateNoteMutation";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -33,12 +32,13 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
   const { mutate: updateNote } = useUpdateNoteMutation();
   const { mutate: deleteNote } = useDeleteNoteMutation();
   const { mutate: restoreNote } = useRestoreNoteMutation();
-  const { mutate: permanentlyDeleteNote } = usePermanentlyDeleteNoteMutation();
 
   const isBookmarked = !!note.bookmarked_at;
 
   const handleCardClick = () => {
-    dialog.open(() => <NoteDetailDrawer note={note} />);
+    if (!readonly) {
+      dialog.open(() => <NoteDetailDrawer note={note} />);
+    }
   };
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
@@ -63,22 +63,8 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
     setIsMenuOpen(false);
   };
 
-  const handlePermanentDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    dialog.open(() => (
-      <Confirm
-        title="영구 삭제"
-        content="이 노트는 복구할 수 없습니다. 정말 영구 삭제하시겠습니까?"
-        onConfirm={() => {
-          permanentlyDeleteNote(note.id);
-          setIsMenuOpen(false);
-        }}
-      />
-    ));
-  };
-
   return (
-    <NoteCardContainer onClick={handleCardClick}>
+    <NoteCardContainer readonly={readonly} onClick={handleCardClick}>
       {/* thumbnail */}
       {note.type === "text" ? (
         // 텍스트 노트의 경우
@@ -168,9 +154,11 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
 function NoteCardContainer({
   children,
   onClick,
+  readonly,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
+  readonly?: boolean;
 }) {
   return (
     <div
@@ -182,7 +170,10 @@ function NoteCardContainer({
           onClick?.();
         }
       }}
-      className="grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag"
+      className={cn(
+        "grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag",
+        readonly && "cursor-default",
+      )}
     >
       {children}
     </div>

@@ -34,7 +34,7 @@ interface TagMakerProps {
   onDeleteTag: (tagId: string) => void;
 
   // 설정
-  autoSave?: boolean;
+  // autoSave?: boolean; // 제거
 }
 
 const TagMaker = ({
@@ -47,7 +47,6 @@ const TagMaker = ({
   onCreateTag,
   onUpdateTag,
   onDeleteTag,
-  autoSave = true,
 }: TagMakerProps) => {
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,8 +121,8 @@ const TagMaker = ({
 
   const handleOpenChange = (isOpen: boolean) => {
     onOpenChange?.(isOpen);
-    if (!isOpen && autoSave) {
-      // 닫힐 때 변경 사항 확인 후 업데이트 (autoSave가 true일 때만)
+    if (!isOpen) {
+      // 닫힐 때 변경 사항 확인 후 업데이트
       const isChanged =
         localSelectedTagIds.length !== selectedTagIds.length ||
         localSelectedTagIds.some((id) => !selectedTagIds.includes(id));
@@ -367,19 +366,15 @@ const TagMaker = ({
                     <span className="shrink-0 text-[12px] text-neutral-300">
                       생성
                     </span>{" "}
-                    <div
-                      className={cn(
-                        TAG_VARIANTS[randomColor].tagColor,
-                        "h-6 truncate rounded-[4px] border px-1.5",
-                      )}
-                    >
-                      <p
+                    <div className={cn("flex h-6 truncate")}>
+                      <span
                         className={cn(
-                          "truncate text-[13px] leading-[22px] transition-colors duration-200",
+                          TAG_VARIANTS[randomColor].tagColor,
+                          "truncate rounded-[4px] border px-1.5 text-[13px] leading-[22px] transition-colors duration-200",
                         )}
                       >
                         #{search}
-                      </p>
+                      </span>
                     </div>
                     <span className="text-right text-[10px] text-base-muted">
                       {search.length}/30
