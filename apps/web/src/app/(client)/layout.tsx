@@ -1,3 +1,4 @@
+import { ScrollArea } from "@pickle/ui";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { AuthGuard } from "@/features/auth/ui/AuthGuard";
@@ -32,7 +33,11 @@ export default async function AppClientLayout({
           </aside>
           <div className="grid flex-1 grid-rows-[auto_1fr]">
             <AppHeader />
-            <main className="overflow-auto p-10">{children}</main>
+            <main className="overflow-auto">
+              <ScrollArea className="h-full">
+                <div className="p-10">{children}</div>
+              </ScrollArea>
+            </main>
           </div>
         </div>
       </AuthGuard>
