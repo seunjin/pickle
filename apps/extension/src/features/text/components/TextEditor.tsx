@@ -3,6 +3,7 @@ import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import type { NoteData } from "@shared/types";
 import { useForm } from "react-hook-form";
 import { EditorContainer } from "@/content/ui/components/EditorContainer";
+import { SignoutButton } from "@/content/ui/components/SignoutButton";
 
 /**
  * TextEditor Component
@@ -15,7 +16,8 @@ interface TextEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (finalData: Partial<NoteData>) => void;
+  isSaving?: boolean;
 }
 
 type TextFormValues = {
@@ -29,18 +31,28 @@ export function TextEditor({
   onUpdate,
   onClose,
   onSave,
+  isSaving = false,
 }: TextEditorProps) {
-  const { register, handleSubmit } = useForm<TextFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<TextFormValues>({
+    mode: "onTouched",
     values: {
-      title: note.title || "",
+      title: "",
       text: note.text || "",
-      memo: note.memo || "",
+      memo: "",
     },
   });
 
   const onSubmit = (data: TextFormValues) => {
-    onUpdate(data);
-    onSave?.();
+    const finalData = {
+      ...data,
+      title: data.title.trim() || "Untitled",
+    };
+    onUpdate(finalData);
+    onSave?.(finalData);
   };
 
   return (
@@ -55,21 +67,21 @@ export function TextEditor({
         >
           <TextareaContainLabel
             label="TITLE"
-            placeholder="타이틀"
+            placeholder={"Untitled"}
+            error={errors.title?.message}
             {...register("title")}
           />
           <TextareaContainLabel
             label="TEXT"
-            placeholder="텍스트"
-            {...register("text")}
+            required
+            error={errors.text?.message}
+            {...register("text", { required: "TEXT을 입력해주세요." })}
           />
-          <TextareaContainLabel
-            label="MEMO"
-            placeholder="메모"
-            autoFocus
-            {...register("memo")}
-          />
+          <TextareaContainLabel label="MEMO" autoFocus {...register("memo")} />
         </form>
+        <div>
+          <SignoutButton />
+        </div>
       </ScrollArea>
 
       <div className="px-5 pb-5">
@@ -78,6 +90,8 @@ export function TextEditor({
           icon="download_16"
           type="submit"
           form="text-editor-form"
+          disabled={!isValid || isSaving}
+          isPending={isSaving}
         >
           피클에 저장하기
         </Button>

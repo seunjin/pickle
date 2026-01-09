@@ -1,7 +1,9 @@
 import { Header } from "@overlay/components/Header";
 import { Button, ScrollArea, TextareaContainLabel } from "@pickle/ui";
 import type { NoteData } from "@shared/types";
+import { useForm } from "react-hook-form";
 import { EditorContainer } from "@/content/ui/components/EditorContainer";
+import { SignoutButton } from "@/content/ui/components/SignoutButton";
 
 /**
  * BookmarkEditor Component
@@ -14,20 +16,48 @@ interface BookmarkEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (finalData: Partial<NoteData>) => void;
+  isSaving?: boolean;
 }
+
+type BookmarkFormValues = {
+  title: string;
+  memo: string;
+};
 
 export function BookmarkEditor({
   note,
   onUpdate,
   onClose,
   onSave,
+  isSaving = false,
 }: BookmarkEditorProps) {
+  const { register, handleSubmit } = useForm<BookmarkFormValues>({
+    mode: "onTouched",
+    values: {
+      title: note.title || "",
+      memo: "",
+    },
+  });
+
+  const onSubmit = (data: BookmarkFormValues) => {
+    const finalData = {
+      ...data,
+      title: data.title.trim() || "Untitled",
+    };
+    onUpdate(finalData);
+    onSave?.(finalData);
+  };
+
   return (
     <EditorContainer>
       <Header title="북마크 저장" onClose={onClose} />
       <ScrollArea className="mr-2 h-full overflow-auto">
-        <div className="mr-4 flex min-w-0 flex-col gap-2.5 py-0.5 pl-5">
+        <form
+          id="bookmark-editor-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="mr-4 flex min-w-0 flex-col gap-2.5 py-0.5 pl-5"
+        >
           <div className="aspect-video w-full overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
             {note.pageMeta?.image && (
               <img
@@ -76,27 +106,25 @@ export function BookmarkEditor({
           {/* 타이틀 영역 */}
           <TextareaContainLabel
             label="TITLE"
-            placeholder="타이틀"
-            value={note.title || ""}
-            onChange={(e) => onUpdate({ title: e.target.value })}
+            placeholder="Untitled"
+            {...register("title")}
           />
           {/* 메모 영역 */}
-          <TextareaContainLabel
-            label="MEMO"
-            placeholder="메모"
-            value={note.memo || ""}
-            onChange={(e) => onUpdate({ memo: e.target.value })}
-            autoFocus
-          />
-        </div>
+          <TextareaContainLabel label="MEMO" autoFocus {...register("memo")} />
+          <div>
+            <SignoutButton />
+          </div>
+        </form>
       </ScrollArea>
 
       <div className="mt-auto px-5 pb-5">
         <Button
           className="w-full"
-          disabled={!note.pageMeta}
-          onClick={onSave}
+          disabled={!note.pageMeta || isSaving}
           icon="download_16"
+          type="submit"
+          form="bookmark-editor-form"
+          isPending={isSaving}
         >
           피클에 저장하기
         </Button>

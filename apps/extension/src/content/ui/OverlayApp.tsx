@@ -27,7 +27,7 @@ export default function OverlayApp({
   onClose: () => void;
   tabId: number;
 }) {
-  const [view, setView] = useState<ViewType>("capture");
+  const [view, setView] = useState<ViewType>("text");
   const [note, setNote] = useState<NoteData>({});
   const { toast, showToast, hideToast } = useToastStore();
   const dialog = useDialog();
@@ -138,32 +138,33 @@ export default function OverlayApp({
     setNote((prev) => ({ ...prev, ...data }));
   };
 
-  const handleSave = async () => {
-    console.log("Saving note (Overlay):", note);
+  const handleSave = async (finalData?: Partial<NoteData>) => {
+    // Merge current state with finalData from editor (to avoid async state lag)
+    const currentNote = { ...note, ...finalData };
+    console.log("Saving note (Overlay):", currentNote);
     setIsSaving(true);
     setErrorMessage(null);
 
     try {
-      // Construct CreateNoteInput from current note state
-      // Validating required fields minimally here, zod will check on server
-      if (!note.url) throw new Error("URL is missing");
+      // Construct CreateNoteInput from merged state
+      if (!currentNote.url) throw new Error("URL is missing");
 
       // Common fields
       const inputMeta = {
-        url: note.url,
-        favicon: note.pageMeta?.favicon, // Optional
-        site_name: note.pageMeta?.site_name, // Optional
-        title: note.pageMeta?.title, // Optional (or undefined)
-        description: note.pageMeta?.description,
-        image: note.pageMeta?.image,
+        url: currentNote.url,
+        favicon: currentNote.pageMeta?.favicon,
+        site_name: currentNote.pageMeta?.site_name,
+        title: currentNote.pageMeta?.title,
+        description: currentNote.pageMeta?.description,
+        image: currentNote.pageMeta?.image,
       };
 
       const common = {
-        title: note.title || note.pageMeta?.title, // [수정] 사용자가 수정한 제목을 우선순위로 저장
-        meta: inputMeta, // Moved to top-level meta
-        memo: note.memo,
+        title: currentNote.title?.trim() || undefined,
+        meta: inputMeta,
+        memo: currentNote.memo,
         tags: [],
-        blurDataUrl: note.blurDataUrl, // [추가] 이미지 블러 플레이스홀더 데이터
+        blurDataUrl: currentNote.blurDataUrl,
       };
 
       let input: CreateNoteInput;
@@ -245,6 +246,7 @@ export default function OverlayApp({
           onUpdate={handleUpdateNote}
           onClose={onClose}
           onSave={handleSave}
+          isSaving={isSaving}
         />
       )}
       {view === "capture" && (
@@ -254,6 +256,7 @@ export default function OverlayApp({
           onClose={onClose}
           onRetake={handleRetake}
           onSave={handleSave}
+          isSaving={isSaving}
         />
       )}
       {view === "image" && (
@@ -262,6 +265,7 @@ export default function OverlayApp({
           onUpdate={handleUpdateNote}
           onClose={onClose}
           onSave={handleSave}
+          isSaving={isSaving}
         />
       )}
       {view === "bookmark" && (
@@ -270,6 +274,7 @@ export default function OverlayApp({
           onUpdate={handleUpdateNote}
           onClose={onClose}
           onSave={handleSave}
+          isSaving={isSaving}
         />
       )}
       {/* Local Overlay Toast */}

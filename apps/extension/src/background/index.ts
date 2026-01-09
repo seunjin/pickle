@@ -74,7 +74,7 @@ chrome.contextMenus.onClicked.addListener(
             console.log("Metadata fetched in background:", metadata);
             updateNote(tab.id, {
               pageMeta: metadata,
-              title: metadata.title, // [추가] 추출된 제목을 에디터의 초기 제목으로 설정
+              // title은 에디터에서 관리하도록 제거
             });
           }
         })
@@ -151,7 +151,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 console.log("Metadata fetched after capture:", metadata);
                 updateNote(tabId, {
                   pageMeta: metadata as PageMetadata,
-                  title: (metadata as PageMetadata).title,
+                  // title은 에디터에서 관리하도록 제거
                 });
               }
             })

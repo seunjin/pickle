@@ -2,8 +2,11 @@ import { Header } from "@overlay/components/Header";
 import { Button, ScrollArea, Spinner, TextareaContainLabel } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import type { NoteData } from "@shared/types";
+import { generateDefaultTitle } from "@shared/utils/generateDefaultTitle";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { EditorContainer } from "@/content/ui/components/EditorContainer";
+import { SignoutButton } from "@/content/ui/components/SignoutButton";
 
 /**
  * ImageEditor Component
@@ -16,14 +19,21 @@ interface ImageEditorProps {
   note: NoteData;
   onUpdate: (data: Partial<NoteData>) => void;
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (finalData: Partial<NoteData>) => void;
+  isSaving?: boolean;
 }
+
+type ImageFormValues = {
+  title: string;
+  memo: string;
+};
 
 export function ImageEditor({
   note,
   onUpdate,
   onClose,
   onSave,
+  isSaving = false,
 }: ImageEditorProps) {
   const srcUrl = note.srcUrl;
   const [imageStatus, setImageStatus] = useState<
@@ -33,6 +43,14 @@ export function ImageEditor({
 
   const isLoading = imageStatus === "loading";
   const isError = imageStatus === "error";
+
+  const { register, handleSubmit } = useForm<ImageFormValues>({
+    mode: "onTouched",
+    values: {
+      title: "",
+      memo: "",
+    },
+  });
 
   useEffect(() => {
     if (!srcUrl || imageStatus !== "loading") return;
@@ -50,12 +68,8 @@ export function ImageEditor({
           } else {
             setDiagnosis(`서버 응답 오류가 발생했습니다 (${res.status})`);
           }
-          // <img> 태그도 실패할 수 있지만, <img> 자체가 로드될 가능성이 있으므로
-          // 여기서 강제로 error 상태로 만들지 않습니다.
         }
       } catch (e) {
-        // TypeError는 보통 CORS 보안 정책 차단
-        // <img> 태그는 CORS와 무관하게 표시 가능하므로, 진단 실패가 로드 차단으로 이어지지 않게 합니다.
         setDiagnosis(
           "보안 정책(CORS)으로 인해 상세 정보 확인이 제한되었습니다",
         );
@@ -65,11 +79,24 @@ export function ImageEditor({
     checkImage();
   }, [srcUrl, imageStatus]);
 
+  const onSubmit = (data: ImageFormValues) => {
+    const finalData = {
+      ...data,
+      title: data.title.trim() || generateDefaultTitle(),
+    };
+    onUpdate(finalData);
+    onSave?.(finalData);
+  };
+
   return (
     <EditorContainer>
       <Header title="이미지 저장" onClose={onClose} />
       <ScrollArea className="mr-2 h-full overflow-auto">
-        <div className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5">
+        <form
+          id="image-editor-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="mr-4 flex flex-1 flex-col gap-2.5 py-0.5 pl-5"
+        >
           {/* 이미지 컨테이너 영역 */}
           <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-base-border-light bg-neutral-900">
             {isLoading && (
@@ -128,27 +155,25 @@ export function ImageEditor({
           {/* 타이틀 영역 */}
           <TextareaContainLabel
             label="TITLE"
-            placeholder="타이틀"
-            value={note.title || ""}
-            onChange={(e) => onUpdate({ title: e.target.value })}
+            placeholder={generateDefaultTitle()}
+            {...register("title")}
           />
           {/* 메모 영역 */}
-          <TextareaContainLabel
-            label="MEMO"
-            placeholder="메모"
-            value={note.memo || ""}
-            onChange={(e) => onUpdate({ memo: e.target.value })}
-            autoFocus
-          />
-        </div>
+          <TextareaContainLabel label="MEMO" autoFocus {...register("memo")} />
+          <div>
+            <SignoutButton />
+          </div>
+        </form>
       </ScrollArea>
 
       <div className="px-5 pb-5">
         <Button
           className="w-full"
-          disabled={!srcUrl}
+          disabled={!srcUrl || isSaving}
           icon="download_16"
-          onClick={onSave}
+          type="submit"
+          form="image-editor-form"
+          isPending={isSaving}
         >
           피클에 저장하기
         </Button>
