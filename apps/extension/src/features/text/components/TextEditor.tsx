@@ -78,10 +78,10 @@ export function TextEditor({
             {...register("text", { required: "TEXT을 입력해주세요." })}
           />
           <TextareaContainLabel label="MEMO" autoFocus {...register("memo")} />
+          <div>
+            <SignoutButton />
+          </div>
         </form>
-        <div>
-          <SignoutButton />
-        </div>
       </ScrollArea>
 
       <div className="px-5 pb-5">
