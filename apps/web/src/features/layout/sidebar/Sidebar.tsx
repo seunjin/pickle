@@ -216,12 +216,12 @@ export const Sidebar = () => {
 
           <div className="mt-auto flex flex-col gap-1">
             {/* 설정 */}
-            <SidebarNavItem
+            {/* <SidebarNavItem
               href="/settings"
               icon="setting_20"
               label="설정"
               active={pathname === "/settings"}
-            />
+            /> */}
             {/* 휴지통 */}
             <SidebarNavItem
               href="/trash"
