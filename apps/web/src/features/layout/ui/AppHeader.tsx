@@ -1,11 +1,17 @@
 "use client";
 
-import { Icon, type IconName } from "@pickle/icons";
-import { InputWithAddon } from "@pickle/ui";
+import { Icon } from "@pickle/icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  InputWithAddon,
+} from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useUser } from "@/features/auth/model/useUser";
+import { useSignOut, useUser } from "@/features/auth";
 import { folderQueries } from "@/features/folder";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -29,6 +35,7 @@ export function AppHeader() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { appUser } = useUser();
+  const { signOut } = useSignOut();
   const client = createClient();
 
   const folderId = searchParams.get("folderId");
@@ -59,7 +66,7 @@ export function AppHeader() {
   const avatar_url = appUser?.avatar_url;
 
   return (
-    <header className="flex h-[60px] shrink-0 items-center justify-between gap-8 border-base-border border-b bg-base-background px-10">
+    <header className="flex h-(--web-header-height) shrink-0 items-center justify-between gap-8 border-base-border border-b bg-base-background px-10">
       <div
         className={cn(
           "grid",
@@ -94,13 +101,27 @@ export function AppHeader() {
         />
 
         {avatar_url && (
-          <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-base-border">
-            <img
-              src={avatar_url}
-              alt="Avatar"
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="size-8 shrink-0 overflow-hidden rounded-full border border-base-border"
+              >
+                <img
+                  src={avatar_url}
+                  alt="Avatar"
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <button type="button" className="w-full" onClick={signOut}>
+                  <Icon name="logout_16" /> 로그아웃
+                </button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </header>

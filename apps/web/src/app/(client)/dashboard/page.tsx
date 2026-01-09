@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const tagId = searchParams.get("tagId");
 
   return (
-    <div className="h-full p-10">
+    <div className="h-full">
       <Suspense
         fallback={
           <div className="flex items-center justify-center py-16 text-base-muted">
@@ -18,7 +18,11 @@ export default function DashboardPage() {
           </div>
         }
       >
-        <NoteListWithFilter folderId={folderId} tagId={tagId} />
+        <NoteListWithFilter
+          folderId={folderId}
+          tagId={tagId}
+          nodataType="default"
+        />
       </Suspense>
     </div>
   );

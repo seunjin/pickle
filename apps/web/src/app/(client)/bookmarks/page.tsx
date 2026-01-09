@@ -20,7 +20,7 @@ export default async function BookmarksPage() {
   );
 
   return (
-    <div className="h-full p-10">
+    <div className="h-full">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense
           fallback={
@@ -29,7 +29,7 @@ export default async function BookmarksPage() {
             </div>
           }
         >
-          <NoteListWithFilter onlyBookmarked={true} />
+          <NoteListWithFilter onlyBookmarked nodataType="bookmarks" />
         </Suspense>
       </HydrationBoundary>
     </div>

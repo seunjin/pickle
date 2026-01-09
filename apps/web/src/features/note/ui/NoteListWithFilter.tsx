@@ -4,6 +4,7 @@ import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import type { SelectOptionValue } from "@pickle/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import type { NodataType } from "@/app/(client)/NoteNodata";
 import { useSessionContext } from "@/features/auth";
 import { createClient } from "@/shared/lib/supabase/client";
 import { noteQueries } from "../model/noteQueries";
@@ -15,12 +16,14 @@ interface NoteListWithFilterProps {
   onlyBookmarked?: boolean;
   folderId?: string | null;
   tagId?: string | null;
+  nodataType?: NodataType;
 }
 
 export function NoteListWithFilter({
   onlyBookmarked = false,
   folderId,
   tagId,
+  nodataType,
 }: NoteListWithFilterProps) {
   const client = createClient();
   const { workspace } = useSessionContext();
@@ -56,25 +59,16 @@ export function NoteListWithFilter({
         });
 
   return (
-    <div className="flex flex-col">
-      <NoteListFilter
-        selectedType={selectedType}
-        onTypeChange={setSelectedType}
-        totalCount={allNotes.length}
-        filteredCount={filteredNotes.length}
-      />
-      <NoteList
-        notes={filteredNotes}
-        emptyIcon={onlyBookmarked ? "⭐️" : "📝"}
-        emptyMessage={
-          onlyBookmarked ? "북마크된 노트가 없습니다" : "아직 노트가 없습니다"
-        }
-        emptyDescription={
-          onlyBookmarked
-            ? "중요한 노트를 북마크해 보세요!"
-            : "익스텐션에서 노트를 생성해 보세요!"
-        }
-      />
-    </div>
+    <>
+      {filteredNotes.length > 0 && (
+        <NoteListFilter
+          selectedType={selectedType}
+          onTypeChange={setSelectedType}
+          totalCount={allNotes.length}
+          filteredCount={filteredNotes.length}
+        />
+      )}
+      <NoteList notes={filteredNotes} nodataType={nodataType} />
+    </>
   );
 }

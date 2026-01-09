@@ -22,7 +22,7 @@ export const Sidebar = () => {
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
-  const { workspace, isLoading } = useSessionContext();
+  const { workspace } = useSessionContext();
   const client = createClient();
 
   // ✅ workspace가 로드될 때까지 쿼리 실행 지연
@@ -132,7 +132,7 @@ export const Sidebar = () => {
                     {/* 생성 중인 폴더 로딩 */}
                     {createFolderMutation.isPending && <SidebarFolderLoading />}
 
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col">
                       {folders.map((folder) => (
                         <SidebarFolderItem
                           key={folder.id}
@@ -184,39 +184,37 @@ export const Sidebar = () => {
                   />
                 </button>
               </div>
-              {tagsFolding && (
-                <div className="flex flex-col gap-1">
-                  {tags.map((tag) => {
-                    const style =
-                      TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
-                    const active =
-                      pathname === "/dashboard" &&
-                      searchParams.get("tagId") === tag.id;
-                    return (
-                      <Link
-                        key={tag.id}
-                        href={`/dashboard?tagId=${tag.id}`}
-                        prefetch={false}
-                        className={cn(
-                          "group grid h-9 cursor-pointer grid-cols-[auto_1fr] items-center gap-2 rounded-sm px-3 text-muted-foreground transition-[color,background-color] hover:bg-base-foreground-background hover:text-base-foreground",
-                          active &&
-                            "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
-                        )}
-                      >
-                        <Icon
-                          name="tag_20"
-                          className={cn(style.baseColor, "shrink-0")}
-                        />
-                        <p className="truncate">{tag.name}</p>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+
+              {tagsFolding &&
+                tags.map((tag) => {
+                  const style =
+                    TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
+                  const active =
+                    pathname === "/dashboard" &&
+                    searchParams.get("tagId") === tag.id;
+                  return (
+                    <Link
+                      key={tag.id}
+                      href={`/dashboard?tagId=${tag.id}`}
+                      prefetch={false}
+                      className={cn(
+                        "group grid h-9 cursor-pointer grid-cols-[auto_1fr] items-center gap-2 rounded-sm px-3 text-muted-foreground transition-[color,background-color] hover:bg-base-foreground-background hover:text-base-foreground",
+                        active &&
+                          "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
+                      )}
+                    >
+                      <Icon
+                        name="tag_20"
+                        className={cn(style.baseColor, "shrink-0")}
+                      />
+                      <p className="truncate">{tag.name}</p>
+                    </Link>
+                  );
+                })}
             </div>
           </div>
 
-          <div className="mt-auto">
+          <div className="mt-auto flex flex-col gap-1">
             {/* 설정 */}
             <SidebarNavItem
               href="/settings"

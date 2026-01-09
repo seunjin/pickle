@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { useSessionContext } from "@/features/auth";
 import { NoteList } from "@/features/note";
 import { noteQueries } from "@/features/note/model/noteQueries";
-import EmptyTrashButton from "./EmptyTrashButton";
+import EmptyTrashButton from "@/features/note/ui/EmptyTrashButton";
 
 export function TrashContent() {
   const { workspace } = useSessionContext();
@@ -14,7 +14,7 @@ export function TrashContent() {
   );
 
   return (
-    <div className="h-full p-10">
+    <div className="h-full">
       {trashNotes.length > 0 && (
         <div className="pb-7.5">
           <EmptyTrashButton />
@@ -28,12 +28,7 @@ export function TrashContent() {
           </div>
         }
       >
-        <NoteList
-          notes={trashNotes}
-          readonly
-          emptyMessage="휴지통이 비어 있습니다"
-          emptyDescription="삭제된 노트가 여기에 표시됩니다."
-        />
+        <NoteList notes={trashNotes} readonly nodataType="trash" />
       </Suspense>
     </div>
   );

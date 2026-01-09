@@ -1,7 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { AuthGuard } from "@/features/auth/ui/AuthGuard";
-import { folderQueries } from "@/features/folder";
 import { SidebarWrapper } from "@/features/layout/sidebar/SidebarWrapper";
 import { AppHeader } from "@/features/layout/ui/AppHeader";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
@@ -31,9 +30,9 @@ export default async function AppClientLayout({
           <aside className="h-full w-75 shrink-0 border-base-border border-r">
             <SidebarWrapper />
           </aside>
-          <div className="flex-1">
+          <div className="grid flex-1 grid-rows-[auto_1fr]">
             <AppHeader />
-            <main className="flex-1 overflow-auto">{children}</main>
+            <main className="overflow-auto p-10">{children}</main>
           </div>
         </div>
       </AuthGuard>

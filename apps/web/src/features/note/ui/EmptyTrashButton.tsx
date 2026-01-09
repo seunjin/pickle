@@ -10,8 +10,8 @@ export default function EmptyTrashButton() {
     dialog.open(() => (
       <Confirm
         title="휴지통 비우기"
-        content={`휴지통의 모든 노트가 영구적으로 삭제됩니다.\n계속하시겠습니까?`}
-        confirmButtonText="휴지통 비우기"
+        content={`모든 노트가 영구 삭제됩니다.`}
+        confirmButtonText="비우기"
         isPending={isPending}
         onConfirm={() => {
           emptyTrash();
@@ -20,7 +20,7 @@ export default function EmptyTrashButton() {
     ));
   };
   return (
-    <Button variant="secondary_line" onClick={handleEmptyTrash}>
+    <Button size={"h32"} variant="secondary_line" onClick={handleEmptyTrash}>
       휴지통 비우기 <Icon name="trash_16" />
     </Button>
   );

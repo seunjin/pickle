@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 text-base-muted">
+    <div className="flex h-full flex-col items-center justify-center text-base-muted">
       <div className="mb-4 rounded-full bg-neutral-800 p-6">
         <svg
           xmlns="http://www.w3.org/2000/svg"

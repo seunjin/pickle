@@ -64,17 +64,24 @@ export function ToastCard({
       style={style}
     >
       <div className="pickle-toast-content">
-        <h4 className="pickle-toast-title">
-          {kind === "loading" ? (
-            <Spinner className="size-4" />
-          ) : (
-            <Icon
-              name={kindIcons[kind].icon}
-              className={kindIcons[kind].className}
-            />
+        <div className="flex items-center justify-between gap-4">
+          <h4 className="pickle-toast-title">
+            {kind === "loading" ? (
+              <Spinner className="size-4" />
+            ) : (
+              <Icon
+                name={kindIcons[kind].icon}
+                className={kindIcons[kind].className}
+              />
+            )}
+            {title}
+          </h4>
+          {dismissible && (
+            <button type="button" onClick={handleClose} aria-label="Close">
+              <Icon name="delete_16" />
+            </button>
           )}
-          {title}
-        </h4>
+        </div>
         {description && (
           <p className="pickle-toast-description">{description}</p>
         )}
@@ -107,11 +114,6 @@ export function ToastCard({
           </div>
         )}
       </div>
-      {dismissible && (
-        <button type="button" onClick={handleClose} aria-label="Close">
-          <Icon name="delete_16" />
-        </button>
-      )}
     </div>
   );
 }

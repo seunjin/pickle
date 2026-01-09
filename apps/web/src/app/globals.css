@@ -6,3 +6,7 @@
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../../../../packages/icons/src/**/*.{ts,tsx}";
 @source "./**/*.{ts,tsx}";
+
+:root {
+  --web-header-height: 60px;
+}

@@ -50,7 +50,7 @@ export function TagColorPalette({
       <DropdownMenuContent
         side="bottom"
         align="end"
-        className="z-[110000] shadow-standard"
+        className="z-[110000] w-[155px] shadow-standard"
       >
         <div
           onPointerMove={(e) => e.stopPropagation()}
@@ -91,7 +91,7 @@ export function TagColorPalette({
           <DropdownMenuSeparator />
 
           <DropdownMenuLabel>색</DropdownMenuLabel>
-          <div className="flex w-[190px] flex-wrap gap-1 pb-1.5">
+          <div className="flex flex-wrap gap-1 pb-1.5">
             {TAG_COLORS.map((tag) => {
               const style = TAG_VARIANTS[tag as keyof typeof TAG_VARIANTS];
 

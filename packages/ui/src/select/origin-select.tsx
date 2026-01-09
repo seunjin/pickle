@@ -47,7 +47,7 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         // 레이아웃 및 크기
-        "grid h-9 w-fit grid-cols-[1fr_auto] items-center justify-between gap-2 whitespace-nowrap px-3 py-2 text-sm shadow-xs",
+        "grid h-9 w-fit min-w-25 grid-cols-[1fr_auto] items-center justify-between gap-2 whitespace-nowrap px-3 py-2 text-sm shadow-xs",
         "data-[size=sm]:h-8",
 
         // 배경 및 테두리

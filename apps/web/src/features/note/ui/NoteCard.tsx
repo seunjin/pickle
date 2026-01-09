@@ -118,7 +118,7 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
                       className="w-full cursor-pointer"
                       onClick={handleRestore}
                     >
-                      <Icon name="refresh_16" /> 복원하기
+                      <Icon name="refresh_16" /> 복구하기
                     </button>
                   </DropdownMenuItem>
                 ) : (

@@ -55,14 +55,14 @@ export function Confirm({
 
           {/* Dialog Content */}
           <motion.div
-            className="relative z-10 flex flex-col items-center gap-4 rounded-[16px] border border-base-border-light bg-base-foreground-background px-3 pt-5 pb-3 shadow-standard"
+            className="relative z-10 flex flex-col items-center gap-4 rounded-[8px] border border-base-border-light bg-base-foreground-background px-3 pt-5 pb-3 shadow-standard"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
             <div className="flex flex-col items-center">
               {title && (
-                <h3 className="pb-1 font-semibold text-[14px] text-base-foreground leading-[1.3]">
+                <h3 className="pb-1 font-semibold text-[15px] text-base-foreground leading-[1.3]">
                   {title}
                 </h3>
               )}
