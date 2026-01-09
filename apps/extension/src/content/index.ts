@@ -90,7 +90,36 @@ function extractMetadata() {
 }
 
 function startCapture() {
-  document.body.style.cursor = "crosshair";
+  // 실제 커서 숨기기
+  document.body.style.cursor = "none";
+
+  // 커스텀 커서 생성
+  const customCursor = document.createElement("div");
+  customCursor.id = "pickle-custom-cursor";
+  customCursor.innerHTML = `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <!-- 원형 (14x14, 중앙 배치) -->
+      <circle cx="12" cy="12" r="7" fill="rgba(255,255,255,0.1)" stroke="#888888" stroke-width="1"/>
+      <!-- 십자가 (24x24) -->
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#D0D0D0" stroke-opacity="0.7" stroke-width="1"/>
+      <line x1="0" y1="12" x2="24" y2="12" stroke="#D0D0D0" stroke-opacity="0.7" stroke-width="1"/>
+    </svg>
+  `;
+  customCursor.style.cssText = `
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000001;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+  `;
+  document.body.appendChild(customCursor);
+
+  // 커서 위치 업데이트 함수
+  const updateCursor = (e: MouseEvent) => {
+    customCursor.style.left = `${e.clientX}px`;
+    customCursor.style.top = `${e.clientY}px`;
+  };
+  document.addEventListener("mousemove", updateCursor);
 
   // Overlay 생성
   const overlay = document.createElement("div");
@@ -99,28 +128,20 @@ function startCapture() {
   overlay.style.left = "0";
   overlay.style.width = "100%";
   overlay.style.height = "100%";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+  overlay.style.backgroundColor = "transparent";
   overlay.style.zIndex = "999999";
   overlay.style.display = "flex";
   overlay.style.justifyContent = "center";
   overlay.style.alignItems = "center";
   overlay.id = "pickle-capture-overlay";
 
-  //Overlay 텍스트 추가
-  const overlayChild = document.createElement("span");
-  overlayChild.textContent = "Select area to capture";
-  overlayChild.style.color = "white";
-  overlayChild.style.fontSize = "20px";
-  overlayChild.style.fontWeight = "bold";
-  overlayChild.style.textAlign = "center";
-  overlay.appendChild(overlayChild);
   document.body.appendChild(overlay);
 
   // Selection Box 생성
   const selectionBox = document.createElement("div");
   selectionBox.style.position = "fixed";
-  selectionBox.style.border = "2px solid #22c55e"; // Green color
-  selectionBox.style.backgroundColor = "rgba(34, 197, 94, 0.1)";
+  selectionBox.style.border = "1px solid oklch(0.84696 0.12489 168.53673)"; // Green color
+  selectionBox.style.backgroundColor = "oklch(0.95235 0.04615 172.59756 / 0.1)";
   selectionBox.style.zIndex = "1000000";
   selectionBox.style.display = "none";
   document.body.appendChild(selectionBox);
@@ -145,6 +166,7 @@ function startCapture() {
   };
 
   const onMouseMove = (e: MouseEvent) => {
+    // 커서 위치 업데이트는 항상 실행
     if (!isDragging) return;
 
     const currentX = e.clientX;
@@ -164,6 +186,28 @@ function startCapture() {
     e.stopPropagation();
   };
 
+  // 정리 함수 (공통 로직)
+  const cleanup = () => {
+    document.body.removeChild(overlay);
+    document.body.removeChild(selectionBox);
+    document.body.removeChild(customCursor);
+    document.body.style.cursor = "default";
+
+    overlay.removeEventListener("mousedown", onMouseDown);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+    window.removeEventListener("keydown", onKeyDown);
+    document.removeEventListener("mousemove", updateCursor);
+  };
+
+  // ESC 키 핸들러
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      cleanup();
+      console.log("Capture cancelled by ESC key.");
+    }
+  };
+
   const onMouseUp = () => {
     if (!isDragging) return;
     isDragging = false;
@@ -171,14 +215,7 @@ function startCapture() {
     const rect = selectionBox.getBoundingClientRect();
 
     // 정리
-    document.body.removeChild(overlay);
-    document.body.removeChild(selectionBox);
-    document.body.style.cursor = "default";
-
-    // 이벤트 리스너 제거
-    overlay.removeEventListener("mousedown", onMouseDown);
-    window.removeEventListener("mousemove", onMouseMove);
-    window.removeEventListener("mouseup", onMouseUp);
+    cleanup();
 
     // 너무 작은 영역(실수 클릭) 무시
     if (rect.width < 10 || rect.height < 10) {
@@ -209,4 +246,5 @@ function startCapture() {
   overlay.addEventListener("mousedown", onMouseDown);
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("mouseup", onMouseUp);
+  window.addEventListener("keydown", onKeyDown);
 }

@@ -63,8 +63,8 @@ export function ToastCard({
       className={`pickle-toast-card ${kindStyles[kind]} ${className || ""}`}
       style={style}
     >
-      <div className="pickle-toast-content">
-        <div className="flex items-center justify-between gap-4">
+      <div className="pickle-toast-content w-full">
+        <div className="flex w-full items-center justify-between gap-4">
           <h4 className="pickle-toast-title">
             {kind === "loading" ? (
               <Spinner className="size-4" />

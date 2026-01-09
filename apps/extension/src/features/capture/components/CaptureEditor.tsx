@@ -1,8 +1,10 @@
 import { Header } from "@overlay/components/Header";
+import { Icon } from "@pickle/icons";
 import { Button, ScrollArea, Spinner, TextareaContainLabel } from "@pickle/ui";
 import type { CaptureData, NoteData } from "@shared/types";
 import { useEffect, useState } from "react";
 import { EditorContainer } from "@/content/ui/components/EditorContainer";
+import { SignoutButton } from "@/content/ui/components/SignoutButton";
 
 /**
  * CaptureEditor Component
@@ -98,10 +100,15 @@ export function CaptureEditor({
                     className="max-h-full max-w-full object-contain"
                   />
                   {/* 재캡쳐 버튼 */}
-                  <div className="absolute right-2 bottom-2">
-                    <Button size="h32" onClick={onRetake}>
-                      retake
-                    </Button>
+                  <div className="absolute right-3 bottom-3">
+                    <button
+                      type="button"
+                      className="inline-flex h-7 items-center gap-0.5 rounded-md border border-base-primary bg-base-foreground-background px-1.5 text-base-primary text-sm active:scale-95"
+                      onClick={onRetake}
+                    >
+                      <Icon name="capture_16" className="text-inherit" /> 다시
+                      캡쳐
+                    </button>
                   </div>
                 </div>
               )
@@ -133,6 +140,9 @@ export function CaptureEditor({
             onChange={(e) => onUpdate({ memo: e.target.value })}
             autoFocus
           />
+          <div>
+            <SignoutButton />
+          </div>
         </div>
       </ScrollArea>
       {/* 버튼 영역 */}

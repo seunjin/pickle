@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@pickle/contracts": "workspace:^",
+    "@pickle/icons": "workspace:^",
     "@pickle/ui": "workspace:^",
     "@supabase/supabase-js": "^2.87.1",
     "motion": "^12.23.26",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-hook-form": "^7.70.0"
+    "react-hook-form": "^7.70.0",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "2.0.0-beta.33",

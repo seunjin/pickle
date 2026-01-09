@@ -3,11 +3,12 @@ import { CaptureEditor } from "@features/capture/components/CaptureEditor";
 import { ImageEditor } from "@features/image/components/ImageEditor";
 import { TextEditor } from "@features/text/components/TextEditor";
 import type { CreateNoteInput } from "@pickle/contracts/src/note";
-import { Confirm, Spinner, type ToastKind, useDialog } from "@pickle/ui";
+import { Confirm, Spinner, useDialog } from "@pickle/ui";
 import { saveNote } from "@shared/api/note";
 import { OverlayToast } from "@shared/components/OverlayToast";
 import { extensionStorage } from "@shared/lib/extension-api";
 import { getNoteKey } from "@shared/storage";
+import { useToastStore } from "@shared/stores/useToastStore";
 import type { NoteData, ViewType } from "@shared/types";
 import { AnimatePresence } from "motion/react";
 import { useEffect, useEffectEvent, useState } from "react";
@@ -26,13 +27,9 @@ export default function OverlayApp({
   onClose: () => void;
   tabId: number;
 }) {
-  const [view, setView] = useState<ViewType>("text");
+  const [view, setView] = useState<ViewType>("capture");
   const [note, setNote] = useState<NoteData>({});
-  const [toastState, setToastState] = useState<{
-    title: string;
-    kind: ToastKind;
-    durationMs?: number;
-  } | null>(null);
+  const { toast, showToast, hideToast } = useToastStore();
   const dialog = useDialog();
 
   // Storage Key: Tab ID 기반으로 분리
@@ -67,14 +64,14 @@ export default function OverlayApp({
         />
       ));
     } else {
-      setToastState({
+      showToast({
         title: errorMessage,
         kind: "error",
         durationMs: 4000,
       });
       setErrorMessage(null);
     }
-  }, [errorMessage, dialog]);
+  }, [errorMessage, dialog, showToast]);
 
   // Event handler that reads reactive 'view' state but remains stable
   const handleStorageChange = useEffectEvent(
@@ -122,7 +119,7 @@ export default function OverlayApp({
         console.log("Session recovered! Clearing error...");
         setErrorMessage(null);
         dialog.closeAll(); // Close any login-related dialogs
-        setToastState({
+        showToast({
           title: "로그인이 완료되었습니다.",
           kind: "success",
           durationMs: 4000,
@@ -135,7 +132,7 @@ export default function OverlayApp({
       extensionStorage.onChanged.removeListener(handleStorageChange);
       extensionStorage.onChanged.removeListener(handleSessionRecovery);
     };
-  }, [STORAGE_KEY, dialog]); // handleStorageChange is stable thanks to useEffectEvent
+  }, [STORAGE_KEY, dialog, showToast]); // handleStorageChange is stable thanks to useEffectEvent
 
   const handleUpdateNote = (data: Partial<NoteData>) => {
     setNote((prev) => ({ ...prev, ...data }));
@@ -277,9 +274,7 @@ export default function OverlayApp({
       )}
       {/* Local Overlay Toast */}
       <AnimatePresence>
-        {toastState && (
-          <OverlayToast {...toastState} onClose={() => setToastState(null)} />
-        )}
+        {toast && <OverlayToast {...toast} onClose={hideToast} />}
       </AnimatePresence>
 
       {/* Loading Overlay */}
