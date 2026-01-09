@@ -35,7 +35,9 @@ export default async function AppClientLayout({
             <AppHeader />
             <main className="overflow-auto">
               <ScrollArea className="h-full">
-                <div className="p-10">{children}</div>
+                <div className="h-[calc(100dvh-var(--web-header-height))] p-10">
+                  {children}
+                </div>
               </ScrollArea>
             </main>
           </div>

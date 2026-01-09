@@ -28,6 +28,7 @@ import { folderQueries } from "@/features/folder";
 import { getNote } from "@/features/note/api/getNote";
 import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
+import { TypeLabel } from "@/features/note/ui/TypeLabel";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
 import { createTag as createTagApi } from "@/features/tag/api/createTag";
 import { deleteTag as deleteTagApi } from "@/features/tag/api/deleteTag";
@@ -294,24 +295,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
 
                 {/* 라벨 및 북마크 버튼 */}
                 <div className="flex items-center justify-between pb-3">
-                  <div className="flex items-center gap-1.5">
-                    <div className={type_per_icon[note.type]}>
-                      {note.type === "bookmark" && (
-                        <img src="/type-01.svg" alt="bookmark type icon" />
-                      )}
-                      {(note.type === "image" || note.type === "capture") && (
-                        <img src="/type-02.svg" alt="img type icon" />
-                      )}
-                      {note.type === "text" && (
-                        <img src="/type-03.svg" alt="text type icon" />
-                      )}
-                    </div>
-                    <span className={type_per_class[note.type]}>
-                      {note.type === "image" || note.type === "capture"
-                        ? "IMAGE"
-                        : TYPE_LABELS[note.type] || note.type.toUpperCase()}
-                    </span>
-                  </div>
+                  <TypeLabel type={note.type} mode="detail" />
 
                   {/* 북마크 버튼 - 즉시 저장 유지 */}
                   <button

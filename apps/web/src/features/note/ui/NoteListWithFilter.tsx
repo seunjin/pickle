@@ -68,6 +68,7 @@ export function NoteListWithFilter({
           filteredCount={filteredNotes.length}
         />
       )}
+
       <NoteList notes={filteredNotes} nodataType={nodataType} />
     </>
   );

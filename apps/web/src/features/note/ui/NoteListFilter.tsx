@@ -3,7 +3,7 @@ import { Icon } from "@pickle/icons";
 import { Select, type SelectOptionValue } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useViewStore } from "@/shared/stores/useViewStore";
 import { noteKeys } from "../model/noteQueries";
 
 export const NOTE_FILTER_TYPES = [
@@ -25,7 +25,7 @@ export function NoteListFilter({
   filteredCount?: number;
 }) {
   const queryClient = useQueryClient();
-  const [listForm, setListForm] = useState<"card" | "list">("card");
+  const { listForm, setListForm } = useViewStore();
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({

@@ -1,6 +1,10 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
+import { Activity } from "react";
 import { type NodataType, NoteNodata } from "@/app/(client)/NoteNodata";
-import { NoteCard } from "./NoteCard";
+import { useViewStore } from "@/shared/stores/useViewStore";
+import { NoteCardView } from "./NoteCardView";
+import { NoteContext } from "./NoteContext";
+import { NoteListView } from "./NoteListView";
 
 export function NoteList({
   notes,
@@ -11,15 +15,20 @@ export function NoteList({
   nodataType?: NodataType;
   readonly?: boolean;
 }) {
+  const { listForm } = useViewStore();
+
   if (notes.length === 0) {
     return <NoteNodata type={nodataType} />;
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,295px)] gap-4">
-      {notes.map((note) => (
-        <NoteCard key={note.id} note={note} readonly={readonly} />
-      ))}
-    </div>
+    <NoteContext value={{ notes, readonly }}>
+      <Activity mode={listForm === "list" ? "visible" : "hidden"}>
+        <NoteListView />
+      </Activity>
+      <Activity mode={listForm === "card" ? "visible" : "hidden"}>
+        <NoteCardView />
+      </Activity>
+    </NoteContext>
   );
 }
