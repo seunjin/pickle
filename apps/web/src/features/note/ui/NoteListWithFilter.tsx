@@ -3,6 +3,7 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import type { SelectOptionValue } from "@pickle/ui";
 import { useQuery } from "@tanstack/react-query";
+import { div } from "motion/react-client";
 import { useState } from "react";
 import type { NodataType } from "@/app/(client)/NoteNodata";
 import { useSessionContext } from "@/features/auth";
@@ -59,17 +60,19 @@ export function NoteListWithFilter({
         });
 
   return (
-    <>
-      {filteredNotes.length > 0 && (
-        <NoteListFilter
-          selectedType={selectedType}
-          onTypeChange={setSelectedType}
-          totalCount={allNotes.length}
-          filteredCount={filteredNotes.length}
-        />
-      )}
+    <div className="flex justify-center">
+      <div className="w-[min(80%,1400px)]">
+        {filteredNotes.length > 0 && (
+          <NoteListFilter
+            selectedType={selectedType}
+            onTypeChange={setSelectedType}
+            totalCount={allNotes.length}
+            filteredCount={filteredNotes.length}
+          />
+        )}
 
-      <NoteList notes={filteredNotes} nodataType={nodataType} />
-    </>
+        <NoteList notes={filteredNotes} nodataType={nodataType} />
+      </div>
+    </div>
   );
 }

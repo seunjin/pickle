@@ -30,7 +30,7 @@ export function NoteList({
       <Activity mode={listForm === "card" ? "visible" : "hidden"}>
         <NoteCardView />
       </Activity>
-
+      {/* 
       <div className="sticky bottom-0 flex items-center justify-center gap-4 pb-(--web-header-height)">
         <div className="flex items-center justify-center gap-4 rounded-full border border-base-border-light bg-base-foreground-background/10 p-3 shadow-standard backdrop-blur-sm">
           <button
@@ -51,7 +51,7 @@ export function NoteList({
             <Icon name="arrow_right_16" />
           </button>
         </div>
-      </div>
+      </div> */}
     </NoteContext>
   );
 }
