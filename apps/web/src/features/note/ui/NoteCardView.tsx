@@ -12,7 +12,7 @@ export function NoteCardView() {
   const { notes, readonly } = context;
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,295px)] gap-4 pb-20">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(295px,1fr))] gap-4 pb-20">
       {notes.map((note) => (
         <NoteCard key={note.id} note={note} readonly={readonly} />
       ))}

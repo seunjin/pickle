@@ -8,7 +8,7 @@ export function SignoutButton() {
   const { showToast } = useToastStore();
   const { isLoggedIn, signOut } = useSession();
 
-  // if (!isLoggedIn) return null;
+  if (!isLoggedIn) return null;
 
   const handleSignOut = () => {
     dialog.open(() => (
