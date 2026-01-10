@@ -1,3 +1,4 @@
+import { Icon, type IconName } from "@pickle/icons";
 import { cn } from "@pickle/ui/lib/utils";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 
@@ -8,8 +9,9 @@ export type { SidebarItemBaseProps };
  */
 export const SidebarNavItem = ({
   badge,
+  icon,
   ...props
-}: SidebarItemBaseProps & { badge?: number }) => {
+}: Omit<SidebarItemBaseProps, "icon"> & { badge?: number; icon: IconName }) => {
   const badgeElement =
     badge !== undefined && badge > 0 ? (
       <span
@@ -23,5 +25,25 @@ export const SidebarNavItem = ({
       </span>
     ) : undefined;
 
-  return <SidebarItemBase {...props} rightSection={badgeElement} />;
+  const { active, forceFocus } = props;
+
+  return (
+    <SidebarItemBase
+      {...props}
+      icon={
+        <Icon
+          name={icon}
+          className={cn(
+            "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
+            active && "text-base-primary group-hover:text-base-primary",
+            !active && forceFocus && "text-neutral-300",
+            active &&
+              forceFocus &&
+              "text-base-primary group-hover:text-base-primary",
+          )}
+        />
+      }
+      rightSection={badgeElement}
+    />
+  );
 };

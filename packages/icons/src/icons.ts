@@ -14,7 +14,9 @@ import IconEdit16 from "./react/IconEdit16";
 import IconEllipsis16 from "./react/IconEllipsis16";
 import IconEllipsis20 from "./react/IconEllipsis20";
 import IconErrorCircle16 from "./react/IconErrorCircle16";
+import IconFolder16 from "./react/IconFolder16";
 import IconFolder20 from "./react/IconFolder20";
+import IconInbox16 from "./react/IconInbox16";
 import IconInfoCircle16 from "./react/IconInfoCircle16";
 import IconLayout20 from "./react/IconLayout20";
 import IconLayoutCard16 from "./react/IconLayoutCard16";
@@ -31,6 +33,8 @@ import IconSample20 from "./react/IconSample20";
 import IconSearch20 from "./react/IconSearch20";
 import IconSetting16 from "./react/IconSetting16";
 import IconSetting20 from "./react/IconSetting20";
+import IconSort16 from "./react/IconSort16";
+import IconTag16 from "./react/IconTag16";
 import IconTag20 from "./react/IconTag20";
 import IconTrash16 from "./react/IconTrash16";
 import IconTrash20 from "./react/IconTrash20";
@@ -52,7 +56,9 @@ export {
   IconEllipsis16,
   IconEllipsis20,
   IconErrorCircle16,
+  IconFolder16,
   IconFolder20,
+  IconInbox16,
   IconInfoCircle16,
   IconLayout20,
   IconLayoutCard16,
@@ -69,6 +75,8 @@ export {
   IconSearch20,
   IconSetting16,
   IconSetting20,
+  IconSort16,
+  IconTag16,
   IconTag20,
   IconTrash16,
   IconTrash20,
@@ -91,7 +99,9 @@ export const ICON_PALETTE = {
   ellipsis_16: IconEllipsis16,
   ellipsis_20: IconEllipsis20,
   error_circle_16: IconErrorCircle16,
+  folder_16: IconFolder16,
   folder_20: IconFolder20,
+  inbox_16: IconInbox16,
   info_circle_16: IconInfoCircle16,
   layout_20: IconLayout20,
   layout_card_16: IconLayoutCard16,
@@ -108,6 +118,8 @@ export const ICON_PALETTE = {
   search_20: IconSearch20,
   setting_16: IconSetting16,
   setting_20: IconSetting20,
+  sort_16: IconSort16,
+  tag_16: IconTag16,
   tag_20: IconTag20,
   trash_16: IconTrash16,
   trash_20: IconTrash20,

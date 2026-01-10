@@ -15,6 +15,7 @@ import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
 import { SidebarNavItem } from "./components/SidebarNavItem";
+import { SidebarTagItem } from "./components/SidebarTagItem";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -80,7 +81,7 @@ export const Sidebar = () => {
               {/* 인박스 */}
               <SidebarNavItem
                 href="/dashboard"
-                icon="archive_20"
+                icon="inbox_16"
                 label="Inbox"
                 badge={inboxNotes.length}
                 active={
@@ -93,7 +94,7 @@ export const Sidebar = () => {
               {/* 북마크 */}
               <SidebarNavItem
                 href="/bookmarks"
-                icon="bookmark_20"
+                icon="bookmark_16"
                 label="북마크"
                 active={pathname.includes("/bookmarks")}
               />
@@ -110,10 +111,12 @@ export const Sidebar = () => {
                   <span className="font-semibold text-[13px] text-neutral-650 leading-none tracking-wider">
                     FOLDERS
                   </span>
-                  <Icon
-                    name={foldersFolding ? "arrow_up_16" : "arrow_down_16"}
-                    className="text-inherit"
-                  />
+                  {folders.length === 0 && (
+                    <Icon
+                      name={foldersFolding ? "arrow_up_16" : "arrow_down_16"}
+                      className="text-inherit"
+                    />
+                  )}
                 </button>
               </div>
 
@@ -138,7 +141,6 @@ export const Sidebar = () => {
                           key={folder.id}
                           folderId={folder.id}
                           href={`/dashboard?folderId=${folder.id}`}
-                          icon="folder_20"
                           label={folder.name}
                           active={
                             pathname === "/dashboard" &&
@@ -160,7 +162,7 @@ export const Sidebar = () => {
                       setIsCreatingFolder(true);
                     }}
                   >
-                    <Icon name="plus_20" className="text-color-[inherit]" />
+                    <Icon name="plus_16" className="text-color-[inherit]" />
                     <span>새 폴더 생성하기</span>
                   </button>
                 </div>
@@ -177,40 +179,40 @@ export const Sidebar = () => {
                   <span className="font-semibold text-[13px] text-neutral-650 leading-none tracking-wider">
                     TAGS
                   </span>
-
-                  <Icon
-                    name={tagsFolding ? "arrow_up_16" : "arrow_down_16"}
-                    className="text-inherit"
-                  />
+                  {tags.length > 0 && (
+                    <Icon
+                      name={tagsFolding ? "arrow_up_16" : "arrow_down_16"}
+                      className="text-inherit"
+                    />
+                  )}
                 </button>
               </div>
 
               {tagsFolding &&
                 tags.map((tag) => {
-                  const style =
-                    TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
                   const active =
                     pathname === "/dashboard" &&
                     searchParams.get("tagId") === tag.id;
                   return (
-                    <Link
+                    <SidebarTagItem
                       key={tag.id}
+                      tagId={tag.id}
+                      tagStyle={tag.style}
                       href={`/dashboard?tagId=${tag.id}`}
-                      prefetch={false}
-                      className={cn(
-                        "group grid h-9 cursor-pointer grid-cols-[auto_1fr] items-center gap-2 rounded-sm px-3 text-muted-foreground transition-[color,background-color] hover:bg-base-foreground-background hover:text-base-foreground",
-                        active &&
-                          "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
-                      )}
-                    >
-                      <Icon
-                        name="tag_20"
-                        className={cn(style.baseColor, "shrink-0")}
-                      />
-                      <p className="truncate">{tag.name}</p>
-                    </Link>
+                      icon="tag_16"
+                      label={tag.name}
+                      active={active}
+                    />
                   );
                 })}
+              {/* 태그 노데이터 */}
+              {tags.length === 0 && (
+                <div className="flex h-8 items-center px-3">
+                  <span className="text-[15px] text-base-disabled">
+                    태그없음
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -225,7 +227,7 @@ export const Sidebar = () => {
             {/* 휴지통 */}
             <SidebarNavItem
               href="/trash"
-              icon="trash_20"
+              icon="trash_16"
               label="휴지통"
               active={pathname === "/trash"}
             />

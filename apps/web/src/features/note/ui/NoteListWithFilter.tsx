@@ -60,19 +60,17 @@ export function NoteListWithFilter({
         });
 
   return (
-    <div className="flex justify-center">
-      <div className="w-[min(80%,1400px)]">
-        {filteredNotes.length > 0 && (
-          <NoteListFilter
-            selectedType={selectedType}
-            onTypeChange={setSelectedType}
-            totalCount={allNotes.length}
-            filteredCount={filteredNotes.length}
-          />
-        )}
+    <>
+      {allNotes.length > 0 && (
+        <NoteListFilter
+          selectedType={selectedType}
+          onTypeChange={setSelectedType}
+          totalCount={allNotes.length}
+          filteredCount={filteredNotes.length}
+        />
+      )}
 
-        <NoteList notes={filteredNotes} nodataType={nodataType} />
-      </div>
-    </div>
+      <NoteList notes={filteredNotes} nodataType={nodataType} />
+    </>
   );
 }

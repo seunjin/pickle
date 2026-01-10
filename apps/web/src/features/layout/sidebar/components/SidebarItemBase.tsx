@@ -1,11 +1,11 @@
-import { Icon, type IconName } from "@pickle/icons";
+import { Icon } from "@pickle/icons";
 import { cn } from "@pickle/ui/lib/utils";
 import Link from "next/link";
 import type React from "react";
 
 export interface SidebarItemBaseProps {
   href: string;
-  icon: IconName;
+  icon: React.ReactNode;
   label: string;
   active?: boolean;
   forceFocus?: boolean;
@@ -41,17 +41,9 @@ export const SidebarItemBase = ({
         <div
           className={cn("grid flex-1 grid-cols-[auto_1fr] items-center gap-2")}
         >
-          <Icon
-            name={icon}
-            className={cn(
-              "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
-              active && "text-base-primary group-hover:text-base-primary",
-              !active && forceFocus && "text-neutral-300",
-              active &&
-                forceFocus &&
-                "text-base-primary group-hover:text-base-primary",
-            )}
-          />
+          {/* 아이콘 */}
+          {icon}
+
           <span
             className={cn(
               "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-foreground",

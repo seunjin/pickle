@@ -20,7 +20,7 @@ import {
 import { useFolderNameInput } from "../hooks/useFolderNameInput";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 
-interface SidebarFolderItemProps extends SidebarItemBaseProps {
+interface SidebarFolderItemProps extends Omit<SidebarItemBaseProps, "icon"> {
   folderId: string;
 }
 /**
@@ -28,7 +28,7 @@ interface SidebarFolderItemProps extends SidebarItemBaseProps {
  * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
 export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
-  const { folderId, ...baseProps } = props;
+  const { folderId, active, forceFocus, ...baseProps } = props;
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const dialog = useDialog();
@@ -108,6 +108,19 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
   return (
     <div className="group/folder relative">
       <SidebarItemBase
+        icon={
+          <Icon
+            name={"folder_16"}
+            className={cn(
+              "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
+              active && "text-base-primary group-hover:text-base-primary",
+              !active && forceFocus && "text-neutral-300",
+              active &&
+                forceFocus &&
+                "text-base-primary group-hover:text-base-primary",
+            )}
+          />
+        }
         forceFocus={open}
         {...baseProps}
         rightSection={
@@ -145,7 +158,7 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
                     setIsEditing(true);
                   }}
                 >
-                  <Icon name="edit_16" /> 이름 변경
+                  <Icon name="edit_16" /> 이름 바꾸기
                 </button>
               </DropdownMenuItem>
 
