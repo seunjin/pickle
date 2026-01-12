@@ -1,6 +1,7 @@
 import { Header } from "@overlay/components/Header";
 import { Icon } from "@pickle/icons";
 import { Button, ScrollArea, Spinner, TextareaContainLabel } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import type { CaptureData, NoteData } from "@shared/types";
 import { generateDefaultTitle } from "@shared/utils/generateDefaultTitle";
 import { useEffect, useState } from "react";
@@ -133,11 +134,18 @@ export function CaptureEditor({
                   <div className="absolute right-3 bottom-3">
                     <button
                       type="button"
-                      className="inline-flex h-7 items-center gap-0.5 rounded-md border border-base-primary bg-base-foreground-background px-1.5 text-base-primary text-sm active:scale-95"
+                      className={cn(
+                        "group/retake inline-flex h-7 items-center gap-0.5 rounded-md border border-base-border-light bg-base-foreground-background px-1.5 text-base-muted-foreground text-sm transition-colors active:scale-95",
+                        // hover
+                        "hover:border-base-primary hover:text-base-primary",
+                      )}
                       onClick={onRetake}
                     >
-                      <Icon name="capture_16" className="text-inherit" /> 다시
-                      캡쳐
+                      <Icon
+                        name="capture_16"
+                        className="transition-colors group-hover/retake:text-base-primary"
+                      />{" "}
+                      다시 캡쳐
                     </button>
                   </div>
                 </div>

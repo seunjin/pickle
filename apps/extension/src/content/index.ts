@@ -140,8 +140,8 @@ function startCapture() {
   // Selection Box 생성
   const selectionBox = document.createElement("div");
   selectionBox.style.position = "fixed";
-  selectionBox.style.border = "1px solid oklch(0.84696 0.12489 168.53673)"; // Green color
-  selectionBox.style.backgroundColor = "oklch(0.95235 0.04615 172.59756 / 0.1)";
+  selectionBox.style.border = "2px solid oklch(0.84696 0.12489 168.53673)"; // Green color
+  selectionBox.style.backgroundColor = "rgba(162, 162, 162, 0.24)";
   selectionBox.style.zIndex = "1000000";
   selectionBox.style.display = "none";
   document.body.appendChild(selectionBox);
