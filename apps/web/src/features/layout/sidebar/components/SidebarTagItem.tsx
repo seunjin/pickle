@@ -8,6 +8,8 @@ import {
   DropdownMenuTrigger,
   Input,
   TAG_VARIANTS,
+  type TagColor,
+  TagColorPalette,
   useDialog,
   useToast,
 } from "@pickle/ui";
@@ -47,8 +49,15 @@ export const SidebarTagItem = (props: SidebarTagItemProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const preventFocusRestore = useRef(false);
 
-  const style = TAG_VARIANTS[tagStyle as keyof typeof TAG_VARIANTS];
+  const [tempColor, setTempColor] = useState<TagColor>(tagStyle as TagColor);
+
+  const style = TAG_VARIANTS[tempColor as keyof typeof TAG_VARIANTS];
   const forceFocus = open;
+
+  // 서버 데이터와 로컬 상태 동기화
+  useEffect(() => {
+    setTempColor(tagStyle as TagColor);
+  }, [tagStyle]);
 
   // 편집 모드 진입 시 자동 포커스
   useEffect(() => {
@@ -151,6 +160,18 @@ export const SidebarTagItem = (props: SidebarTagItemProps) => {
                   <Icon name="edit_16" /> 이름 바꾸기
                 </button>
               </DropdownMenuItem>
+              <TagColorPalette
+                color={tempColor}
+                onColorChange={setTempColor}
+                onOpenChange={(isOpen) => {
+                  if (!isOpen && tempColor !== tagStyle) {
+                    updateTagMutation.mutate({
+                      tagId,
+                      input: { style: tempColor },
+                    });
+                  }
+                }}
+              />
 
               <DropdownMenuItem asChild>
                 <button

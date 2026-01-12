@@ -15,7 +15,7 @@ import {
 import { Input } from "../input";
 import { cn } from "../lib/utils";
 import { ScrollArea } from "../scroll-area";
-import { TagColorPalette } from "./TagColorPalette";
+import { TagEditPanel } from "./TagEditPanel";
 import { MAX_TAG_NAME_LENGTH } from "./tag.constants";
 
 interface TagMakerProps {
@@ -293,7 +293,7 @@ const TagMaker = ({
                       </div>
 
                       <div className="ml-auto flex shrink-0 items-center gap-2">
-                        <TagColorPalette
+                        <TagEditPanel
                           trigger={
                             <ActionButton
                               icon="ellipsis_16"

@@ -63,9 +63,10 @@ const DropdownMenuItem = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     inset?: boolean;
+    forceFocus?: boolean;
     variant?: "default" | "destructive";
   }
->(({ className, inset, variant = "default", ...props }, ref) => (
+>(({ className, inset, forceFocus, variant = "default", ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
     data-slot="dropdown-menu-item"
@@ -90,6 +91,8 @@ const DropdownMenuItem = React.forwardRef<
       "data-[variant=destructive]:focus:text-red-500",
       "data-[variant=destructive]:hover:[&_svg]:text-red-500", // 아이콘도 항상 텍스트 색상(빨강)을 따르도록
       "hover:bg-neutral-700",
+      forceFocus &&
+        "bg-neutral-700 text-base-foreground [&_svg]:text-neutral-300",
       className,
     )}
     {...props}
