@@ -112,7 +112,7 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
           <Icon
             name={"folder_16"}
             className={cn(
-              "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
+              "shrink-0 transition-colors group-hover:text-neutral-300",
               active && "text-base-primary group-hover:text-base-primary",
               !active && forceFocus && "text-neutral-300",
               active &&
@@ -195,7 +195,7 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
             aria-label="닫기"
           />
           <div className="absolute top-[50%] left-[50%] z-50 flex h-[46px] w-full translate-x-[-50%] translate-y-[-50%] items-center gap-2 rounded-lg bg-neutral-850 px-3 shadow-standard outline outline-base-border-light">
-            <Icon name="folder_20" className="shrink-0 text-neutral-400" />
+            <Icon name="folder_16" className="shrink-0 text-neutral-400" />
             <Input
               ref={inputRef}
               size={"mini"}

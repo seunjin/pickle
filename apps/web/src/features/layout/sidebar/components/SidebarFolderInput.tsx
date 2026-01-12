@@ -59,7 +59,7 @@ export const SidebarFolderInput = ({
             // "h-[46px] bg-neutral-850 shadow-md outline outline-base-border-light"
           )}
         >
-          <Icon name="folder_20" className="shrink-0" />
+          <Icon name="folder_16" className="shrink-0" />
           <Input
             autoFocus
             type="text"

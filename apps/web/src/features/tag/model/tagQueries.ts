@@ -10,6 +10,7 @@ export const tagKeys = {
 };
 
 export const tagQueries = {
+  all: tagKeys.all,
   list: (
     params: { client?: SupabaseClient<Database>; workspaceId?: string } = {},
   ) =>
