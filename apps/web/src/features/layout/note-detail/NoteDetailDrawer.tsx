@@ -27,6 +27,8 @@ import { type HTMLAttributes, useEffect, useState } from "react";
 import { folderQueries } from "@/features/folder";
 import { getNote } from "@/features/note/api/getNote";
 import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
+import { usePermanentlyDeleteNoteMutation } from "@/features/note/model/usePermanentlyDeleteNoteMutation";
+import { useRestoreNoteMutation } from "@/features/note/model/useRestoreNoteMutation";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
 import { TypeLabel } from "@/features/note/ui/TypeLabel";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
@@ -41,6 +43,7 @@ import { createClient } from "@/shared/lib/supabase/client";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
+  readOnly?: boolean;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -71,7 +74,10 @@ const type_per_icon: Record<
     "flex items-center justify-center size-6 rounded-sm bg-yellow-500/10",
 };
 
-export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
+export default function NoteDetailDrawer({
+  note,
+  readOnly,
+}: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
   const dialog = useDialog();
   const queryClient = useQueryClient();
@@ -82,6 +88,10 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   const { mutateAsync: updateNote } = updateNoteMutation;
   const deleteNoteMutation = useDeleteNoteMutation();
   const { mutateAsync: deleteNote } = deleteNoteMutation;
+  const permanentlyDeleteNoteMutation = usePermanentlyDeleteNoteMutation();
+  const { mutateAsync: permanentlyDeleteNote } = permanentlyDeleteNoteMutation;
+  const restoreNoteMutation = useRestoreNoteMutation();
+  const { mutateAsync: restoreNote } = restoreNoteMutation;
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
 
   // ✅ Sidebar prefetch 재사용 (추가 API 호출 없음!)
@@ -298,30 +308,32 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                   <TypeLabel type={note.type} mode="detail" />
 
                   {/* 북마크 버튼 - 즉시 저장 유지 */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const isBookmarked = !!currentNote.bookmarked_at;
-                      const newBookmarkedAt = isBookmarked
-                        ? null
-                        : new Date().toISOString();
-                      // 북마크는 updateNoteAsync를 기다리지 않고 낙관적으로 처리될 수 있음
-                      updateNote({
-                        noteId: currentNote.id,
-                        payload: { bookmarked_at: newBookmarkedAt },
-                      });
-                    }}
-                  >
-                    <Icon
-                      name="bookmark_20"
-                      className={cn(
-                        "transition-colors",
-                        currentNote.bookmarked_at
-                          ? "text-base-primary"
-                          : "text-neutral-500",
-                      )}
-                    />
-                  </button>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const isBookmarked = !!currentNote.bookmarked_at;
+                        const newBookmarkedAt = isBookmarked
+                          ? null
+                          : new Date().toISOString();
+                        // 북마크는 updateNoteAsync를 기다리지 않고 낙관적으로 처리될 수 있음
+                        updateNote({
+                          noteId: currentNote.id,
+                          payload: { bookmarked_at: newBookmarkedAt },
+                        });
+                      }}
+                    >
+                      <Icon
+                        name="bookmark_20"
+                        className={cn(
+                          "transition-colors",
+                          currentNote.bookmarked_at
+                            ? "text-base-primary"
+                            : "text-neutral-500",
+                        )}
+                      />
+                    </button>
+                  )}
                 </div>
 
                 {/* form */}
@@ -338,6 +350,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                     }
                     required
                     error={errors.title}
+                    readOnly={readOnly}
                   />
 
                   {currentNote.type === "text" && (
@@ -352,10 +365,14 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       }
                       required
                       error={errors.text}
+                      readOnly={readOnly}
                     />
                   )}
 
-                  <URLComponent url={currentNote.url || ""} />
+                  <URLComponent
+                    url={currentNote.url || ""}
+                    readOnly={readOnly}
+                  />
 
                   {/* MEMO */}
                   <TextareaContainLabel
@@ -367,6 +384,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                         memo: e.target.value,
                       }))
                     }
+                    readOnly={readOnly}
                   />
                 </div>
 
@@ -389,6 +407,7 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       { value: "inbox", label: "Inbox" },
                       ...folders.map((f) => ({ value: f.id, label: f.name })),
                     ]}
+                    disabled={readOnly}
                   />
                 </div>
 
@@ -418,11 +437,13 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
                       }
                       onDeleteTag={(tagId) => deleteTagMutation.mutate(tagId)}
                       trigger={
-                        <ActionButton
-                          icon="plus_16"
-                          onClick={() => setIsTagMakerOpen(!isTagMakerOpen)}
-                          forceFocus={isTagMakerOpen}
-                        />
+                        readOnly ? null : (
+                          <ActionButton
+                            icon="plus_16"
+                            onClick={() => setIsTagMakerOpen(!isTagMakerOpen)}
+                            forceFocus={isTagMakerOpen}
+                          />
+                        )
                       }
                     />
                   </div>
@@ -518,35 +539,81 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
 
             {/* drawer footer */}
             <div className="mt-auto flex gap-2 border-base-border-light border-t p-5 pb-0">
-              <Button
-                icon="trash_16"
-                variant={"icon"}
-                className="shrink-0"
-                onClick={() => {
-                  dialog.open(() => (
-                    <Confirm
-                      title="노트 삭제"
-                      content="이 노트를 삭제하시겠습니까?"
-                      onConfirm={async () => {
-                        try {
-                          await deleteNote(note.id);
-                          close();
-                        } catch (error) {
-                          console.error("Failed to delete note:", error);
-                        }
-                      }}
-                    />
-                  ));
-                }}
-              />
-              <Button
-                className="flex-1"
-                isPending={isSavePending}
-                disabled={!isValid}
-                onClick={handleSave}
-              >
-                저장하기
-              </Button>
+              {readOnly ? (
+                <>
+                  <Button
+                    icon="trash_16"
+                    variant={"icon"}
+                    iconSide="left"
+                    className="shrink-0"
+                    onClick={() => {
+                      dialog.open(() => (
+                        <Confirm
+                          title="노트 영구 삭제"
+                          content="이 노트를 영구 삭제하시겠습니까?"
+                          onConfirm={async () => {
+                            try {
+                              await permanentlyDeleteNote(note.id);
+                              close();
+                            } catch (error) {
+                              console.error(
+                                "Failed to permanently delete note:",
+                                error,
+                              );
+                            }
+                          }}
+                        />
+                      ));
+                    }}
+                  />
+                  <Button
+                    icon="refresh_16"
+                    className="flex-1"
+                    onClick={async () => {
+                      try {
+                        await restoreNote(note.id);
+                        close();
+                      } catch (error) {
+                        console.error("Failed to restore note:", error);
+                      }
+                    }}
+                  >
+                    복구하기
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    icon="trash_16"
+                    variant={"icon"}
+                    className="shrink-0"
+                    onClick={() => {
+                      dialog.open(() => (
+                        <Confirm
+                          title="노트 삭제"
+                          content="이 노트를 삭제하시겠습니까?"
+                          onConfirm={async () => {
+                            try {
+                              await deleteNote(note.id);
+                              close();
+                            } catch (error) {
+                              console.error("Failed to delete note:", error);
+                            }
+                          }}
+                        />
+                      ));
+                    }}
+                  />
+                  <Button
+                    className="flex-1"
+                    isPending={isSavePending}
+                    disabled={!isValid || readOnly}
+                    onClick={handleSave}
+                  >
+                    저장하기
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         </motion.div>
@@ -555,7 +622,13 @@ export default function NoteDetailDrawer({ note }: NoteDetailDrawerProps) {
   );
 }
 
-const URLComponent = ({ url }: { url: string }) => {
+const URLComponent = ({
+  url,
+  readOnly,
+}: {
+  url: string;
+  readOnly?: boolean;
+}) => {
   return (
     <div
       className={cn(
@@ -580,15 +653,19 @@ const URLComponent = ({ url }: { url: string }) => {
           </span>
           <span className="text-[12px] text-base-muted leading-none">*</span>
         </div>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="cursor-pointer text-base-muted hover:text-neutral-300 active:scale-95"
-          title="URL 복사"
-        >
-          <Icon name="link_12" className="text-inherit" />
-        </a>
+        {!readOnly && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "cursor-pointer text-base-muted hover:text-neutral-300 active:scale-95",
+            )}
+            title="URL 복사"
+          >
+            <Icon name="link_12" className="text-inherit" />
+          </a>
+        )}
       </div>
       <p className="block text-[14px] text-form-input-disabled-foreground leading-[1.3] underline-offset-3 transition-[color,underline]">
         {url}

@@ -65,7 +65,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     variant = "primary",
     size = "h38",
     asChild = false,
-    iconSide = "right",
+    iconSide = "left",
     icon,
     isPending,
     disabled: disabledProp,

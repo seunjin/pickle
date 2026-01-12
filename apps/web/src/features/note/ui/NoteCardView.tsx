@@ -9,12 +9,12 @@ export function NoteCardView() {
     throw new Error("NoteCardView must be used within a NoteContext");
   }
 
-  const { notes, readonly } = context;
+  const { notes, readOnly } = context;
 
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(295px,1fr))] gap-4 pb-20">
       {notes.map((note) => (
-        <NoteCard key={note.id} note={note} readonly={readonly} />
+        <NoteCard key={note.id} note={note} readOnly={readOnly} />
       ))}
     </div>
   );

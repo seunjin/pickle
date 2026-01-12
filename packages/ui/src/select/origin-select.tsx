@@ -56,7 +56,7 @@ function SelectTrigger({
 
         // 포커스 및 상태
         "focus-visible:outline focus-visible:outline-base-primary",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "disabled:cursor-not-allowed disabled:text-form-input-disabled-foreground",
         "data-[placeholder]:text-muted-foreground",
 
         // 에러 상태 (Aria-invalid)

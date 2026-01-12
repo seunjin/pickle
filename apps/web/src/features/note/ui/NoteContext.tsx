@@ -1,9 +1,9 @@
 import type { NoteWithAsset } from "@pickle/contracts";
 import { createContext } from "react";
 
-interface NoteContextValue {
+export interface NoteContextValue {
   notes: NoteWithAsset[];
-  readonly: boolean;
+  readOnly: boolean;
 }
 
 export const NoteContext = createContext<NoteContextValue | null>(null);

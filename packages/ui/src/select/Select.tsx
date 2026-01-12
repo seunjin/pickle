@@ -18,11 +18,8 @@ export type SelectOption = {
 };
 
 interface SelectProps {
-  options: {
-    value: string;
-    label: string;
-    disabled?: boolean;
-  }[];
+  options: SelectOption[];
+  disabled?: boolean;
   defaultValue?: string;
   placeholder?: React.ReactNode;
   value?: string;
@@ -30,6 +27,7 @@ interface SelectProps {
 }
 export function Select({
   options,
+  disabled,
   defaultValue,
   placeholder,
   value,
@@ -43,6 +41,7 @@ export function Select({
         onOpenChange={setOpen}
         value={value ?? defaultValue}
         onValueChange={onValueChange}
+        disabled={disabled}
       >
         <SelectTrigger
           className={cn(

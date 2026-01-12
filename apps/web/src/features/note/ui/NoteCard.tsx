@@ -22,10 +22,10 @@ import { Thumbnail } from "./thumbnail/Thumbnail";
 
 interface NoteCardProps {
   note: NoteWithAsset;
-  readonly?: boolean;
+  readOnly?: boolean;
 }
 
-export function NoteCard({ note, readonly }: NoteCardProps) {
+export function NoteCard({ note, readOnly }: NoteCardProps) {
   const dialog = useDialog();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -36,9 +36,7 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
   const isBookmarked = !!note.bookmarked_at;
 
   const handleCardClick = () => {
-    if (!readonly) {
-      dialog.open(() => <NoteDetailDrawer note={note} />);
-    }
+    dialog.open(() => <NoteDetailDrawer note={note} readOnly={readOnly} />);
   };
 
   const handleBookmarkToggle = (e: React.MouseEvent) => {
@@ -64,7 +62,7 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
   };
 
   return (
-    <NoteCardContainer readonly={readonly} onClick={handleCardClick}>
+    <NoteCardContainer readOnly={readOnly} onClick={handleCardClick}>
       {/* thumbnail */}
       {note.type === "text" ? (
         // 텍스트 노트의 경우
@@ -111,16 +109,27 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="bottom" sideOffset={5}>
-                {readonly ? (
-                  <DropdownMenuItem asChild>
-                    <button
-                      type="button"
-                      className="w-full cursor-pointer"
-                      onClick={handleRestore}
-                    >
-                      <Icon name="refresh_16" /> 복구하기
-                    </button>
-                  </DropdownMenuItem>
+                {readOnly ? (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <button
+                        type="button"
+                        className="w-full cursor-pointer"
+                        onClick={handleRestore}
+                      >
+                        <Icon name="refresh_16" /> 복구하기
+                      </button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <button
+                        type="button"
+                        className="w-full cursor-pointer"
+                        onClick={handleRestore}
+                      >
+                        <Icon name="trash_16" /> 영구 삭제
+                      </button>
+                    </DropdownMenuItem>
+                  </>
                 ) : (
                   <DropdownMenuItem asChild>
                     <button
@@ -135,15 +144,19 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
               </DropdownMenuContent>
             </DropdownMenu>
             {/* 북마크 버튼 */}
-            <ActionButton
-              icon={"bookmark_16"}
-              variant="action"
-              disabled={readonly}
-              className={
-                isBookmarked ? "text-base-primary hover:text-base-primary" : ""
-              }
-              onClick={handleBookmarkToggle}
-            />
+            {!readOnly && (
+              <ActionButton
+                icon={"bookmark_16"}
+                variant="action"
+                disabled={readOnly}
+                className={
+                  isBookmarked
+                    ? "text-base-primary hover:text-base-primary"
+                    : ""
+                }
+                onClick={handleBookmarkToggle}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -154,11 +167,11 @@ export function NoteCard({ note, readonly }: NoteCardProps) {
 function NoteCardContainer({
   children,
   onClick,
-  readonly,
+  readOnly,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
-  readonly?: boolean;
+  readOnly?: boolean;
 }) {
   return (
     <div
@@ -172,7 +185,6 @@ function NoteCardContainer({
       }}
       className={cn(
         "grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag",
-        readonly && "cursor-default",
       )}
     >
       {children}

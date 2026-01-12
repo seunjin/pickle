@@ -1,9 +1,7 @@
 "use client";
 import { Icon } from "@pickle/icons";
 import { Select, type SelectOptionValue } from "@pickle/ui";
-import { cn } from "@pickle/ui/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { useViewStore } from "@/shared/stores/useViewStore";
 import { noteKeys } from "../model/noteQueries";
 
 export const NOTE_FILTER_TYPES = [
@@ -25,7 +23,6 @@ export function NoteListFilter({
   filteredCount?: number;
 }) {
   const queryClient = useQueryClient();
-  const { listForm, setListForm } = useViewStore();
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({
@@ -45,33 +42,7 @@ export function NoteListFilter({
           onValueChange={onTypeChange}
           options={NOTE_FILTER_TYPES}
         />
-        {/*  노트카드 레이아웃 버튼 */}
-        <div className="flex h-9 items-center gap-0.5 rounded-lg border border-base-border-light bg-form-input-background px-[2px]">
-          <button
-            type="button"
-            className={cn(
-              "inline-flex size-7.5 items-center justify-center rounded-md text-base-muted transition-colors active:scale-95",
-              "hover:bg-base-foreground-background hover:text-neutral-300",
-              listForm === "card" &&
-                "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
-            )}
-            onClick={() => setListForm("card")}
-          >
-            <Icon name="layout_card_16" className="text-inherit" />
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "inline-flex size-7.5 items-center justify-center rounded-md text-base-muted transition-colors active:scale-95",
-              "hover:bg-base-foreground-background hover:text-neutral-300",
-              listForm === "list" &&
-                "bg-base-primary-active-background text-base-primary hover:bg-base-primary-active-background hover:text-base-primary",
-            )}
-            onClick={() => setListForm("list")}
-          >
-            <Icon name="layout_list_16" className="text-inherit" />
-          </button>
-        </div>
+
         {/* retry */}
         <div className="flex size-9 items-center justify-center rounded-lg border border-base-border-light bg-form-input-background px-[2px]">
           <button

@@ -28,7 +28,7 @@ export function TrashContent() {
           </div>
         }
       >
-        <NoteList notes={trashNotes} readonly nodataType="trash" />
+        <NoteList notes={trashNotes} readOnly nodataType="trash" />
       </Suspense>
     </div>
   );

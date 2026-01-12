@@ -10,8 +10,9 @@ export const TextareaContainLabel = React.forwardRef<
     required?: boolean;
     error?: string | boolean;
     urlMode?: boolean;
+    readOnly?: boolean;
   }
->(({ label, required, error, urlMode, className, ...props }, ref) => {
+>(({ label, required, error, urlMode, className, readOnly, ...props }, ref) => {
   const id = useId(); // 고유 ID 생성
   return (
     <div>
@@ -30,6 +31,7 @@ export const TextareaContainLabel = React.forwardRef<
           /* 6. 선택(Selection) 스타일 */
           "selection:bg-base-muted-foreground",
           /* 7. 읽기 전용(ReadOnly) 상태 */
+          readOnly && "ring-0 focus-within:ring-0",
           error && "ring-1 ring-system-error focus-within:ring-system-error",
           className,
         )}
@@ -49,13 +51,14 @@ export const TextareaContainLabel = React.forwardRef<
         <textarea
           id={id}
           ref={ref}
-          {...props}
           className={cn(
             "field-sizing-content block min-h-[40px] w-full resize-none appearance-none border-0 bg-transparent p-0 text-sm outline-none placeholder:text-form-input-placeholder",
             /* 8. 비활성화(Disabled) 상태 */
             "disabled:cursor-not-allowed disabled:text-form-input-disabled-foreground",
-            "readOnly:cursor-not-allowed readOnly:text-form-input-disabled-foreground",
+            "read-only:cursor-default read-only:text-form-input-disabled-foreground",
           )}
+          readOnly={readOnly}
+          {...props}
         />
       </div>
       {error && (
