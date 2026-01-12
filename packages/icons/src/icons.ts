@@ -5,6 +5,7 @@ import IconArrowRight16 from "./react/IconArrowRight16";
 import IconArrowUp16 from "./react/IconArrowUp16";
 import IconBookmark16 from "./react/IconBookmark16";
 import IconBookmark20 from "./react/IconBookmark20";
+import IconBrush16 from "./react/IconBrush16";
 import IconCapture16 from "./react/IconCapture16";
 import IconCheck16 from "./react/IconCheck16";
 import IconCheckCircle16 from "./react/IconCheckCircle16";
@@ -47,6 +48,7 @@ export {
   IconArrowUp16,
   IconBookmark16,
   IconBookmark20,
+  IconBrush16,
   IconCapture16,
   IconCheck16,
   IconCheckCircle16,
@@ -90,6 +92,7 @@ export const ICON_PALETTE = {
   arrow_up_16: IconArrowUp16,
   bookmark_16: IconBookmark16,
   bookmark_20: IconBookmark20,
+  brush_16: IconBrush16,
   capture_16: IconCapture16,
   check_16: IconCheck16,
   check_circle_16: IconCheckCircle16,

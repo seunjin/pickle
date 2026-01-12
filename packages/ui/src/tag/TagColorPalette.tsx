@@ -44,7 +44,7 @@ export function TagColorPalette({
               e.stopPropagation();
             }}
           >
-            <Icon name="tag_16" /> 색상 변경
+            <Icon name="brush_16" /> 색상 변경
           </button>
         </DropdownMenuItem>
       </DropdownMenuTrigger>
