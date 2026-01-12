@@ -10,7 +10,6 @@ import {
   TAG_VARIANTS,
   TagMaker,
   TextareaContainLabel,
-  toast,
   useDialog,
   useDialogController,
   useToast,
@@ -27,8 +26,6 @@ import { type HTMLAttributes, useEffect, useState } from "react";
 import { folderQueries } from "@/features/folder";
 import { getNote } from "@/features/note/api/getNote";
 import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
-import { usePermanentlyDeleteNoteMutation } from "@/features/note/model/usePermanentlyDeleteNoteMutation";
-import { useRestoreNoteMutation } from "@/features/note/model/useRestoreNoteMutation";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
 import { TypeLabel } from "@/features/note/ui/TypeLabel";
 import { Thumbnail } from "@/features/note/ui/thumbnail/Thumbnail";
@@ -88,10 +85,6 @@ export default function NoteDetailDrawer({
   const { mutateAsync: updateNote } = updateNoteMutation;
   const deleteNoteMutation = useDeleteNoteMutation();
   const { mutateAsync: deleteNote } = deleteNoteMutation;
-  const permanentlyDeleteNoteMutation = usePermanentlyDeleteNoteMutation();
-  const { mutateAsync: permanentlyDeleteNote } = permanentlyDeleteNoteMutation;
-  const restoreNoteMutation = useRestoreNoteMutation();
-  const { mutateAsync: restoreNote } = restoreNoteMutation;
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
 
   // ✅ Sidebar prefetch 재사용 (추가 API 호출 없음!)
@@ -538,83 +531,39 @@ export default function NoteDetailDrawer({
             </ScrollArea>
 
             {/* drawer footer */}
-            <div className="mt-auto flex gap-2 border-base-border-light border-t p-5 pb-0">
-              {readOnly ? (
-                <>
-                  <Button
-                    icon="trash_16"
-                    variant={"icon"}
-                    iconSide="left"
-                    className="shrink-0"
-                    onClick={() => {
-                      dialog.open(() => (
-                        <Confirm
-                          title="노트 영구 삭제"
-                          content="이 노트를 영구 삭제하시겠습니까?"
-                          onConfirm={async () => {
-                            try {
-                              await permanentlyDeleteNote(note.id);
-                              close();
-                            } catch (error) {
-                              console.error(
-                                "Failed to permanently delete note:",
-                                error,
-                              );
-                            }
-                          }}
-                        />
-                      ));
-                    }}
-                  />
-                  <Button
-                    icon="refresh_16"
-                    className="flex-1"
-                    onClick={async () => {
-                      try {
-                        await restoreNote(note.id);
-                        close();
-                      } catch (error) {
-                        console.error("Failed to restore note:", error);
-                      }
-                    }}
-                  >
-                    복구하기
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    icon="trash_16"
-                    variant={"icon"}
-                    className="shrink-0"
-                    onClick={() => {
-                      dialog.open(() => (
-                        <Confirm
-                          title="노트 삭제"
-                          content="이 노트를 삭제하시겠습니까?"
-                          onConfirm={async () => {
-                            try {
-                              await deleteNote(note.id);
-                              close();
-                            } catch (error) {
-                              console.error("Failed to delete note:", error);
-                            }
-                          }}
-                        />
-                      ));
-                    }}
-                  />
-                  <Button
-                    className="flex-1"
-                    isPending={isSavePending}
-                    disabled={!isValid || readOnly}
-                    onClick={handleSave}
-                  >
-                    저장하기
-                  </Button>
-                </>
-              )}
-            </div>
+            {!readOnly && (
+              <div className="mt-auto flex gap-2 border-base-border-light border-t p-5 pb-0">
+                <Button
+                  icon="trash_16"
+                  variant={"icon"}
+                  className="shrink-0"
+                  onClick={() => {
+                    dialog.open(() => (
+                      <Confirm
+                        title="노트 삭제"
+                        content="이 노트를 삭제하시겠습니까?"
+                        onConfirm={async () => {
+                          try {
+                            await deleteNote(note.id);
+                            close();
+                          } catch (error) {
+                            console.error("Failed to delete note:", error);
+                          }
+                        }}
+                      />
+                    ));
+                  }}
+                />
+                <Button
+                  className="flex-1"
+                  isPending={isSavePending}
+                  disabled={!isValid}
+                  onClick={handleSave}
+                >
+                  저장하기
+                </Button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
