@@ -1,4 +1,5 @@
 import type { Database } from "@pickle/contracts";
+import { MAX_STORAGE_BYTES } from "@pickle/contracts";
 import type {
   CreateNoteInput,
   StoredNoteData,
@@ -126,6 +127,31 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         const res = await fetch(imageUrl);
         const blob = await res.blob();
         const fileSize = blob.size;
+
+        // 5-1-1. 스토리지 용량 체크 (50MB 제한)
+        const { data: assets, error: usageError } = await supabase
+          .from("assets")
+          .select("full_size_bytes, thumb_size_bytes")
+          .eq("workspace_id", workspaceMember.workspace_id);
+
+        if (usageError) {
+          console.error("Storage usage check failed:", usageError);
+        } else {
+          const currentUsage =
+            assets?.reduce(
+              (acc, a) =>
+                acc + (a.full_size_bytes || 0) + (a.thumb_size_bytes || 0),
+              0,
+            ) || 0;
+
+          if (currentUsage + fileSize > MAX_STORAGE_BYTES) {
+            return {
+              success: false,
+              error: `스토리지 용량이 부족합니다. (최대 50MB, 현재 ${(currentUsage / (1024 * 1024)).toFixed(1)}MB 사용 중)`,
+            };
+          }
+        }
+
         const fileName = `${crypto.randomUUID()}.png`;
 
         // Folder Structure: {workspace_id}/{user_id}/{filename}

@@ -5,6 +5,7 @@ export type { Database } from "./database";
 export * from "./database-generated";
 export * from "./folder";
 export * from "./note";
+export * from "./storage";
 export * from "./tag";
 export * from "./user";
 export * from "./workspace";

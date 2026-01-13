@@ -11,6 +11,7 @@ export function useEmptyTrashMutation() {
     mutationFn: () => permanentlyDeleteAllTrashNotes(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace"] });
       dialog.close();
       toast.success({
         title: "휴지통의 비우기에 성공했습니다.",

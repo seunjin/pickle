@@ -14,6 +14,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useSignOut, useUser } from "@/features/auth";
 import { folderQueries } from "@/features/folder";
 import { tagQueries } from "@/features/tag/model/tagQueries";
+import { StorageUsage } from "@/features/workspace/ui/StorageUsage";
 import { createClient } from "@/shared/lib/supabase/client";
 
 const ROUTE_CONFIG: Record<string, { title: string }> = {
@@ -88,9 +89,9 @@ export function AppHeader() {
         )}
       </div>
 
-      <div className="flex w-100 shrink-0 items-center gap-3">
+      <div className="flex shrink-0 items-center gap-6">
         <InputWithAddon
-          containerClassName="group w-full"
+          containerClassName="group w-80"
           placeholder="검색어를 입력해 주세요."
           startAddon={
             <Icon
@@ -99,6 +100,8 @@ export function AppHeader() {
             />
           }
         />
+
+        <StorageUsage />
 
         {avatar_url && (
           <DropdownMenu>

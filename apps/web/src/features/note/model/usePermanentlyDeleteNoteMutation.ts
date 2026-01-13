@@ -10,6 +10,7 @@ export function usePermanentlyDeleteNoteMutation() {
     mutationFn: (noteId: string) => permanentlyDeleteNote(noteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace"] });
       toast.success({
         title: "노트가 영구 삭제되었습니다.",
       });
