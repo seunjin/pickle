@@ -6,9 +6,9 @@ import { noteKeys } from "../model/noteQueries";
 
 export const NOTE_FILTER_TYPES = [
   { value: "all", label: "All Types" },
-  { value: "text", label: "Text" },
-  { value: "image", label: "Image" },
-  { value: "bookmark", label: "Bookmark" },
+  { value: "bookmark", label: "URL" },
+  { value: "image", label: "IMAGE" },
+  { value: "text", label: "TEXT" },
 ];
 
 export function NoteListFilter({
