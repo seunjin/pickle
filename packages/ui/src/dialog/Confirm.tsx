@@ -1,7 +1,8 @@
 "use client";
+import type { VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "motion/react";
 import { useDialogController } from "react-layered-dialog";
-import { Button } from "../button";
+import { Button, type buttonVariants } from "../button";
 import { cn } from "../lib/utils";
 
 interface ConfirmProps {
@@ -9,6 +10,7 @@ interface ConfirmProps {
   content: string;
   onCancel?: () => void;
   onConfirm?: () => void;
+  confirmType?: VariantProps<typeof buttonVariants>["variant"];
   cancelButtonText?: string;
   confirmButtonText?: string;
   isPending?: boolean;
@@ -19,6 +21,7 @@ export function Confirm({
   content,
   onCancel,
   onConfirm,
+  confirmType = "primary",
   cancelButtonText = "취소",
   confirmButtonText = "확인",
   isPending,
@@ -83,6 +86,7 @@ export function Confirm({
                   size={"h32"}
                   isPending={isPending}
                   disabled={isPending}
+                  variant={confirmType}
                   onClick={handleConfirm}
                 >
                   {confirmButtonText}

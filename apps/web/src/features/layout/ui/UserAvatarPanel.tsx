@@ -11,6 +11,7 @@ import {
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import { useSessionContext, useSignOut, useUser } from "@/features/auth";
 import { workspaceQueries } from "@/features/workspace/model/workspaceQueries";
@@ -60,12 +61,16 @@ export function UserAvatarPanel() {
               className="size-10 rounded-full border border-base-border object-cover"
             />
             <div className="flex flex-col justify-center gap-1">
-              <div className="flex items-center gap-0.5">
+              <Link
+                href="/settings"
+                className="flex items-center gap-0.5"
+                onClick={() => setOpen(false)}
+              >
                 <span className="font-medium text-[13px] text-neutral-200 leading-none">
                   {appUser?.full_name}
                 </span>
                 <Icon name="arrow_right_12" className="text-neutral-300" />
-              </div>
+              </Link>
               <span className="text-[13px] text-muted-foreground leading-none">
                 {appUser?.email}
               </span>

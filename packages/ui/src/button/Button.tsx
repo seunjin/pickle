@@ -28,6 +28,11 @@ const buttonVariants = cva(
           "hover:border-neutral-650",
           "disabled:bg-neutral-800 disabled:text-neutral-600",
         ),
+        destructive: cn(
+          "bg-red-500 font-semibold text-base-foreground",
+          "hover:bg-red-400",
+          "disabled:bg-red-500/50 disabled:text-neutral-200/50",
+        ),
         icon: cn(
           "!px-0 aspect-square",
           "border border-base-border-light bg-neutral-800 text-base-muted",

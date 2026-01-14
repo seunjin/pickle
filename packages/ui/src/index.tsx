@@ -1,4 +1,5 @@
 export * from "./button";
+export * from "./checkbox";
 export * from "./constants/tag";
 export * from "./dialog";
 export * from "./dropdown-menu";

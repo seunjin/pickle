@@ -127,9 +127,8 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         const blob = await res.blob();
         const fileSize = blob.size;
 
-        // 5-1-1. 스토리지 용량 체크 (통합 용량 및 가변 한도 정책 반영)
         const { data: usage, error: usageError } = await supabase.rpc(
-          "get_workspace_storage_info" as any,
+          "get_workspace_storage_info" as "get_workspace_storage_info",
           {
             p_workspace_id: workspaceMember.workspace_id,
           },

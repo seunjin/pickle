@@ -22,7 +22,7 @@ const ROUTE_CONFIG: Record<string, { title: string }> = {
     title: "휴지통",
   },
   "/settings": {
-    title: "설정",
+    title: "계정 설정",
   },
 };
 
