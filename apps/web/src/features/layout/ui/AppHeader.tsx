@@ -5,7 +5,7 @@ import { InputWithAddon } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useUser } from "@/features/auth";
+import { useRef, useState } from "react";
 import { folderQueries } from "@/features/folder";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -29,11 +29,14 @@ const ROUTE_CONFIG: Record<string, { title: string }> = {
 export function AppHeader() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { appUser } = useUser();
   const client = createClient();
 
   const folderId = searchParams.get("folderId");
   const tagId = searchParams.get("tagId");
+
+  // 검색어 조회
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [search, setSearch] = useState<string>("");
 
   // 데이터 조회 (캐시 활용)
   const { data: folders = [] } = useQuery(folderQueries.list(client));
@@ -82,6 +85,9 @@ export function AppHeader() {
 
       <div className="flex shrink-0 items-center gap-6">
         <InputWithAddon
+          ref={searchRef}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           containerClassName="group w-80"
           placeholder="검색어를 입력해 주세요."
           startAddon={
@@ -89,6 +95,23 @@ export function AppHeader() {
               name="search_20"
               className="transition-colors group-focus-within:text-base-primary"
             />
+          }
+          endAddon={
+            search.length > 0 && (
+              <button
+                type="button"
+                className="group/search-delete inline-flex size-4 items-center justify-center rounded-full bg-neutral-700"
+                onClick={() => {
+                  setSearch("");
+                  searchRef.current?.focus();
+                }}
+              >
+                <Icon
+                  name="delete_16"
+                  className="size-3 text-neutral-400 transition-colors group-hover/search-delete:text-neutral-300"
+                />
+              </button>
+            )
           }
         />
 
