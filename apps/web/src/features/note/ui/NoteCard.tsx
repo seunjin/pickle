@@ -184,7 +184,7 @@ function NoteCardContainer({
         }
       }}
       className={cn(
-        "grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag",
+        "hover:transform-[translate3d(0,-4px,0)] grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag transition-[transform] duration-300 ease-in-out",
       )}
     >
       {children}
