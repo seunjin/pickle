@@ -1,9 +1,7 @@
 "use client";
 import { Icon } from "@pickle/icons";
-import { ScrollArea, TAG_VARIANTS } from "@pickle/ui";
-import { cn } from "@pickle/ui/lib/utils";
+import { ScrollArea } from "@pickle/ui";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth";
@@ -156,7 +154,7 @@ export const Sidebar = () => {
                 <div className="px-3 py-2">
                   <button
                     type="button"
-                    className="flex w-full cursor-pointer items-center gap-2 text-base-muted text-sm transition-colors hover:text-base-foreground"
+                    className="flex w-full cursor-pointer items-center gap-2 text-neutral-600 text-sm transition-colors hover:text-base-foreground"
                     onClick={() => {
                       setFoldersFolding(true);
                       setIsCreatingFolder(true);
