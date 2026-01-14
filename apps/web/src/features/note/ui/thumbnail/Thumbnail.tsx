@@ -11,8 +11,8 @@ export const Thumbnail = ({
 }) => {
   const ThumbnailNoImage = () => {
     return (
-      <div className="flex w-full select-none items-center justify-center bg-base-muted text-center font-semibold text-base text-neutral-600">
-        No Image
+      <div className="flex h-full w-full select-none items-center justify-center bg-green-400">
+        <img src="/symbol-black.svg" alt="symbol-black" />
       </div>
     );
   };

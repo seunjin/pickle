@@ -12,7 +12,7 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
             <img
               src={`/nodata-${type}.svg`}
               alt={`nodata-${type}`}
-              className="mb-6 size-[44px]"
+              className="mb-6 size-[38px]"
             />
             <p className="pb-2 text-[15px] text-neutral-300 leading-none">
               아직 저장된 노트가 없어요 🙂
@@ -28,7 +28,7 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
             <img
               src={`/nodata-${type}.svg`}
               alt={`nodata-${type}`}
-              className="mb-6 size-[44px]"
+              className="mb-6 size-[38px]"
             />
             <p className="pb-2 text-[15px] text-neutral-300 leading-none">
               아직 북마크가 없어요 🙂
@@ -44,7 +44,7 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
             <img
               src={`/nodata-${type}.svg`}
               alt={`nodata-${type}`}
-              className="mb-6 size-[44px]"
+              className="mb-6 size-[38px]"
             />
             <p className="pb-2 text-[15px] text-neutral-300 leading-none">
               휴지통이 비어 있어요 🙂

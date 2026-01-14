@@ -24,7 +24,7 @@ export function ToastCard({
   description,
   action,
   cancel,
-  dismissible = true,
+  dismissible = false,
   className,
   style,
   onClose,
