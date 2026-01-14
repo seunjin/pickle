@@ -2,15 +2,18 @@
 
 import { Icon } from "@pickle/icons";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
   InputWithAddon,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { useSignOut, useUser } from "@/features/auth";
 import { folderQueries } from "@/features/folder";
 import { tagQueries } from "@/features/tag/model/tagQueries";
@@ -38,6 +41,7 @@ export function AppHeader() {
   const { appUser } = useUser();
   const { signOut } = useSignOut();
   const client = createClient();
+  const [avatarPanelOpen, setAvatarPanelOpen] = useState<boolean>(false);
 
   const folderId = searchParams.get("folderId");
   const tagId = searchParams.get("tagId");
@@ -101,28 +105,111 @@ export function AppHeader() {
           }
         />
 
-        <StorageUsage />
-
         {avatar_url && (
-          <DropdownMenu>
+          <DropdownMenu
+            open={avatarPanelOpen}
+            onOpenChange={setAvatarPanelOpen}
+          >
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="size-8 shrink-0 overflow-hidden rounded-full border border-base-border"
+                className="group/avatar inline-flex shrink-0 items-center gap-0.5 overflow-hidden outline-none"
               >
                 <img
                   src={avatar_url}
                   alt="Avatar"
-                  className="h-full w-full object-cover"
+                  className="size-8 rounded-full border border-base-border object-cover"
+                />
+                <Icon
+                  name={avatarPanelOpen ? "arrow_up_16" : "arrow_down_16"}
+                  className={cn(
+                    "transiton-color group-hover/avatar:text-neutral-300",
+                    avatarPanelOpen && "text-neutral-300",
+                  )}
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <button type="button" className="w-full" onClick={signOut}>
-                  <Icon name="logout_16" /> 로그아웃
-                </button>
-              </DropdownMenuItem>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-[260px] px-2 pt-5 pb-3"
+            >
+              {/* 프로필 */}
+              <div className="px-3 pb-4">
+                <div className="flex items-center gap-3 pb-5">
+                  <img
+                    src={avatar_url}
+                    alt="Avatar"
+                    className="size-10 rounded-full border border-base-border object-cover"
+                  />
+                  <div className="flex flex-col justify-center gap-1">
+                    {/* 유저 이름 */}
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[13px] text-neutral-200 leading-none">
+                        {appUser?.full_name}
+                      </span>
+                      <Icon
+                        name="arrow_right_12"
+                        className="text-neutral-300"
+                      />
+                    </div>
+                    {/* 유저 이메일 */}
+                    <span className="text-[13px] text-muted-foreground leading-none">
+                      {appUser?.email}
+                    </span>
+                  </div>
+                </div>
+                <Button className="w-full" size={"h32"}>
+                  플랜 업그레이드
+                </Button>
+              </div>
+              <DropdownMenuSeparator className="-mx-2" />
+              {/* 스토리지 사용량 */}
+              <div className="pt-5 pb-4">
+                <div className="flex flex-col gap-4 px-3">
+                  <span className="font-medium text-[13px] text-neutral-200 leading-none">
+                    스토리지 사용량
+                  </span>
+                  <div className="pb-3">
+                    <StorageUsage />
+                  </div>
+                </div>
+                <div className="rounded-lg bg-neutral-900 p-3 text-[11px] text-neutral-500">
+                  <dl className="flex justify-between">
+                    <dt className="">이미지</dt>
+                    <dd>23.8MB</dd>
+                  </dl>
+                  <dl className="flex justify-between">
+                    <dt>북마크</dt>
+                    <dd>23.8MB</dd>
+                  </dl>
+                  <dl className="flex justify-between">
+                    <dt>텍스트</dt>
+                    <dd>23.8MB</dd>
+                  </dl>
+                </div>
+              </div>
+              <DropdownMenuSeparator className="-mx-2" />
+              <div className="flex flex-col gap-[5px] pt-2">
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    className="flex w-full items-center gap-2"
+                  >
+                    <Icon name="logout_16" /> 피클약관
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    className="flex w-full items-center gap-2"
+                  >
+                    <Icon name="logout_16" />
+                    로그아웃
+                  </button>
+                </DropdownMenuItem>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         )}

@@ -27,28 +27,21 @@ export const StorageUsage = () => {
   const isWarning = usageBytes >= MAX_STORAGE_BYTES * STORAGE_WARNING_THRESHOLD;
 
   return (
-    <div className="flex min-w-[120px] flex-col gap-1.5">
-      <div className="flex items-center justify-between font-medium text-[11px]">
-        <span
-          className={cn(
-            "transition-colors",
-            isWarning ? "text-orange-500" : "text-base-muted-foreground",
-          )}
-        >
-          스토리지 사용량
-        </span>
-        <span className="text-base-muted-foreground">
-          {usageMB.toFixed(1)} / {MAX_STORAGE_MB}MB
-        </span>
-      </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full border border-base-border-light/50 bg-neutral-800">
+    <div className="flex flex-col gap-2">
+      <div className="h-2 w-full overflow-hidden rounded-full border border-base-border-light/50 bg-neutral-650">
         <div
-          className={cn(
-            "h-full rounded-full transition-all duration-500",
-            isWarning ? "bg-orange-500" : "bg-neutral-400",
-          )}
-          style={{ width: `${percentage}%` }}
+          className={cn("h-full rounded-full")}
+          style={{
+            width: `${percentage}%`,
+            background: isWarning
+              ? "linear-gradient(to right, var(--color-red-400), var(--color-red-500))"
+              : "linear-gradient(to right, var(--color-green-200), var(--color-green-400))",
+          }}
         />
+      </div>
+      <div className="flex items-center justify-between font-medium text-[10px] text-neutral-300">
+        <span>사용량 {usageMB.toFixed(1)}</span>
+        <span className="text-base-muted-foreground">{MAX_STORAGE_MB}MB</span>
       </div>
     </div>
   );
