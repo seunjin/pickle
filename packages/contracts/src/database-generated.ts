@@ -7,10 +7,30 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5";
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -332,18 +352,21 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
+          storage_limit_bytes: number | null;
           updated_at: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
           name: string;
+          storage_limit_bytes?: number | null;
           updated_at?: string;
         };
         Update: {
           created_at?: string;
           id?: string;
           name?: string;
+          storage_limit_bytes?: number | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -354,6 +377,16 @@ export type Database = {
     };
     Functions: {
       complete_signup: { Args: { marketing_agreed?: boolean }; Returns: Json };
+      get_workspace_storage_info: {
+        Args: { p_workspace_id: string };
+        Returns: {
+          asset_bytes: number;
+          bookmark_bytes: number;
+          limit_bytes: number;
+          text_bytes: number;
+          total_used_bytes: number;
+        }[];
+      };
     };
     Enums: {
       user_status: "pending" | "active" | "suspended" | "deleted";
@@ -486,6 +519,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       user_status: ["pending", "active", "suspended", "deleted"],

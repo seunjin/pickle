@@ -1,5 +1,4 @@
 import type { Database } from "@pickle/contracts";
-import { MAX_STORAGE_BYTES } from "@pickle/contracts";
 import type {
   CreateNoteInput,
   StoredNoteData,
@@ -128,26 +127,27 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         const blob = await res.blob();
         const fileSize = blob.size;
 
-        // 5-1-1. 스토리지 용량 체크 (50MB 제한)
-        const { data: assets, error: usageError } = await supabase
-          .from("assets")
-          .select("full_size_bytes, thumb_size_bytes")
-          .eq("workspace_id", workspaceMember.workspace_id);
+        // 5-1-1. 스토리지 용량 체크 (통합 용량 및 가변 한도 정책 반영)
+        const { data: usage, error: usageError } = await supabase.rpc(
+          "get_workspace_storage_info" as any,
+          {
+            p_workspace_id: workspaceMember.workspace_id,
+          },
+        );
 
         if (usageError) {
           console.error("Storage usage check failed:", usageError);
         } else {
-          const currentUsage =
-            assets?.reduce(
-              (acc, a) =>
-                acc + (a.full_size_bytes || 0) + (a.thumb_size_bytes || 0),
-              0,
-            ) || 0;
+          const usageInfo = Array.isArray(usage) ? usage[0] : usage;
+          const { total_used_bytes, limit_bytes } = usageInfo || {
+            total_used_bytes: 0,
+            limit_bytes: 52428800,
+          };
 
-          if (currentUsage + fileSize > MAX_STORAGE_BYTES) {
+          if (Number(total_used_bytes) + fileSize > Number(limit_bytes)) {
             return {
               success: false,
-              error: `스토리지 용량이 부족합니다. (최대 50MB, 현재 ${(currentUsage / (1024 * 1024)).toFixed(1)}MB 사용 중)`,
+              error: `스토리지 용량이 부족합니다. (한도: ${(Number(limit_bytes) / (1024 * 1024)).toFixed(0)}MB, 현재 ${(Number(total_used_bytes) / (1024 * 1024)).toFixed(1)}MB 사용 중)`,
             };
           }
         }

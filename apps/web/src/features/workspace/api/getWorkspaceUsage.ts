@@ -1,29 +1,41 @@
-import type { Database } from "@pickle/contracts";
+import type { Database, WorkspaceStorageUsage } from "@pickle/contracts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/shared/lib/supabase/client";
 
 /**
- * 워크스페이스의 스토리지 사용량(바이트 합계)을 조회합니다.
- * assets 테이블의 full_size_bytes와 thumb_size_bytes를 합산합니다.
+ * 워크스페이스의 통합 스토리지 사용량 및 한도 정보를 조회합니다.
+ * 파일(Assets)과 DB 데이터(Notes)의 용량을 합산합니다.
  */
 export const getWorkspaceUsage = async (
   workspaceId: string,
   client?: SupabaseClient<Database>,
-): Promise<number> => {
+): Promise<WorkspaceStorageUsage> => {
   const supabase = client ?? createClient();
 
-  const { data, error } = await supabase
-    .from("assets")
-    .select("full_size_bytes, thumb_size_bytes")
-    .eq("workspace_id", workspaceId);
+  // DB에 생성한 RPC 함수 호출
+  const { data, error } = await supabase.rpc(
+    "get_workspace_storage_info" as any,
+    {
+      p_workspace_id: workspaceId,
+    },
+  );
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const totalBytes = data.reduce((acc, asset) => {
-    return acc + (asset.full_size_bytes || 0) + (asset.thumb_size_bytes || 0);
-  }, 0);
+  // RPC 결과가 배열로 반환되므로 첫 번째 아이템 사용
+  const usageInfo = (Array.isArray(data) ? data[0] : data) as any;
 
-  return totalBytes;
+  if (!usageInfo) {
+    throw new Error("Failed to fetch storage usage info");
+  }
+
+  return {
+    asset_bytes: Number(usageInfo.asset_bytes || 0),
+    bookmark_bytes: Number(usageInfo.bookmark_bytes || 0),
+    text_bytes: Number(usageInfo.text_bytes || 0),
+    total_used_bytes: Number(usageInfo.total_used_bytes || 0),
+    limit_bytes: Number(usageInfo.limit_bytes || 0),
+  };
 };
