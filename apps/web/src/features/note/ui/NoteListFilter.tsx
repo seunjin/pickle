@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@pickle/icons";
-import { Select, type SelectOptionValue } from "@pickle/ui";
+import { Select, type SelectOptionValue, UtilButton } from "@pickle/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { noteKeys } from "../model/noteQueries";
 
@@ -14,11 +14,15 @@ export const NOTE_FILTER_TYPES = [
 export function NoteListFilter({
   selectedType,
   onTypeChange,
+  sort,
+  onSortChange,
   totalCount = 0,
   filteredCount = 0,
 }: {
   selectedType: SelectOptionValue;
   onTypeChange: (value: SelectOptionValue) => void;
+  sort: "latest" | "oldest";
+  onSortChange: (value: "latest" | "oldest") => void;
   totalCount?: number;
   filteredCount?: number;
 }) {
@@ -54,7 +58,7 @@ export function NoteListFilter({
           </button>
         </div>
       </div>
-      <div>
+      <div className="flex items-center gap-3">
         {/* 총 노트 수 및 필터링 상세 */}
         <span className="font-medium text-[14px] text-base-muted">
           총 {totalCount}개
@@ -64,6 +68,14 @@ export function NoteListFilter({
             </span>
           )}
         </span>
+
+        <UtilButton
+          icon="sort_16"
+          variant="secondary_line"
+          onClick={() => onSortChange(sort === "latest" ? "oldest" : "latest")}
+        >
+          {sort === "latest" ? "최신순" : "오래된순"}
+        </UtilButton>
       </div>
     </div>
   );

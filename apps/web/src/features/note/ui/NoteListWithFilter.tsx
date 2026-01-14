@@ -3,8 +3,7 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import type { SelectOptionValue } from "@pickle/ui";
 import { useQuery } from "@tanstack/react-query";
-import { div } from "motion/react-client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { NodataType } from "@/app/(client)/NoteNodata";
 import { useSessionContext } from "@/features/auth";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -30,6 +29,7 @@ export function NoteListWithFilter({
   const { workspace } = useSessionContext();
   const workspaceId = workspace?.id;
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
+  const [sort, setSort] = useState<"latest" | "oldest">("latest");
 
   // 실시간 동기화 구독 시작 (BroadcastChannel)
   useSyncNoteList();
@@ -48,16 +48,24 @@ export function NoteListWithFilter({
     enabled: !!workspaceId,
   });
 
-  // 2. Client-side Filtering (Type filter only)
-  const filteredNotes =
-    selectedType === "all"
-      ? allNotes
-      : allNotes.filter((note: NoteWithAsset) => {
-          if (selectedType === "image") {
-            return note.type === "image" || note.type === "capture";
-          }
-          return note.type === selectedType;
-        });
+  // 2. Client-side Filtering & Sorting
+  const sortedNotes = useMemo(() => {
+    const filtered =
+      selectedType === "all"
+        ? allNotes
+        : allNotes.filter((note: NoteWithAsset) => {
+            if (selectedType === "image") {
+              return note.type === "image" || note.type === "capture";
+            }
+            return note.type === selectedType;
+          });
+
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sort === "latest" ? dateB - dateA : dateA - dateB;
+    });
+  }, [allNotes, selectedType, sort]);
 
   return (
     <>
@@ -65,12 +73,14 @@ export function NoteListWithFilter({
         <NoteListFilter
           selectedType={selectedType}
           onTypeChange={setSelectedType}
+          sort={sort}
+          onSortChange={setSort}
           totalCount={allNotes.length}
-          filteredCount={filteredNotes.length}
+          filteredCount={sortedNotes.length}
         />
       )}
 
-      <NoteList notes={filteredNotes} nodataType={nodataType} />
+      <NoteList notes={sortedNotes} nodataType={nodataType} />
     </>
   );
 }

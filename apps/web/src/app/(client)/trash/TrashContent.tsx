@@ -2,7 +2,7 @@
 
 import { UtilButton } from "@pickle/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSessionContext } from "@/features/auth";
 import { NoteList } from "@/features/note";
 import { noteQueries } from "@/features/note/model/noteQueries";
@@ -14,6 +14,14 @@ export function TrashContent() {
   const { data: trashNotes = [] } = useQuery(
     noteQueries.trash(undefined, workspace?.id),
   );
+
+  const sortedNotes = useMemo(() => {
+    return [...trashNotes].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sort === "latest" ? dateB - dateA : dateA - dateB;
+    });
+  }, [trashNotes, sort]);
 
   return (
     <div className="h-full">
@@ -43,7 +51,7 @@ export function TrashContent() {
           </div>
         }
       >
-        <NoteList notes={trashNotes} readOnly nodataType="trash" />
+        <NoteList notes={sortedNotes} readOnly nodataType="trash" />
       </Suspense>
     </div>
   );
