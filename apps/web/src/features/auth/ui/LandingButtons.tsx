@@ -18,24 +18,12 @@ export const LandingButtons = ({
   initialUser,
   initialAppUser,
 }: LandingButtonsProps) => {
-  // 1. 로그인하지 않은 상태
+  // 1. 로그인하지 않은 상태 -> 로그인 버튼 노출
   if (!initialUser) {
     return <GoogleLoginButton next={next} />;
   }
 
-  // 2. 인증은 되었으나 회원가입 절차가 남은 상태
-  if (initialAppUser?.status === "pending") {
-    return (
-      <Link
-        href={next ? `/signup?next=${next}` : "/signup"}
-        className="flex h-12 items-center justify-center rounded-full bg-indigo-600 px-8 font-semibold text-white shadow-indigo-200 shadow-lg transition-all hover:bg-indigo-700 hover:shadow-indigo-300 active:scale-95"
-      >
-        회원가입 완료하기
-      </Link>
-    );
-  }
-
-  // 3. 활성화된 유저 -> 대시보드 혹은 다음 페이지로 이동
+  // 2. 이미 로그인된 상태 (pending 포함) -> 대시보드 혹은 다음 페이지로 이동
   return (
     <Link
       href={next || "/dashboard"}

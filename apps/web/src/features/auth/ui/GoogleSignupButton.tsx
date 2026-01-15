@@ -15,69 +15,23 @@ interface GoogleLoginButtonProps {
 
 export const GoogleLoginButton = ({
   next,
-  label = "Google로 계속하기",
+  label = "Google로 회원가입",
   disabled,
   options,
 }: GoogleLoginButtonProps) => {
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
   const supabase = createClient();
 
-  const handleGoogleLogin = async () => {
-    if (isLoggingIn) return;
-
-    /**
-     * @TODO 회원가입/로그인 이탈 분석을 위한 트래킹 이벤트를 여기서 실행합니다.
-     * 예: amplitude.track('click_google_login', { is_signup: !!options?.data });
-     */
-
-    setIsLoggingIn(true);
-
-    const loginPromise = (async () => {
-      const callbackUrl = new URL(
-        "/api/internal/auth/callback",
-        window.location.origin,
-      );
-      if (next) {
-        callbackUrl.searchParams.set("next", next);
-      }
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: callbackUrl.toString(),
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-          data: options?.data,
-        } as any,
-      });
-
-      if (error) throw error;
-    })();
-
-    toast.promise(loginPromise, {
-      loading: "Google로 로그인하는 중...",
-      success: "로그인 페이지로 이동합니다.",
-      error: "로그인에 실패했습니다. 다시 시도해 주세요.",
-    });
-
-    try {
-      await loginPromise;
-    } catch (error) {
-      console.error("Login failed:", error);
-      setIsLoggingIn(false);
-    }
-  };
+  const handleSignup = async () => {};
 
   return (
     <button
       type="button"
-      onClick={handleGoogleLogin}
-      disabled={isLoggingIn || disabled}
+      onClick={handleSignup}
+      disabled={isSignup || disabled}
       className="group flex h-12 w-[340px] items-center justify-center gap-1 rounded-full border border-neutral-300 bg-white font-semibold text-[15px] text-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-60"
     >
-      {isLoggingIn ? (
+      {isSignup ? (
         <Spinner className="size-5" />
       ) : (
         <svg className="size-5" viewBox="0 0 24 24" role="img">

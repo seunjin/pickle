@@ -10,3 +10,28 @@
 :root {
   --web-header-height: 60px;
 }
+
+.effect-bg {
+  position: relative;
+}
+.effect-bg:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: -1;
+}
+.effect-bg:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("../../public/bg.png");
+  background-size: cover;
+  z-index: -2;
+}
