@@ -9,9 +9,12 @@ import {
   ScrollArea,
   useDialog,
 } from "@pickle/ui";
+import { useSessionContext, useSignOut } from "@/features/auth";
 
 export function SettingContent() {
   const dialog = useDialog();
+  const { user } = useSessionContext();
+  const { signOut } = useSignOut();
   return (
     <div className="h-full">
       <div className="mx-auto h-full w-[min(100%,800px)]">
@@ -31,7 +34,7 @@ export function SettingContent() {
                   <div className="flex items-center gap-3">
                     <img src="/google.svg" className="" alt="google logo" />{" "}
                     <span className="text-[15px] text-base-muted-foreground leading-none">
-                      pickle@gmail.com
+                      {user?.email ?? "로딩 중..."}
                     </span>
                   </div>
                 </dd>
@@ -86,7 +89,7 @@ export function SettingContent() {
             >
               회원탈퇴
             </Button>
-            <Button variant="secondary_line" size="h32">
+            <Button variant="secondary_line" size="h32" onClick={signOut}>
               로그아웃
             </Button>
           </div>

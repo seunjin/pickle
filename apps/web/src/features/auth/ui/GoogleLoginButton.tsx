@@ -54,7 +54,7 @@ export const GoogleLoginButton = ({ next }: GoogleLoginButtonProps) => {
       type="button"
       onClick={handleGoogleLogin}
       disabled={isLoggingIn}
-      className="group flex h-12 items-center justify-center gap-3 rounded-full bg-white px-8 font-semibold text-gray-900 shadow-md ring-1 ring-gray-200 transition-all hover:bg-gray-50 hover:shadow-lg active:scale-95 disabled:opacity-70 disabled:active:scale-100"
+      className="group flex h-12 w-[340px] items-center justify-center gap-1 rounded-full border border-neutral-300 bg-white font-semibold text-[15px] text-neutral-950"
     >
       {isLoggingIn ? (
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />

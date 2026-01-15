@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
 import { LandingButtons } from "../../features/auth/ui/LandingButtons";
 
@@ -16,27 +17,46 @@ export default async function Home(props: {
   const { user, appUser } = await getServerAuth();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="flex flex-1 flex-col items-center justify-center gap-8 p-8 text-center">
-        <div className="max-w-2xl space-y-4">
-          <h1 className="font-bold text-5xl tracking-tight">Pickle</h1>
-          <p className="text-gray-600 text-xl dark:text-gray-400">
-            웹 서핑 중 발견한 모든 영감을 <br className="sm:hidden" />한 곳에
-            저장하고 관리하세요.
+    <div className="grid min-h-dvh grid-rows-[1fr_auto] py-10">
+      <div className="flex flex-1 flex-col items-center justify-center pb-8">
+        <div className="flex flex-col gap-6 pb-15 text-center">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-[10px] bg-green-400">
+            <img
+              src="/symbol-black.svg"
+              alt="pickle symbol"
+              className="w-[22.65px]"
+            />
+          </div>
+          <h1 className="font-bold text-[28px] leading-[1.3]">로그인</h1>
+          <p className="text-[16px] text-gray-300 leading-[1.3]">
+            한 번 보고 지나쳤던 아이디어를 한 곳에 모아두고
+            <br />
+            언제든 쉽게 찾아보세요💡
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
+        <div className="pb-7.5">
           <LandingButtons
             next={next}
             initialUser={user}
             initialAppUser={appUser}
           />
         </div>
-      </main>
 
-      <footer className="py-8 text-center text-gray-500 text-sm">
-        © 2025 Pickle. All rights reserved.
+        <div className="flex items-center gap-[5px]">
+          <span className="text-[14px] text-gray-500 leading-none">
+            아직 계정이 없으신가요?
+          </span>
+          <Link
+            href="/signup"
+            className="font-medium text-[14px] text-base-muted-foreground leading-none transition-colors hover:text-base-primary"
+          >
+            회원가입
+          </Link>
+        </div>
+      </div>
+      <footer className="text-center text-gray-500 text-sm">
+        © 2026 Pickle. All rights reserved.
       </footer>
     </div>
   );
