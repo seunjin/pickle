@@ -59,8 +59,12 @@ export default function OverlayApp({
               import.meta.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
             window.open(`${appUrl}/auth/sync`, "_blank");
             setErrorMessage(null);
+            dialog.close();
           }}
-          onCancel={() => setErrorMessage(null)}
+          onCancel={() => {
+            setErrorMessage(null);
+            dialog.close();
+          }}
         />
       ));
     } else {

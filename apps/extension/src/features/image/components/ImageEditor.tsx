@@ -159,7 +159,12 @@ export function ImageEditor({
             {...register("title")}
           />
           {/* 메모 영역 */}
-          <TextareaContainLabel label="MEMO" autoFocus {...register("memo")} />
+          <TextareaContainLabel
+            label="MEMO"
+            placeholder="나의 생각을 함께 기록하세요."
+            autoFocus
+            {...register("memo")}
+          />
           <div>
             <SignoutButton />
           </div>

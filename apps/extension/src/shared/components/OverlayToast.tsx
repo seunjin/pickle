@@ -35,7 +35,7 @@ export function OverlayToast({
       animate={{ opacity: 1, y: 0, x: "-50%" }}
       exit={{ opacity: 0, y: "50%", x: "-50%" }}
       transition={{ duration: 0.2 }}
-      className={`absolute left-[50%] z-100 ${className || "bottom-16"}
+      className={`absolute left-[50%] z-100 ${className || "bottom-17.5"}
       `}
     >
       <ToastCard id="overlay-toast" kind={kind} onClose={onClose} {...props} />
