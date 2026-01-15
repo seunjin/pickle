@@ -1,22 +1,62 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { ActionButton, Button, Checkbox } from "@pickle/ui";
+import { Checkbox, useDialog } from "@pickle/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useUser } from "@/features/auth/model/useUser";
 import { GoogleLoginButton } from "@/features/auth/ui/GoogleLoginButton";
+import TermsArgreementModal, {
+  type TermsType,
+} from "@/features/layout/terms/TermsArgreementModal";
 export default function SignupPageContent() {
   const { user, appUser, isLoading } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
+  const dialog = useDialog();
 
   const [agreements, setAgreements] = useState({
     terms: false,
     privacy: false,
     marketing: false,
   });
+
+  const handleAgreementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setAgreements((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  const handleAllAgreementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = e.target;
+    setAgreements((prev) => ({
+      ...prev,
+      terms: checked,
+      privacy: checked,
+      marketing: checked,
+    }));
+  };
+
+  const isAllAgreementsChecked =
+    agreements.terms && agreements.privacy && agreements.marketing;
+
+  const handleTermsModalOpen = (type: TermsType) => {
+    dialog.open(() => (
+      <TermsArgreementModal
+        type={type}
+        onAgree={() => {
+          setAgreements((prev) => ({
+            ...prev,
+            [type]: true,
+          }));
+          dialog.close();
+        }}
+      />
+    ));
+  };
 
   // 이미 활성화된 유저라면 리다이렉트
   if (!isLoading && appUser?.status === "active") {
@@ -57,7 +97,15 @@ export default function SignupPageContent() {
                 htmlFor="terms-all"
                 className="group inline-flex w-full cursor-pointer items-center gap-3"
               >
-                <Checkbox id="terms-all" /> <span>전체약관 동의</span>
+                <Checkbox
+                  id="terms-all"
+                  name="terms-all"
+                  checked={isAllAgreementsChecked}
+                  onChange={handleAllAgreementChange}
+                />{" "}
+                <span className="text-[14px] text-base-foreground">
+                  전체약관 동의
+                </span>
               </label>
             </div>
 
@@ -67,7 +115,12 @@ export default function SignupPageContent() {
                 htmlFor="terms"
                 className="group inline-flex flex-1 cursor-pointer items-center gap-3"
               >
-                <Checkbox id="terms" />{" "}
+                <Checkbox
+                  id="terms"
+                  name="terms"
+                  checked={agreements.terms}
+                  onChange={handleAgreementChange}
+                />{" "}
                 <span className="inline-flex items-center gap-1 text-[14px]">
                   <strong className="font-normal text-base-primary">
                     [필수]
@@ -77,6 +130,7 @@ export default function SignupPageContent() {
               </label>
               <button
                 type="button"
+                onClick={() => handleTermsModalOpen("terms")}
                 className="text-neutral-600 transition-colors hover:text-base-muted"
               >
                 <Icon name="arrow_right_16" className="text-inherit" />
@@ -86,10 +140,15 @@ export default function SignupPageContent() {
             {/* 개인정보 수집 및 이용 동의 */}
             <div className="flex items-center gap-3">
               <label
-                htmlFor="terms2"
+                htmlFor="privacy"
                 className="group inline-flex flex-1 cursor-pointer items-center gap-3"
               >
-                <Checkbox id="terms2" />{" "}
+                <Checkbox
+                  id="privacy"
+                  name="privacy"
+                  checked={agreements.privacy}
+                  onChange={handleAgreementChange}
+                />{" "}
                 <span className="inline-flex items-center gap-1 text-[14px]">
                   <strong className="font-normal text-base-primary">
                     [필수]
@@ -99,6 +158,7 @@ export default function SignupPageContent() {
               </label>
               <button
                 type="button"
+                onClick={() => handleTermsModalOpen("privacy")}
                 className="text-neutral-600 transition-colors hover:text-base-muted"
               >
                 <Icon name="arrow_right_16" className="text-inherit" />
@@ -108,10 +168,15 @@ export default function SignupPageContent() {
             {/* 마케팅 정보 수신 동의 */}
             <div className="flex items-center gap-3">
               <label
-                htmlFor="terms3"
+                htmlFor="marketing"
                 className="group inline-flex flex-1 cursor-pointer items-center gap-3"
               >
-                <Checkbox id="terms3" />{" "}
+                <Checkbox
+                  id="marketing"
+                  name="marketing"
+                  checked={agreements.marketing}
+                  onChange={handleAgreementChange}
+                />{" "}
                 <span className="inline-flex items-center gap-1 text-[14px]">
                   <strong className="font-normal text-base-muted">
                     [선택]
@@ -121,6 +186,7 @@ export default function SignupPageContent() {
               </label>
               <button
                 type="button"
+                onClick={() => handleTermsModalOpen("marketing")}
                 className="text-neutral-600 transition-colors hover:text-base-muted"
               >
                 <Icon name="arrow_right_16" className="text-inherit" />
@@ -128,7 +194,9 @@ export default function SignupPageContent() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <GoogleLoginButton disabled />
+            <GoogleLoginButton
+              disabled={!agreements.terms && !agreements.privacy}
+            />
           </div>
         </PickleCausticGlass>
       </div>
