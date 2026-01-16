@@ -13,8 +13,12 @@ import { createClient } from "@/shared/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // "next" 파라미터가 있다면, 인증 완료 후 해당 URL로 이동시킵니다. (기본값: 홈 '/')
   const next = searchParams.get("next") ?? "/";
+
+  // URL 파라미터에서 약관 동의 여부 추출 (Atomic Signup 강화 방식)
+  const isTermsViaUrl = searchParams.get("terms") === "true";
+  const isPrivacyViaUrl = searchParams.get("privacy") === "true";
+  const isMarketingViaUrl = searchParams.get("marketing") === "true";
 
   if (code) {
     const supabase = await createClient();
@@ -37,26 +41,25 @@ export async function GET(request: Request) {
           .eq("id", currentUser.id)
           .single();
 
-        // 프로필이 없는 경우 메타데이터를 확인하여 즉시 생성 시도 (Atomic Signup 지원)
+        // 프로필이 없는 경우 메타데이터 또는 URL 파라미터를 확인하여 즉시 생성 시도
         if (!userProfile) {
           console.warn(
-            "User profile missing, checking metadata for automatic signup...",
+            "User profile missing, checking values for automatic signup...",
           );
           const meta = currentUser.user_metadata;
           const isTermsAgreed =
-            meta?.is_terms_agreed === true || meta?.is_terms_agreed === "true";
+            isTermsViaUrl || String(meta?.is_terms_agreed) === "true";
           const isPrivacyAgreed =
-            meta?.is_privacy_agreed === true ||
-            meta?.is_privacy_agreed === "true";
+            isPrivacyViaUrl || String(meta?.is_privacy_agreed) === "true";
+          const isMarketingAgreed =
+            isMarketingViaUrl || String(meta?.is_marketing_agreed) === "true";
 
           if (isTermsAgreed && isPrivacyAgreed) {
-            console.log("Found agreement metadata, completing signup...");
+            console.log("Agreement data found, completing signup...");
             const { error: completeError } = await supabase.rpc(
               "complete_signup",
               {
-                marketing_agreed:
-                  meta?.is_marketing_agreed === true ||
-                  meta?.is_marketing_agreed === "true",
+                marketing_agreed: isMarketingAgreed,
               },
             );
 
@@ -65,17 +68,17 @@ export async function GET(request: Request) {
               return NextResponse.redirect(`${origin}${destination}`);
             }
             console.error(
-              "Failed to complete signup via metadata:",
+              "Failed to complete signup via callback:",
               completeError,
             );
           }
 
-          // 자동 생성이 불가능하거나 실패한 경우만 로그인 페이지로 안내
-          return NextResponse.redirect(`${origin}/signin?reason=no_profile`);
+          // 필수 약관 동의가 없거나 자동 생성이 실패한 경우 가입 페이지로 유도 (이미 세션은 있음)
+          return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
         }
 
         if (userProfile.status === "pending") {
-          return NextResponse.redirect(`${origin}/signin?reason=no_profile`);
+          return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
         }
       }
 

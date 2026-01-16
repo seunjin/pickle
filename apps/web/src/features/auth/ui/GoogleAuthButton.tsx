@@ -51,6 +51,19 @@ export const GoogleAuthButton = ({
         callbackUrl.searchParams.set("next", next);
       }
 
+      // 약관 동의 데이터가 있다면 콜백 URL에 파라미터로 추가 (Atomic Signup을 위한 확실한 전달 방식)
+      if (options?.data) {
+        if (options.data.is_terms_agreed) {
+          callbackUrl.searchParams.set("terms", "true");
+        }
+        if (options.data.is_privacy_agreed) {
+          callbackUrl.searchParams.set("privacy", "true");
+        }
+        if (options.data.is_marketing_agreed) {
+          callbackUrl.searchParams.set("marketing", "true");
+        }
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

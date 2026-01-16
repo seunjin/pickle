@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { Checkbox, toast, useDialog } from "@pickle/ui";
+import { Alert, Checkbox, useDialog } from "@pickle/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -214,12 +214,22 @@ export default function SignupPageContent() {
                             marketing_agreed: agreements.marketing,
                           });
 
-                          toast.success({ title: "가입 완료" });
+                          dialog.open(() => (
+                            <Alert
+                              title="가입 성공"
+                              content="회원가입에 성공했습니다."
+                            />
+                          ));
 
                           // 인증 상태를 확실히 갱신하기 위해 전체 페이지 새로고침하며 이동
                           window.location.href = next;
                         } catch (error) {
-                          toast.error({ title: "가입 실패" });
+                          dialog.open(() => (
+                            <Alert
+                              title="가입 실패"
+                              content={`회원가입에 실패했습니다.\n${error}`}
+                            />
+                          ));
                           console.error(error);
                           setIsCompleting(false);
                         }
