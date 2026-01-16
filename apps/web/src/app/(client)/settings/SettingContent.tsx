@@ -7,19 +7,28 @@ import {
   Confirm,
   Modal,
   ScrollArea,
+  Spinner,
   toast,
   useDialog,
 } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { deleteAccount, useSessionContext, useSignOut } from "@/features/auth";
+import { Activity, useState } from "react";
+import {
+  deleteAccount,
+  updateUser,
+  useSessionContext,
+  useSignOut,
+} from "@/features/auth";
+import { createClient } from "@/shared/lib/supabase/client";
 
 export function SettingContent() {
   const dialog = useDialog();
-  const { user } = useSessionContext();
+  const { user, appUser, updateAppUser } = useSessionContext();
   const { signOut } = useSignOut();
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingAgreement, setIsUpdatingAgreement] = useState(false);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -30,8 +39,6 @@ export function SettingContent() {
     } catch (error) {
       toast.error({
         title: "탈퇴 처리 중 오류가 발생했습니다.",
-        description:
-          error instanceof Error ? error.message : "잠시 후 다시 시도해주세요.",
       });
     } finally {
       setIsDeleting(false);
@@ -73,9 +80,73 @@ export function SettingContent() {
                   <div className="flex w-full items-center justify-between gap-2">
                     <label
                       htmlFor="terms"
-                      className="flex cursor-pointer items-center gap-3"
+                      className={cn(
+                        "flex cursor-pointer select-none items-center gap-3",
+                        isUpdatingAgreement ? "cursor-not-allowed" : "",
+                      )}
                     >
-                      <Checkbox id="terms" />
+                      <Activity
+                        mode={isUpdatingAgreement ? "visible" : "hidden"}
+                      >
+                        <Spinner />
+                      </Activity>
+                      <Activity
+                        mode={!isUpdatingAgreement ? "visible" : "hidden"}
+                      >
+                        <Checkbox
+                          id="terms"
+                          checked={appUser?.is_marketing_agreed ?? false}
+                          disabled={isUpdatingAgreement}
+                          onChange={async (e) => {
+                            if (!user || !appUser || isUpdatingAgreement)
+                              return;
+
+                            const originalValue = appUser.is_marketing_agreed;
+                            const newValue = e.target.checked;
+
+                            setIsUpdatingAgreement(true);
+
+                            // 1. 낙관적 업데이트 (UI 즉시 반영)
+                            updateAppUser({ is_marketing_agreed: newValue });
+
+                            try {
+                              const supabase = createClient();
+                              // 2. 실제 API 호출 및 최소 대시 시간(500ms) 보장
+                              const [res] = await Promise.all([
+                                updateUser(supabase, user.id, {
+                                  is_marketing_agreed: newValue,
+                                }),
+                                new Promise((resolve) =>
+                                  setTimeout(resolve, 1000),
+                                ),
+                              ]);
+
+                              const { error } = res;
+
+                              toast.success({
+                                title:
+                                  "마케팅 수신 설정이 업데이트 되었습니다.",
+                              });
+
+                              if (error) throw error;
+                            } catch (error) {
+                              // 3. 실패 시 롤백 및 알림
+                              updateAppUser({
+                                is_marketing_agreed: originalValue,
+                              });
+                              toast.error({
+                                title: "마케팅 수신 설정 저장에 실패했습니다.",
+                              });
+                              console.error(
+                                "Failed to update agreement:",
+                                error,
+                              );
+                            } finally {
+                              setIsUpdatingAgreement(false);
+                            }
+                          }}
+                        />
+                      </Activity>
                       <div className="flex items-center gap-1">
                         <span className="text-[14px] text-base-muted leading-none">
                           [선택]

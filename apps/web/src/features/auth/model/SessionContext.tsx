@@ -13,6 +13,7 @@ interface SessionContextType {
   workspace: Workspace | null;
   isLoading: boolean;
   refreshAppUser: () => Promise<void>;
+  updateAppUser: (updates: Partial<AppUser>) => void;
 }
 
 const SessionContext = createContext<SessionContextType | null>(null);
@@ -118,13 +119,25 @@ export const SessionProvider = ({
 
   const refreshAppUser = async () => {
     if (user) {
-      await getUser(supabase, user.id).then(setAppUser);
+      const data = await getUser(supabase, user.id);
+      setAppUser(data);
     }
+  };
+
+  const updateAppUser = (updates: Partial<AppUser>) => {
+    setAppUser((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
   return (
     <SessionContext.Provider
-      value={{ user, appUser, workspace, isLoading, refreshAppUser }}
+      value={{
+        user,
+        appUser,
+        workspace,
+        isLoading,
+        refreshAppUser,
+        updateAppUser,
+      }}
     >
       {children}
     </SessionContext.Provider>
