@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { Checkbox, Spinner, toast, useDialog } from "@pickle/ui";
+import { Checkbox, toast, useDialog } from "@pickle/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -199,50 +199,44 @@ export default function SignupPageContent() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {user && (!appUser || appUser.status === "pending") ? (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      setIsCompleting(true);
-                      await completeSignup({
-                        marketing_agreed: agreements.marketing,
-                      });
-                      toast.success({
-                        title: "가입 완료",
-                        description: "회원가입이 성공적으로 완료되었습니다.",
-                      });
-                      // 유저 정보 갱신을 위해 페이지 새로고침 또는 리다이렉트
-                      window.location.href = next;
-                    } catch (_error) {
-                      toast.error({
-                        title: "가입 실패",
-                        description: "가입 처리 중 오류가 발생했습니다.",
-                      });
-                      setIsCompleting(false);
-                    }
-                  }}
-                  disabled={
-                    isCompleting || !agreements.terms || !agreements.privacy
-                  }
-                  className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  {isCompleting ? <Spinner className="size-5" /> : "가입 완료"}
-                </button>
-              ) : (
-                <GoogleAuthButton
-                  next={next}
-                  label="Google로 회원가입"
-                  disabled={!agreements.terms || !agreements.privacy}
-                  options={{
-                    data: {
-                      is_terms_agreed: agreements.terms,
-                      is_privacy_agreed: agreements.privacy,
-                      is_marketing_agreed: agreements.marketing,
-                    },
-                  }}
-                />
-              )}
+              <GoogleAuthButton
+                next={next}
+                label="Google로 회원가입"
+                disabled={
+                  isCompleting || !agreements.terms || !agreements.privacy
+                }
+                onClick={
+                  user && (!appUser || appUser.status === "pending")
+                    ? async () => {
+                        try {
+                          setIsCompleting(true);
+                          await completeSignup({
+                            marketing_agreed: agreements.marketing,
+                          });
+                          toast.success({
+                            title: "가입 완료",
+                            description:
+                              "회원가입이 성공적으로 완료되었습니다.",
+                          });
+                          window.location.href = next;
+                        } catch (_error) {
+                          toast.error({
+                            title: "가입 실패",
+                            description: "가입 처리 중 오류가 발생했습니다.",
+                          });
+                          setIsCompleting(false);
+                        }
+                      }
+                    : undefined
+                }
+                options={{
+                  data: {
+                    is_terms_agreed: agreements.terms,
+                    is_privacy_agreed: agreements.privacy,
+                    is_marketing_agreed: agreements.marketing,
+                  },
+                }}
+              />
             </div>
           </PickleCausticGlass>
 

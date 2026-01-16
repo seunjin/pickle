@@ -11,6 +11,7 @@ interface GoogleAuthButtonProps {
   options?: {
     data?: Record<string, any>;
   };
+  onClick?: () => void;
 }
 
 /**
@@ -21,12 +22,18 @@ export const GoogleAuthButton = ({
   label = "Google로 계속하기",
   disabled,
   options,
+  onClick,
 }: GoogleAuthButtonProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const supabase = createClient();
 
   const handleAuth = async () => {
     if (isProcessing || disabled) return;
+
+    if (onClick) {
+      onClick();
+      return;
+    }
 
     /**
      * @TODO 추적 이벤트 연동

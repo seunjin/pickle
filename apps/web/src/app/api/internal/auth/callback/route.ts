@@ -37,23 +37,40 @@ export async function GET(request: Request) {
           .eq("id", currentUser.id)
           .single();
 
-        // If profile is missing (e.g. manual deletion or trigger failure), try to recover
+        // 프로필이 없는 경우 메타데이터를 확인하여 즉시 생성 시도 (Atomic Signup 지원)
         if (!userProfile) {
-          console.warn("User profile missing, attempting recovery...");
-          const { error: insertError } = await supabase.from("users").insert({
-            id: currentUser.id,
-            email: currentUser.email,
-            full_name: currentUser.user_metadata.full_name,
-            avatar_url: currentUser.user_metadata.avatar_url,
-            status: "pending",
-          });
+          console.warn(
+            "User profile missing, checking metadata for automatic signup...",
+          );
+          const meta = currentUser.user_metadata;
+          const isTermsAgreed =
+            meta?.is_terms_agreed === true || meta?.is_terms_agreed === "true";
+          const isPrivacyAgreed =
+            meta?.is_privacy_agreed === true ||
+            meta?.is_privacy_agreed === "true";
 
-          if (insertError) {
-            console.error("Failed to recover user profile:", insertError);
-            return NextResponse.redirect(
-              `${origin}/signin?error=recovery_failed`,
+          if (isTermsAgreed && isPrivacyAgreed) {
+            console.log("Found agreement metadata, completing signup...");
+            const { error: completeError } = await supabase.rpc(
+              "complete_signup",
+              {
+                marketing_agreed:
+                  meta?.is_marketing_agreed === true ||
+                  meta?.is_marketing_agreed === "true",
+              },
+            );
+
+            if (!completeError) {
+              const destination = next === "/" ? "/dashboard" : next;
+              return NextResponse.redirect(`${origin}${destination}`);
+            }
+            console.error(
+              "Failed to complete signup via metadata:",
+              completeError,
             );
           }
+
+          // 자동 생성이 불가능하거나 실패한 경우만 로그인 페이지로 안내
           return NextResponse.redirect(`${origin}/signin?reason=no_profile`);
         }
 
