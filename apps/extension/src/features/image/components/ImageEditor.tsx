@@ -57,8 +57,9 @@ export function ImageEditor({
 
     const checkImage = async () => {
       try {
+        if (!srcUrl) return;
         // HEAD 요청으로 메타데이터만 빠르게 확인 (CORS 허용 서버인 경우에만 작동)
-        const res = await fetch(srcUrl!, { method: "HEAD" });
+        const res = await fetch(srcUrl, { method: "HEAD" });
 
         if (!res.ok) {
           if (res.status === 404) {

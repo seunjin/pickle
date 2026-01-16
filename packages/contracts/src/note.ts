@@ -20,6 +20,8 @@ export const commonMetaDataSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   image: optionalUrl,
+  image_width: z.number().optional(), // [NEW] 외부 이미지 너비
+  image_height: z.number().optional(), // [NEW] 외부 이미지 높이
 });
 
 // --- 2. 저장된 데이터 스키마 (순수 콘텐츠) ---
@@ -92,6 +94,8 @@ const createInputMetaSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   image: optionalUrl,
+  image_width: z.number().optional(),
+  image_height: z.number().optional(),
 });
 
 // 4-1. 공통 입력 필드 (생성)

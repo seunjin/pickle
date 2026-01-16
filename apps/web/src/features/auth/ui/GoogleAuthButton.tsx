@@ -4,13 +4,20 @@ import { Spinner, toast } from "@pickle/ui";
 import { useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 
+interface AuthOptions {
+  data?: {
+    is_terms_agreed?: boolean;
+    is_privacy_agreed?: boolean;
+    is_marketing_agreed?: boolean;
+    [key: string]: unknown;
+  };
+}
+
 interface GoogleAuthButtonProps {
   next?: string;
   label?: string;
   disabled?: boolean;
-  options?: {
-    data?: Record<string, any>;
-  };
+  options?: AuthOptions;
   onClick?: () => void;
 }
 
@@ -73,7 +80,9 @@ export const GoogleAuthButton = ({
             prompt: "consent",
           },
           data: options?.data,
-        } as any,
+        } as Parameters<typeof supabase.auth.signInWithOAuth>[0]["options"] & {
+          data?: object;
+        },
       });
 
       if (error) throw error;

@@ -1,14 +1,25 @@
 import type { NoteWithAsset } from "@pickle/contracts";
 import { cn } from "@pickle/ui/lib/utils";
+import type { CSSProperties } from "react";
 import { AssetImage } from "../AssetImage";
 
 export const Thumbnail = ({
   note,
   className,
+  style,
+  objectFit = "cover",
 }: {
   note: NoteWithAsset;
   className?: HTMLDivElement["className"];
+  style?: CSSProperties;
+  objectFit?: "cover" | "contain" | "none" | "scale-down";
 }) => {
+  const objectFitClass = {
+    contain: "object-contain",
+    cover: "object-cover",
+    none: "object-none",
+    "scale-down": "object-scale-down",
+  };
   const ThumbnailNoImage = () => {
     return (
       <div className="flex h-full w-full select-none items-center justify-center bg-green-400">
@@ -23,8 +34,10 @@ export const Thumbnail = ({
           <img
             src={note.meta.image}
             alt={note.meta?.description}
-            className={cn("h-full w-full object-cover")}
+            className={cn("h-full w-full", objectFitClass[objectFit])}
             loading="lazy"
+            width={note.meta.image_width}
+            height={note.meta.image_height}
           />
         ) : (
           <ThumbnailNoImage />
@@ -34,6 +47,7 @@ export const Thumbnail = ({
           <AssetImage
             path={note.assets?.full_path}
             alt={""}
+            objectFit={objectFit}
             blurDataUrl={note.assets?.blur_data_url}
           />
         ) : (
@@ -44,6 +58,7 @@ export const Thumbnail = ({
           <AssetImage
             path={note.assets?.full_path}
             alt={""}
+            objectFit={objectFit}
             blurDataUrl={note.assets?.blur_data_url}
           />
         ) : (
@@ -56,6 +71,8 @@ export const Thumbnail = ({
   };
 
   return renderThumbnail() ? (
-    <div className={className}>{renderThumbnail()}</div>
+    <div style={style} className={className}>
+      {renderThumbnail()}
+    </div>
   ) : null;
 };

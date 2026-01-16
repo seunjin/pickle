@@ -96,9 +96,14 @@ export const getNotes = async (
   }
 
   // 중첩된 tag 구조를 평탄화 (tag_list: [{ tag: { ... } }] -> tag_list: [{ ... }])
-  const transformedData = notesData?.map((note: any) => ({
+  const transformedData = (
+    notesData as unknown as Array<Record<string, unknown>> | null
+  )?.map((note) => ({
     ...note,
-    tag_list: note.tag_list?.map((item: any) => item.tag).filter(Boolean) || [],
+    tag_list:
+      (note.tag_list as Array<{ tag: unknown }> | undefined)
+        ?.map((item) => item.tag)
+        .filter(Boolean) || [],
   }));
 
   // Zod 스키마를 확장하여 Note + Assets + Tags 구조를 정의합니다.

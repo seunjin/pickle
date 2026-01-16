@@ -1,3 +1,5 @@
+import type { Database } from "@pickle/contracts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { queryOptions } from "@tanstack/react-query";
 import { type GetNotesParams, getNotes } from "../api/getNotes";
 import { getTrashNotes } from "../api/getTrashNotes";
@@ -16,7 +18,7 @@ export const noteQueries = {
       queryFn: () => getNotes(params),
       staleTime: 0,
     }),
-  trash: (client?: any, workspaceId?: string) =>
+  trash: (client?: SupabaseClient<Database>, workspaceId?: string) =>
     queryOptions({
       queryKey: ["notes", "trash", workspaceId],
       queryFn: () => getTrashNotes(client, workspaceId),

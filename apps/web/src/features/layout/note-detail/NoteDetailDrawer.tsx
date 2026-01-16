@@ -22,7 +22,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { type HTMLAttributes, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { folderQueries } from "@/features/folder";
 import { getNote } from "@/features/note/api/getNote";
 import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
@@ -43,34 +43,6 @@ interface NoteDetailDrawerProps {
   readOnly?: boolean;
 }
 
-const _TYPE_LABELS: Record<string, string> = {
-  text: "TEXT",
-  image: "IMAGE",
-  capture: "CAPTURE",
-  bookmark: "URL",
-} as const;
-
-const _type_per_class: Record<
-  NoteWithAsset["type"],
-  HTMLAttributes<"span">["className"]
-> = {
-  text: "font-medium text-[14px] text-blue-500 tracking-wider",
-  image: "font-medium text-[14px] text-green-500 tracking-wider",
-  capture: "font-medium text-[14px] text-green-500 tracking-wider",
-  bookmark: "font-medium text-[14px] text-yellow-500 tracking-wider",
-};
-
-const _type_per_icon: Record<
-  NoteWithAsset["type"],
-  HTMLAttributes<"span">["className"]
-> = {
-  text: "flex items-center justify-center size-6 rounded-sm bg-blue-500/10",
-  image: "flex items-center justify-center size-6 rounded-sm bg-green-500/10",
-  capture: "flex items-center justify-center size-6 rounded-sm bg-green-500/10",
-  bookmark:
-    "flex items-center justify-center size-6 rounded-sm bg-yellow-500/10",
-};
-
 export default function NoteDetailDrawer({
   note,
   readOnly,
@@ -86,7 +58,8 @@ export default function NoteDetailDrawer({
   const deleteNoteMutation = useDeleteNoteMutation();
   const { mutateAsync: deleteNote } = deleteNoteMutation;
   const [isTagMakerOpen, setIsTagMakerOpen] = useState<boolean>(false);
-
+  const [thumbnailDetailOpen, setThumbnailDetailOpen] =
+    useState<boolean>(false);
   // ✅ Sidebar prefetch 재사용 (추가 API 호출 없음!)
   const { data: folders = [] } = useSuspenseQuery(folderQueries.list(client));
 
@@ -262,10 +235,29 @@ export default function NoteDetailDrawer({
     }
   };
 
+  const hasAssetType = note.type === "capture" || note.type === "image";
+  const isBookmarkWithImage =
+    note.type === "bookmark" && note.meta?.image_width;
+
+  const width = hasAssetType
+    ? note.assets?.width
+    : isBookmarkWithImage
+      ? note.meta?.image_width
+      : null;
+  const height = hasAssetType
+    ? note.assets?.height
+    : isBookmarkWithImage
+      ? note.meta?.image_height
+      : null;
+
+  const noteThumbnailWidth = width ? `${width}px` : "auto";
+  const noteThumbnailHeight = height ? `${height}px` : "auto";
+
+  console.log({ noteThumbnailWidth, noteThumbnailHeight });
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
-        <motion.div
+        <div
           className="fixed inset-0 flex items-center justify-end"
           style={{ zIndex: zIndex }}
         >
@@ -278,294 +270,352 @@ export default function NoteDetailDrawer({
             transition={{ duration: 0.2 }}
             onClick={handleClose}
           />
-
-          {/* drawer */}
+          {/* Thumbnail Detail */}
           <motion.div
-            className="relative z-20 mr-[15px] grid h-[calc(100%-30px)] w-90 grid-rows-[auto_1fr_auto] rounded-[16px] border border-base-border-light bg-base-foreground-background py-5 shadow-standard"
+            className="relative z-20 flex h-[calc(100%-30px)] w-full justify-end gap-[15px] px-[15px]"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.3 }}
+            onClick={(_e) => {
+              handleClose();
+            }}
           >
-            {/* drawer content */}
-            <ScrollArea className="h-full overflow-auto">
-              <div className="px-5">
-                {/* type : image | capture | bookmark 일때 썸네일 */}
-                <Thumbnail
-                  note={note}
-                  className="mb-5 h-[200px] overflow-clip rounded-xl"
-                />
+            <AnimatePresence>
+              {thumbnailDetailOpen && (
+                <motion.div
+                  className="relative z-20 grid h-full w-[calc(100dvh-30px)] max-w-[calc(100dvh-30px)] flex-1 grid-rows-[1fr] rounded-[16px] border border-base-border-light bg-base-foreground-background py-5 shadow-standard"
+                  initial={{ opacity: 0, x: "70%" }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: "70%" }}
+                  transition={{ duration: 0.3 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <header className="absolute top-3 right-3 z-10 flex items-center justify-end gap-2">
+                    <ActionButton icon="download_16" />
+                    <ActionButton
+                      icon="delete_16"
+                      onClick={() => setThumbnailDetailOpen(false)}
+                    />
+                  </header>
+                  <div className="flex h-full items-center justify-center">
+                    <Thumbnail
+                      note={note}
+                      className={cn("h-full w-full")}
+                      objectFit="scale-down"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                {/* 라벨 및 북마크 버튼 */}
-                <div className="flex items-center justify-between pb-3">
-                  <TypeLabel type={note.type} mode="detail" />
+            {/* drawer */}
+            <motion.div
+              className="relative z-30 grid h-full w-90 shrink-0 grid-rows-[auto_1fr_auto] rounded-[16px] border border-base-border-light bg-base-foreground-background py-5 shadow-standard"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              {/* drawer content */}
+              <ScrollArea className="h-full overflow-auto">
+                <div className="px-5">
+                  {/* type : image | capture | bookmark 일때 썸네일 */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-base-primary"
+                    onClick={() => setThumbnailDetailOpen(!thumbnailDetailOpen)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setThumbnailDetailOpen(!thumbnailDetailOpen);
+                      }
+                    }}
+                  >
+                    <Thumbnail
+                      note={note}
+                      className="mb-5 h-[200px] overflow-clip rounded-xl"
+                    />
+                  </div>
 
-                  {/* 북마크 버튼 - 즉시 저장 유지 */}
-                  {!readOnly && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const isBookmarked = !!currentNote.bookmarked_at;
-                        const newBookmarkedAt = isBookmarked
-                          ? null
-                          : new Date().toISOString();
-                        // 북마크는 updateNoteAsync를 기다리지 않고 낙관적으로 처리될 수 있음
-                        updateNote({
-                          noteId: currentNote.id,
-                          payload: { bookmarked_at: newBookmarkedAt },
-                        });
-                      }}
-                    >
-                      <Icon
-                        name="bookmark_20"
-                        className={cn(
-                          "transition-colors",
-                          currentNote.bookmarked_at
-                            ? "text-base-primary"
-                            : "text-neutral-500",
-                        )}
-                      />
-                    </button>
-                  )}
-                </div>
+                  {/* 라벨 및 북마크 버튼 */}
+                  <div className="flex items-center justify-between pb-3">
+                    <TypeLabel type={note.type} mode="detail" />
 
-                {/* form */}
-                <div className="mb-6 flex flex-col gap-2 border-base-border-light border-b pb-3">
-                  {/* TITLE */}
-                  <TextareaContainLabel
-                    label="TITLE"
-                    value={localNote.title || ""}
-                    onChange={(e) =>
-                      setLocalNote((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    required
-                    error={errors.title}
-                    readOnly={readOnly}
-                  />
+                    {/* 북마크 버튼 - 즉시 저장 유지 */}
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const isBookmarked = !!currentNote.bookmarked_at;
+                          const newBookmarkedAt = isBookmarked
+                            ? null
+                            : new Date().toISOString();
+                          // 북마크는 updateNoteAsync를 기다리지 않고 낙관적으로 처리될 수 있음
+                          updateNote({
+                            noteId: currentNote.id,
+                            payload: { bookmarked_at: newBookmarkedAt },
+                          });
+                        }}
+                      >
+                        <Icon
+                          name="bookmark_20"
+                          className={cn(
+                            "transition-colors",
+                            currentNote.bookmarked_at
+                              ? "text-base-primary"
+                              : "text-neutral-500",
+                          )}
+                        />
+                      </button>
+                    )}
+                  </div>
 
-                  {currentNote.type === "text" && (
+                  {/* form */}
+                  <div className="mb-6 flex flex-col gap-2 border-base-border-light border-b pb-3">
+                    {/* TITLE */}
                     <TextareaContainLabel
-                      label="TEXT"
-                      value={localNote.text || ""}
+                      label="TITLE"
+                      value={localNote.title || ""}
                       onChange={(e) =>
                         setLocalNote((prev) => ({
                           ...prev,
-                          text: e.target.value,
+                          title: e.target.value,
                         }))
                       }
                       required
-                      error={errors.text}
+                      error={errors.title}
                       readOnly={readOnly}
                     />
-                  )}
 
-                  <URLComponent
-                    url={currentNote.url || ""}
-                    readOnly={readOnly}
-                  />
+                    {currentNote.type === "text" && (
+                      <TextareaContainLabel
+                        label="TEXT"
+                        value={localNote.text || ""}
+                        onChange={(e) =>
+                          setLocalNote((prev) => ({
+                            ...prev,
+                            text: e.target.value,
+                          }))
+                        }
+                        required
+                        error={errors.text}
+                        readOnly={readOnly}
+                      />
+                    )}
 
-                  {/* MEMO */}
-                  <TextareaContainLabel
-                    label="MEMO"
-                    value={localNote.memo || ""}
-                    onChange={(e) =>
-                      setLocalNote((prev) => ({
-                        ...prev,
-                        memo: e.target.value,
-                      }))
-                    }
-                    readOnly={readOnly}
-                  />
-                </div>
+                    <URLComponent
+                      url={currentNote.url || ""}
+                      readOnly={readOnly}
+                    />
 
-                {/* FOLDERS */}
-                <div className="mb-5 border-base-border-light border-b pb-3">
-                  <div className="flex h-9 items-center justify-between">
-                    <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
-                      FOLDERS
-                    </span>
-                  </div>
-                  <Select
-                    value={localNote.folder_id ?? "inbox"}
-                    onValueChange={(val) =>
-                      setLocalNote((prev) => ({
-                        ...prev,
-                        folder_id: val === "inbox" ? null : val,
-                      }))
-                    }
-                    options={[
-                      { value: "inbox", label: "Inbox" },
-                      ...folders.map((f) => ({ value: f.id, label: f.name })),
-                    ]}
-                    disabled={readOnly}
-                  />
-                </div>
-
-                {/* TAGS */}
-                <div className="mb-5 border-base-border-light border-b pb-3">
-                  <div className="flex h-9 items-center justify-between">
-                    <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
-                      TAGS
-                    </span>
-                    <TagMaker
-                      open={isTagMakerOpen}
-                      onOpenChange={setIsTagMakerOpen}
-                      tags={allTags}
-                      selectedTagIds={localNote.tags || []} // 로컬 상태 연결
-                      onSetTags={(tagIds) =>
-                        setLocalNote((prev) => ({ ...prev, tags: tagIds }))
-                      } // 로컬 상태 업데이트
-                      onCreateTag={async (name, style) => {
-                        const newTag = await createTagMutation.mutateAsync({
-                          name,
-                          style,
-                        });
-                        return newTag.id;
-                      }}
-                      onUpdateTag={(tagId, updates) =>
-                        updateTagMutation.mutate({ tagId, updates })
+                    {/* MEMO */}
+                    <TextareaContainLabel
+                      label="MEMO"
+                      value={localNote.memo || ""}
+                      onChange={(e) =>
+                        setLocalNote((prev) => ({
+                          ...prev,
+                          memo: e.target.value,
+                        }))
                       }
-                      onDeleteTag={(tagId) => deleteTagMutation.mutate(tagId)}
-                      trigger={
-                        readOnly ? null : (
-                          <ActionButton
-                            icon="plus_16"
-                            onClick={() => setIsTagMakerOpen(!isTagMakerOpen)}
-                            forceFocus={isTagMakerOpen}
-                          />
-                        )
-                      }
+                      readOnly={readOnly}
                     />
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {localNote.tags?.map((tagId) => {
-                      const tag = allTags.find((t) => t.id === tagId);
-                      if (!tag) return null;
-                      const style = TAG_VARIANTS[tag.style];
-                      return (
-                        <div
-                          key={tag.id}
-                          className={cn(
-                            "grid h-[26px] grid-cols-[1fr_auto] items-center gap-0.5 rounded-[4px] border px-1.5",
-                            style.tagColor,
-                          )}
-                        >
-                          <span className="truncate text-[13px]">
-                            #{tag.name}
-                          </span>
-                          <button
-                            type="button"
-                            className={cn(
-                              "ml-0.5 flex size-4 items-center justify-center rounded-full transition-colors hover:bg-black/10",
-                            )}
-                            onClick={() =>
-                              setLocalNote((prev) => ({
-                                ...prev,
-                                tags: prev.tags?.filter((id) => id !== tag.id),
-                              }))
-                            }
-                          >
-                            <Icon
-                              name="delete_16"
-                              className={cn(style.buttonColor)}
-                            />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
-                {/* DETAILS */}
-                <div className="pb-20">
-                  <div className="mb-[8.5px] flex h-9 items-center justify-between">
-                    <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
-                      DETAILS
-                    </span>
+                  {/* FOLDERS */}
+                  <div className="mb-5 border-base-border-light border-b pb-3">
+                    <div className="flex h-9 items-center justify-between">
+                      <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
+                        FOLDERS
+                      </span>
+                    </div>
+                    <Select
+                      value={localNote.folder_id ?? "inbox"}
+                      onValueChange={(val) =>
+                        setLocalNote((prev) => ({
+                          ...prev,
+                          folder_id: val === "inbox" ? null : val,
+                        }))
+                      }
+                      options={[
+                        { value: "inbox", label: "Inbox" },
+                        ...folders.map((f) => ({ value: f.id, label: f.name })),
+                      ]}
+                      disabled={readOnly}
+                    />
                   </div>
-                  <div className="flex flex-col gap-2">
-                    {(note.type === "image" || note.type === "capture") && (
-                      <>
-                        <dl className="flex items-center">
-                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                            파일 종류
-                          </dt>
-                          <dd className="text-[13px] text-neutral-500 leading-none">
-                            webp 이미지
-                          </dd>
-                        </dl>
-                        <dl className="flex items-center">
-                          <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                            파일 크기
-                          </dt>
-                          <dd className="text-[13px] text-neutral-500 leading-none">
-                            {note.assets?.full_size_bytes
-                              ? formatBytes(note.assets.full_size_bytes)
-                              : "-"}
-                          </dd>
-                        </dl>
-                      </>
-                    )}
-                    <dl className="flex items-center">
-                      <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                        등록일
-                      </dt>
-                      <dd className="text-[13px] text-neutral-500 leading-none">
-                        {formatDate(note.created_at, "datetime")}
-                      </dd>
-                    </dl>
-                    <dl className="flex items-center">
-                      <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
-                        수정일
-                      </dt>
-                      <dd className="text-[13px] text-neutral-500 leading-none">
-                        {formatDate(note.updated_at, "datetime")}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
 
-            {/* drawer footer */}
-            {!readOnly && (
-              <div className="mt-auto flex gap-2 border-base-border-light border-t p-5 pb-0">
-                <Button
-                  icon="trash_16"
-                  variant={"icon"}
-                  className="shrink-0"
-                  onClick={() => {
-                    dialog.open(() => (
-                      <Confirm
-                        title="노트 삭제"
-                        content="이 노트를 삭제하시겠습니까?"
-                        onConfirm={async () => {
-                          try {
-                            await deleteNote(note.id);
-                            close();
-                          } catch (error) {
-                            console.error("Failed to delete note:", error);
-                          }
+                  {/* TAGS */}
+                  <div className="mb-5 border-base-border-light border-b pb-3">
+                    <div className="flex h-9 items-center justify-between">
+                      <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
+                        TAGS
+                      </span>
+                      <TagMaker
+                        open={isTagMakerOpen}
+                        onOpenChange={setIsTagMakerOpen}
+                        tags={allTags}
+                        selectedTagIds={localNote.tags || []} // 로컬 상태 연결
+                        onSetTags={(tagIds) =>
+                          setLocalNote((prev) => ({ ...prev, tags: tagIds }))
+                        } // 로컬 상태 업데이트
+                        onCreateTag={async (name, style) => {
+                          const newTag = await createTagMutation.mutateAsync({
+                            name,
+                            style,
+                          });
+                          return newTag.id;
                         }}
+                        onUpdateTag={(tagId, updates) =>
+                          updateTagMutation.mutate({ tagId, updates })
+                        }
+                        onDeleteTag={(tagId) => deleteTagMutation.mutate(tagId)}
+                        trigger={
+                          readOnly ? null : (
+                            <ActionButton
+                              icon="plus_16"
+                              onClick={() => setIsTagMakerOpen(!isTagMakerOpen)}
+                              forceFocus={isTagMakerOpen}
+                            />
+                          )
+                        }
                       />
-                    ));
-                  }}
-                />
-                <Button
-                  className="flex-1"
-                  isPending={isSavePending}
-                  disabled={!isValid}
-                  onClick={handleSave}
-                >
-                  저장하기
-                </Button>
-              </div>
-            )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {localNote.tags?.map((tagId) => {
+                        const tag = allTags.find((t) => t.id === tagId);
+                        if (!tag) return null;
+                        const style = TAG_VARIANTS[tag.style];
+                        return (
+                          <div
+                            key={tag.id}
+                            className={cn(
+                              "grid h-[26px] grid-cols-[1fr_auto] items-center gap-0.5 rounded-[4px] border px-1.5",
+                              style.tagColor,
+                            )}
+                          >
+                            <span className="truncate text-[13px]">
+                              #{tag.name}
+                            </span>
+                            <button
+                              type="button"
+                              className={cn(
+                                "ml-0.5 flex size-4 items-center justify-center rounded-full transition-colors hover:bg-black/10",
+                              )}
+                              onClick={() =>
+                                setLocalNote((prev) => ({
+                                  ...prev,
+                                  tags: prev.tags?.filter(
+                                    (id) => id !== tag.id,
+                                  ),
+                                }))
+                              }
+                            >
+                              <Icon
+                                name="delete_16"
+                                className={cn(style.buttonColor)}
+                              />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* DETAILS */}
+                  <div className="pb-20">
+                    <div className="mb-[8.5px] flex h-9 items-center justify-between">
+                      <span className="font-semibold text-[13px] text-neutral-600 leading-none tracking-wider">
+                        DETAILS
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {(note.type === "image" || note.type === "capture") && (
+                        <>
+                          <dl className="flex items-center">
+                            <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                              파일 종류
+                            </dt>
+                            <dd className="text-[13px] text-neutral-500 leading-none">
+                              webp 이미지
+                            </dd>
+                          </dl>
+                          <dl className="flex items-center">
+                            <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                              파일 크기
+                            </dt>
+                            <dd className="text-[13px] text-neutral-500 leading-none">
+                              {note.assets?.full_size_bytes
+                                ? formatBytes(note.assets.full_size_bytes)
+                                : "-"}
+                            </dd>
+                          </dl>
+                        </>
+                      )}
+                      <dl className="flex items-center">
+                        <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                          등록일
+                        </dt>
+                        <dd className="text-[13px] text-neutral-500 leading-none">
+                          {formatDate(note.created_at, "datetime")}
+                        </dd>
+                      </dl>
+                      <dl className="flex items-center">
+                        <dt className="w-[70px] text-[12px] text-neutral-500 leading-none">
+                          수정일
+                        </dt>
+                        <dd className="text-[13px] text-neutral-500 leading-none">
+                          {formatDate(note.updated_at, "datetime")}
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+
+              {/* drawer footer */}
+              {!readOnly && (
+                <div className="mt-auto flex gap-2 border-base-border-light border-t p-5 pb-0">
+                  <Button
+                    icon="trash_16"
+                    variant={"icon"}
+                    className="shrink-0"
+                    onClick={() => {
+                      dialog.open(() => (
+                        <Confirm
+                          title="노트 삭제"
+                          content="이 노트를 삭제하시겠습니까?"
+                          onConfirm={async () => {
+                            try {
+                              await deleteNote(note.id);
+                              close();
+                            } catch (error) {
+                              console.error("Failed to delete note:", error);
+                            }
+                          }}
+                        />
+                      ));
+                    }}
+                  />
+                  <Button
+                    className="flex-1"
+                    isPending={isSavePending}
+                    disabled={!isValid}
+                    onClick={handleSave}
+                  >
+                    저장하기
+                  </Button>
+                </div>
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

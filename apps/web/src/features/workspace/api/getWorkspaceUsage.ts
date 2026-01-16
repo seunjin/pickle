@@ -13,19 +13,16 @@ export const getWorkspaceUsage = async (
   const supabase = client ?? createClient();
 
   // DB에 생성한 RPC 함수 호출
-  const { data, error } = await supabase.rpc(
-    "get_workspace_storage_info" as any,
-    {
-      p_workspace_id: workspaceId,
-    },
-  );
+  const { data, error } = await supabase.rpc("get_workspace_storage_info", {
+    p_workspace_id: workspaceId,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
   // RPC 결과가 배열로 반환되므로 첫 번째 아이템 사용
-  const usageInfo = (Array.isArray(data) ? data[0] : data) as any;
+  const usageInfo = Array.isArray(data) ? data[0] : null;
 
   if (!usageInfo) {
     throw new Error("Failed to fetch storage usage info");

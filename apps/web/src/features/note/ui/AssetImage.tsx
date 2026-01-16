@@ -6,6 +6,7 @@ interface AssetImageProps {
   path: string;
   alt: string;
   className?: string;
+  objectFit?: "cover" | "contain" | "none" | "scale-down";
   blurDataUrl?: string | null;
 }
 
@@ -29,6 +30,7 @@ export const AssetImage = ({
   path,
   alt,
   className,
+  objectFit = "cover",
   blurDataUrl,
 }: AssetImageProps) => {
   // 이미 로드된 이미지면 즉시 표시 (블러 스킵, 애니메이션 스킵)
@@ -45,6 +47,13 @@ export const AssetImage = ({
 
   // Public URL은 고정이므로 React Query 캐싱 불필요 (브라우저가 캐싱)
   const publicUrl = path ? getPublicImageUrl(path) : null;
+
+  const objectFitClass = {
+    contain: "object-contain",
+    cover: "object-cover",
+    none: "object-none",
+    "scale-down": "object-scale-down",
+  };
 
   if (!publicUrl) {
     return (
@@ -65,7 +74,7 @@ export const AssetImage = ({
           alt=""
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover"
+          className={objectFitClass[objectFit]}
           unoptimized
         />
       )}
@@ -81,7 +90,7 @@ export const AssetImage = ({
         alt={alt}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        className={`object-cover ${!isCached && showPlaceholder ? "transition-opacity duration-500" : ""} ${
+        className={`${objectFitClass[objectFit]} ${!isCached && showPlaceholder ? "transition-opacity duration-500" : ""} ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         unoptimized={

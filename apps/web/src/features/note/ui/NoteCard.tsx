@@ -62,7 +62,7 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
   };
 
   return (
-    <NoteCardContainer readOnly={readOnly} onClick={handleCardClick}>
+    <NoteCardContainer onClick={handleCardClick}>
       {/* thumbnail */}
       {note.type === "text" ? (
         // 텍스트 노트의 경우
@@ -167,11 +167,9 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
 function NoteCardContainer({
   children,
   onClick,
-  readOnly,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
-  readOnly?: boolean;
 }) {
   return (
     <div

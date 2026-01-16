@@ -17,7 +17,7 @@ export function useExtensionAuth() {
 
     // 2. Listen for changes (e.g. re-sync)
     const handleStorageChange = (
-      changes: { [key: string]: any },
+      changes: { [key: string]: chrome.storage.StorageChange },
       areaName: string,
     ) => {
       if (areaName === "local" && changes.supabaseSession) {

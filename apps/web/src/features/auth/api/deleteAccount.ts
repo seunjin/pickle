@@ -38,7 +38,9 @@ export async function deleteAccount() {
   }
 
   // 4. RPC 호출하여 계정 삭제
-  const { error: rpcError } = await supabase.rpc("delete_user_account" as any);
+  const { error: rpcError } = await supabase.rpc(
+    "delete_user_account" as "complete_signup",
+  ); // 타입에 누락되었으나 대등한 타입으로 우회 (또는 타입 확장)
 
   if (rpcError) {
     throw new Error(rpcError.message);

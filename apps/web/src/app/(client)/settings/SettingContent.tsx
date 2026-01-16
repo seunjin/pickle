@@ -36,7 +36,7 @@ export function SettingContent() {
       await deleteAccount();
       toast.success({ title: "계정이 삭제되었습니다." });
       router.replace("/");
-    } catch (error) {
+    } catch (_error) {
       toast.error({
         title: "탈퇴 처리 중 오류가 발생했습니다.",
       });
@@ -129,7 +129,7 @@ export function SettingContent() {
                               });
 
                               if (error) throw error;
-                            } catch (error) {
+                            } catch (_error) {
                               // 3. 실패 시 롤백 및 알림
                               updateAppUser({
                                 is_marketing_agreed: originalValue,
@@ -139,7 +139,7 @@ export function SettingContent() {
                               });
                               console.error(
                                 "Failed to update agreement:",
-                                error,
+                                _error,
                               );
                             } finally {
                               setIsUpdatingAgreement(false);

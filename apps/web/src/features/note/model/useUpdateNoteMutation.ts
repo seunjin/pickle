@@ -17,7 +17,7 @@ export function useUpdateNoteMutation() {
       noteId: string;
       payload: UpdateNoteInput;
     }) => updateNote(noteId, payload),
-    onSuccess: (_, { noteId }) => {
+    onSuccess: () => {
       // 관련 쿼리 무효화 (목록 및 상세)
       queryClient.invalidateQueries({ queryKey: noteKeys.all });
     },

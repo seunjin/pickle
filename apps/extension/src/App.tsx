@@ -47,7 +47,7 @@ function App() {
 
     // Change listener
     const handleStorageChange = (
-      changes: { [key: string]: any },
+      changes: { [key: string]: chrome.storage.StorageChange },
       areaName: string,
     ) => {
       if (areaName === "local" && changes[storageKey]) {

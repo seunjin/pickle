@@ -22,7 +22,6 @@ import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 interface SidebarTagItemProps extends SidebarItemBaseProps {
   icon: IconName;
   tagId: string;
-  iconClassName?: string;
   tagStyle: keyof typeof TAG_VARIANTS;
 }
 /**
@@ -30,8 +29,7 @@ interface SidebarTagItemProps extends SidebarItemBaseProps {
  * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
 export const SidebarTagItem = (props: SidebarTagItemProps) => {
-  const { tagId, icon, iconClassName, tagStyle, label, active, ...baseProps } =
-    props;
+  const { tagId, icon, tagStyle, label, active, ...baseProps } = props;
   const [open, setOpen] = useState<boolean>(false);
   const dialog = useDialog();
   const toast = useToast();

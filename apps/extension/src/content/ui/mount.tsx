@@ -61,7 +61,12 @@ export function mountOverlay(tabId: number) {
 
 // Global Message Listener for Opening Overlay
 extensionRuntime.onMessage.addListener(
-  (request: any, _sender: any, sendResponse: (response?: any) => void) => {
+  (
+    message: unknown,
+    _sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: { status: string }) => void,
+  ) => {
+    const request = message as { action: string; tabId?: number };
     if (request.action === "OPEN_OVERLAY") {
       if (request.tabId) {
         mountOverlay(request.tabId);

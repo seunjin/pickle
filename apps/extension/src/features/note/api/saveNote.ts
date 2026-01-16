@@ -119,6 +119,25 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
     // 기본적으로 note.data를 그대로 쓰되, 업로드 된 이미지 정보만 덮어씌움
     let storedData: StoredNoteData = note.data;
 
+    // 5-0. Bookmark 외부 이미지 해상도 추출 (업로드는 하지 않음)
+    if (note.type === "bookmark" && note.meta.image) {
+      try {
+        const res = await fetch(note.meta.image);
+        if (res.ok) {
+          const blob = await res.blob();
+          const bitmap = await createImageBitmap(blob);
+          note.meta.image_width = bitmap.width;
+          note.meta.image_height = bitmap.height;
+          bitmap.close();
+        }
+      } catch (e) {
+        console.warn(
+          "[SaveNote] Failed to fetch bookmark image dimensions:",
+          e,
+        );
+      }
+    }
+
     // Discriminated Union 덕분에 note.type 체크 시 note.data가 자동으로 Narrowing 됨
     if (note.type === "image" || note.type === "capture") {
       const imageUrl = note.data.image_url;
@@ -128,6 +147,11 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         const res = await fetch(imageUrl);
         const blob = await res.blob();
         const fileSize = blob.size;
+
+        // 이미지 실제 해상도 추출
+        const bitmap = await createImageBitmap(blob);
+        const { width, height } = bitmap;
+        bitmap.close();
 
         const { data: usage, error: usageError } = await supabase.rpc(
           "get_workspace_storage_info" as "get_workspace_storage_info",
@@ -178,6 +202,8 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
             type: note.type,
             full_path: uploadData.path,
             full_size_bytes: fileSize,
+            width: width, // [NEW] 실제 너비 저장
+            height: height, // [NEW] 실제 높이 저장
             blur_data_url: note.blurDataUrl ?? null,
           })
           .select()
