@@ -213,17 +213,14 @@ export default function SignupPageContent() {
                           await completeSignup({
                             marketing_agreed: agreements.marketing,
                           });
-                          toast.success({
-                            title: "가입 완료",
-                            description:
-                              "회원가입이 성공적으로 완료되었습니다.",
-                          });
+
+                          toast.success({ title: "가입 완료" });
+
+                          // 인증 상태를 확실히 갱신하기 위해 전체 페이지 새로고침하며 이동
                           window.location.href = next;
-                        } catch (_error) {
-                          toast.error({
-                            title: "가입 실패",
-                            description: "가입 처리 중 오류가 발생했습니다.",
-                          });
+                        } catch (error) {
+                          toast.error({ title: "가입 실패" });
+                          console.error(error);
                           setIsCompleting(false);
                         }
                       }

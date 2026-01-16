@@ -1,7 +1,7 @@
 "use client";
 import { Icon, type IconName } from "@pickle/icons";
 import type * as React from "react";
-
+import { cn } from "../lib/utils";
 import { Spinner } from "../spinner";
 /**
  * [중요] sonner를 직접 임포트하지 않고 index.tsx의 인스턴스를 사용합니다.
@@ -21,7 +21,7 @@ export function ToastCard({
   id,
   kind,
   title,
-  description,
+  // description,
   action,
   cancel,
   dismissible = false,
@@ -60,7 +60,7 @@ export function ToastCard({
 
   return (
     <div
-      className={`pickle-toast-card ${kindStyles[kind]} ${className || ""}`}
+      className={cn("pickle-toast-card", kindStyles[kind], className)}
       style={style}
     >
       <div className="pickle-toast-content w-full">
@@ -82,9 +82,9 @@ export function ToastCard({
             </button>
           )}
         </div>
-        {description && (
+        {/* {description && (
           <p className="pickle-toast-description">{description}</p>
-        )}
+        )} */}
         {(action || cancel) && (
           <div className="pickle-toast-actions">
             {action && (
