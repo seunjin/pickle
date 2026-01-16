@@ -7,7 +7,8 @@
 ### 설계 원칙
 - **익스텐션 주체 인증**: 웹 브리지 없이 익스텐션에서 직접 로그인
 - **PKCE 지원**: MV3 Service Worker 환경에서 안전한 OAuth 플로우
-- **자동 토큰 갱신**: Refresh Token으로 사용자 무감지 세션 연장
+- **웹 세션 동기화**: 익스텐션 로그인 상태를 웹 애플리케이션으로 자동 전파
+- **Type-Safety 강화**: Any 타입을 제거하고 구체적인 인터페이스 정의 (CONVENTIONS 준수)
 
 ### 아키텍처
 
@@ -194,7 +195,27 @@ if (wsError.code === "PGRST301" || wsError.message.includes("JWT expired")) {
 }
 ```
 
-## 9. 관련 문서
+## 9. 웹-익스텐션 세션 동기화 (Web-Ext Sync)
+
+익스텐션에서 로그인한 정보를 웹 사이트([picklenote.io](https://picklenote.io))와 공유하기 위해 `/api/internal/auth/extension-sync` 엔드포인트를 사용합니다.
+
+### 동기화 흐름
+1. 익스텐션에서 OAuth 로그인 완료 후 세션 획득
+2. 익스텐션이 웹의 싱크 API URL을 새 탭으로 오픈
+   - URL: `/api/internal/auth/extension-sync?access_token=...&refresh_token=...`
+3. 서버는 전달받은 토큰을 웹 서비스의 인증 쿠키로 설정
+4. 설정 완료 후 메인 대시보드로 리다이렉트
+
+> [!WARNING]
+> 현재는 URL 파라미터로 토큰을 전달하는 방식입니다. 보안 강화를 위해 프로덕션 환경에서는 1회용 인증 코드(One-time Code) 방식으로 고도화가 필요합니다.
+
+## 10. 기술적 개선 사항 (Improvements)
+
+- **Any 타입 제거**: `getNotes`, `getTrashNotes`, `updateUser` 등 주요 API 및 쿼리 함수의 타입을 `SupabaseClient<Database>`와 구체적인 Data 인터페이스로 명시화하여 런타임 에러 방지.
+- **RPC 타입 확장**: `Database` 타입에 누락된 RPC 함수(`delete_user_account` 등)를 안전하게 처리하기 위한 타입 캐스팅 전략 적용.
+- **접근성(a11y) 강화**: 상세 페이지의 썸네일 클릭 영역 등에 키보드 네비게이션 지원(`tabIndex`, `onKeyDown`) 추가.
+
+## 11. 관련 문서
 
 - [Extension Architecture](./extension_architecture.md)
 - [Data Access Layer](./data_access_layer.md)
