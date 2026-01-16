@@ -88,11 +88,11 @@ export function AppHeader() {
           ref={searchRef}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          containerClassName="group w-80"
+          containerClassName="group w-80 rounded-[8px]"
           placeholder="검색어를 입력해 주세요."
           startAddon={
             <Icon
-              name="search_20"
+              name="search_16"
               className="transition-colors group-focus-within:text-base-primary"
             />
           }

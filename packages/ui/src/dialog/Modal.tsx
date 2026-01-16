@@ -35,7 +35,7 @@ export function Modal({
           {/* Dialog Content */}
           <motion.div
             className={cn(
-              "relative z-10 flex flex-col items-center gap-4 rounded-[20px] border border-base-border-light bg-base-foreground-background py-[30px] shadow-standard",
+              "relative z-10 flex flex-col items-center gap-4 rounded-[20px] border border-base-border-light bg-base-foreground-background py-[24px_30px] shadow-standard",
               contentClassName,
             )}
             initial={{ opacity: 0, scale: 0.95 }}

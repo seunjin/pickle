@@ -6,6 +6,7 @@ export function Toaster() {
   return (
     <SonnerToaster
       position="top-center"
+      style={{ display: "flex", justifyContent: "center" }}
       toastOptions={{
         classNames: {
           title: "pickle-toast-title",

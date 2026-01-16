@@ -24,7 +24,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           className={cn(
             "pointer-events-none size-4 shrink-0 rounded-[4px] border transition-all",
             // 1. Unchecked (기본)
-            "border-base-muted bg-neutral-850",
+            "border-base-muted",
             // 2. Hover (비활성화가 아닐 때만 적용)
             "group-hover:border-base-primary group-hover:bg-base-primary-active-background",
             // 3. Checked (선택됨) - Hover보다 뒤에 배치
@@ -39,7 +39,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
 
         {/* 체크 아이콘 (Icon) */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity peer-checked:opacity-100">
-          <Icon name="check_16" className="size-3 text-neutral-950" />
+          <Icon name="check_mini_12" className="size-3 text-neutral-950" />
         </div>
       </div>
     );

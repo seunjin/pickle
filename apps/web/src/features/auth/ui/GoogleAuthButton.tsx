@@ -35,7 +35,7 @@ export const GoogleAuthButton = ({
 
     setIsProcessing(true);
 
-    const authPromise = (async () => {
+    try {
       const callbackUrl = new URL(
         "/api/internal/auth/callback",
         window.location.origin,
@@ -57,18 +57,12 @@ export const GoogleAuthButton = ({
       });
 
       if (error) throw error;
-    })();
-
-    toast.promise(authPromise, {
-      loading: "Google 연결 중...",
-      success: "인증 페이지로 이동합니다.",
-      error: "인증에 실패했습니다. 다시 시도해 주세요.",
-    });
-
-    try {
-      await authPromise;
     } catch (error) {
       console.error("Auth failed:", error);
+      toast.error({
+        title: "인증 실패",
+        description: "Google 인증에 실패했습니다. 다시 시도해 주세요.",
+      });
       setIsProcessing(false);
     }
   };

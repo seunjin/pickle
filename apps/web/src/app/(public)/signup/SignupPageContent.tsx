@@ -1,16 +1,17 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { Checkbox, useDialog } from "@pickle/ui";
+import { Checkbox, toast, useDialog } from "@pickle/ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@/features/auth/model/useUser";
 import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
 import TermsArgreementModal, {
   type TermsType,
 } from "@/features/layout/terms/TermsArgreementModal";
+
 export default function SignupPageContent() {
-  const { user, appUser, isLoading } = useUser();
+  const { appUser, isLoading } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
@@ -21,6 +22,13 @@ export default function SignupPageContent() {
     privacy: false,
     marketing: false,
   });
+
+  // 이미 활성화된 유저라면 리다이렉트
+  useEffect(() => {
+    if (!isLoading && appUser?.status === "active") {
+      router.replace(next);
+    }
+  }, [isLoading, appUser, router, next]);
 
   const handleAgreementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -58,13 +66,8 @@ export default function SignupPageContent() {
     ));
   };
 
-  // 이미 활성화된 유저라면 리다이렉트
-  if (!isLoading && appUser?.status === "active") {
-    router.replace(next);
-    return null;
-  }
-
-  if (isLoading) {
+  // 로딩 중이거나 리다이렉트 중일 때 스켈레톤/로딩 표시
+  if (isLoading || appUser?.status === "active") {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
@@ -213,89 +216,6 @@ export default function SignupPageContent() {
         © 2026 Pickle. All rights reserved.
       </footer>
     </div>
-    // <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-    //   <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
-    //     <div className="text-center">
-    //       <h1 className="font-bold text-3xl text-gray-900">환영합니다! 🎉</h1>
-    //       <p className="mt-2 text-gray-600">
-    //         서비스 이용을 위해 약관에 동의해주세요.
-    //       </p>
-    //     </div>
-
-    //     <div className="space-y-4">
-    //       <div className="rounded-lg border p-4">
-    //         <label className="flex cursor-pointer items-start gap-3">
-    //           <input
-    //             type="checkbox"
-    //             checked={agreements.terms}
-    //             onChange={(e) =>
-    //               setAgreements({...agreements, terms: e.target.checked })
-    //             }
-    //             className="mt-1 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-    //           />
-    //           <span className="text-gray-700 text-sm">
-    //             <span className="font-semibold text-indigo-600">[필수]</span>{" "}
-    //             서비스 이용약관 동의
-    //           </span>
-    //         </label>
-    //       </div>
-
-    //       <div className="rounded-lg border p-4">
-    //         <label className="flex cursor-pointer items-start gap-3">
-    //           <input
-    //             type="checkbox"
-    //             checked={agreements.privacy}
-    //             onChange={(e) =>
-    //               setAgreements({...agreements, privacy: e.target.checked })
-    //             }
-    //             className="mt-1 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-    //           />
-    //           <span className="text-gray-700 text-sm">
-    //             <span className="font-semibold text-indigo-600">[필수]</span>{" "}
-    //             개인정보 수집 및 동의
-    //           </span>
-    //         </label>
-    //       </div>
-
-    //       <div className="rounded-lg border p-4">
-    //         <label className="flex cursor-pointer items-start gap-3">
-    //           <input
-    //             type="checkbox"
-    //             checked={agreements.marketing}
-    //             onChange={(e) =>
-    //               setAgreements({...agreements, marketing: e.target.checked })
-    //             }
-    //             className="mt-1 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-    //           />
-    //           <span className="text-gray-700 text-sm">
-    //             <span className="text-gray-500">[선택]</span> 마케팅 정보 수신
-    //             동의
-    //           </span>
-    //         </label>
-    //       </div>
-    //     </div>
-
-    //     <div className="pt-4">
-    //       <GoogleLoginButton
-    //         next={next}
-    //         label="동의하고 시작하기"
-    //         disabled={!agreements.terms || !agreements.privacy}
-    //         options={{
-    //           data: {
-    //             is_terms_agreed: agreements.terms,
-    //             is_privacy_agreed: agreements.privacy,
-    //             is_marketing_agreed: agreements.marketing,
-    //           },
-    //         }}
-    //       />
-    //       {!agreements.terms || !agreements.privacy ? (
-    //         <p className="mt-2 text-center text-[12px] text-red-500">
-    //           필수 약관에 모두 동의해주세요.
-    //         </p>
-    //       ) : null}
-    //     </div>
-    //   </div>
-    // </div>
   );
 }
 
@@ -311,19 +231,17 @@ const PickleCausticGlass = ({ children, className = "" }: Props) => {
       <div className="absolute inset-0 overflow-hidden rounded-[20px] bg-neutral-950/5 backdrop-blur-xl" />
 
       {/* 2. 빛의 맺힘 (Internal Reflection) */}
-      {/* 5시 방향 내부 반사광은 그대로 유지 (반응 좋으셨던 부분) */}
       <div
         className="pointer-events-none absolute inset-0 rounded-[20px]"
         style={{
           boxShadow: `
-            inset -5px -5px 10px -5px rgba(255, 255, 255, 0.1),
+            inset -5px -5px 15px -5px rgba(255, 255, 255, 0.1),
             inset -2px -2px 5px 0px rgba(255, 255, 255, 0.01)
           `,
         }}
       />
 
-      {/* 3. 엣지 하이라이트 (수정됨!) */}
-      {/* 1시와 7시는 아예 투명하게 날려버림 */}
+      {/* 3. 엣지 하이라이트 */}
       <div
         className="pointer-events-none absolute inset-0 rounded-[20px]"
         style={{
@@ -343,8 +261,7 @@ const PickleCausticGlass = ({ children, className = "" }: Props) => {
         }}
       />
 
-      {/* 4. 상단 컷팅 라인 (11시 강조용) */}
-      {/* 11시 쪽에만 아주 얇은 1px 라인을 추가해서 밀도를 높임 */}
+      {/* 4. 상단 컷팅 라인 */}
       <div
         className="pointer-events-none absolute inset-0 rounded-[20px] opacity-80"
         style={{

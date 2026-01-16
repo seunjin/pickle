@@ -23,7 +23,7 @@ export default async function Home(props: {
   }
 
   return (
-    <div className="grid min-h-dvh grid-rows-[1fr_auto] py-10">
+    <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] py-10">
       <div className="flex flex-1 flex-col items-center justify-center pb-8">
         <div className="flex flex-col gap-6 pb-15 text-center">
           <div className="mx-auto flex size-12 items-center justify-center rounded-[10px] bg-green-400">

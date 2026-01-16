@@ -11,6 +11,7 @@ import IconCapture16 from "./react/IconCapture16";
 import IconCard16 from "./react/IconCard16";
 import IconCheck16 from "./react/IconCheck16";
 import IconCheckCircle16 from "./react/IconCheckCircle16";
+import IconCheckMini12 from "./react/IconCheckMini12";
 import IconDelete16 from "./react/IconDelete16";
 import IconDocument16 from "./react/IconDocument16";
 import IconDownload16 from "./react/IconDownload16";
@@ -34,6 +35,7 @@ import IconPlus16 from "./react/IconPlus16";
 import IconPlus20 from "./react/IconPlus20";
 import IconRefresh16 from "./react/IconRefresh16";
 import IconSample20 from "./react/IconSample20";
+import IconSearch16 from "./react/IconSearch16";
 import IconSearch20 from "./react/IconSearch20";
 import IconSetting16 from "./react/IconSetting16";
 import IconSetting20 from "./react/IconSetting20";
@@ -57,6 +59,7 @@ export {
   IconCard16,
   IconCheck16,
   IconCheckCircle16,
+  IconCheckMini12,
   IconDelete16,
   IconDocument16,
   IconDownload16,
@@ -80,6 +83,7 @@ export {
   IconPlus20,
   IconRefresh16,
   IconSample20,
+  IconSearch16,
   IconSearch20,
   IconSetting16,
   IconSetting20,
@@ -104,6 +108,7 @@ export const ICON_PALETTE = {
   card_16: IconCard16,
   check_16: IconCheck16,
   check_circle_16: IconCheckCircle16,
+  check_mini_12: IconCheckMini12,
   delete_16: IconDelete16,
   document_16: IconDocument16,
   download_16: IconDownload16,
@@ -127,6 +132,7 @@ export const ICON_PALETTE = {
   plus_20: IconPlus20,
   refresh_16: IconRefresh16,
   sample_20: IconSample20,
+  search_16: IconSearch16,
   search_20: IconSearch20,
   setting_16: IconSetting16,
   setting_20: IconSetting20,
