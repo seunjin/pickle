@@ -69,7 +69,7 @@ export function ImageEditor({
             setDiagnosis(`서버 응답 오류가 발생했습니다 (${res.status})`);
           }
         }
-      } catch (e) {
+      } catch (_e) {
         setDiagnosis(
           "보안 정책(CORS)으로 인해 상세 정보 확인이 제한되었습니다",
         );

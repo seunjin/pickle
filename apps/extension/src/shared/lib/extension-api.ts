@@ -13,7 +13,7 @@ export function getIsExtensionValid() {
       typeof chrome.runtime !== "undefined" &&
       !!chrome.runtime.id
     );
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -31,7 +31,7 @@ export const extensionStorage = {
           key,
           callback as (items: Record<string, any>) => void,
         );
-      } catch (e) {
+      } catch (_e) {
         console.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
@@ -62,7 +62,7 @@ export const extensionStorage = {
     if (getIsExtensionValid()) {
       try {
         chrome.storage.local.set(items, callback || (() => {}));
-      } catch (e) {
+      } catch (_e) {
         console.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
@@ -83,7 +83,7 @@ export const extensionStorage = {
     if (getIsExtensionValid()) {
       try {
         chrome.storage.local.remove(key, callback || (() => {}));
-      } catch (e) {
+      } catch (_e) {
         console.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
@@ -106,7 +106,7 @@ export const extensionStorage = {
       if (getIsExtensionValid()) {
         try {
           chrome.storage.onChanged.addListener(callback as any);
-        } catch (e) {
+        } catch (_e) {
           console.warn("[Pickle] Extension context invalidated.");
         }
       } else {
@@ -123,7 +123,7 @@ export const extensionStorage = {
       if (getIsExtensionValid()) {
         try {
           chrome.storage.onChanged.removeListener(callback as any);
-        } catch (e) {
+        } catch (_e) {
           console.warn("[Pickle] Extension context invalidated.");
         }
       } else {
@@ -152,7 +152,7 @@ export const extensionTabs = {
             callback(null);
           }
         });
-      } catch (e) {
+      } catch (_e) {
         callback(null);
       }
     } else {
@@ -188,7 +188,7 @@ export const extensionRuntime = {
       if (getIsExtensionValid()) {
         try {
           chrome.runtime.onMessage.addListener(callback);
-        } catch (e) {
+        } catch (_e) {
           console.warn("[Pickle] Extension context invalidated.");
         }
       } else {
@@ -215,7 +215,7 @@ export const extensionRuntime = {
       if (getIsExtensionValid()) {
         try {
           chrome.runtime.onMessage.removeListener(callback);
-        } catch (e) {
+        } catch (_e) {
           console.warn("[Pickle] Extension context invalidated.");
         }
       } else {
@@ -230,7 +230,7 @@ export const extensionRuntime = {
     if (getIsExtensionValid()) {
       try {
         chrome.runtime.sendMessage(message, callback || (() => {}));
-      } catch (e) {
+      } catch (_e) {
         console.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );

@@ -23,15 +23,15 @@ export function LandingAuthHandler() {
       dialog.open(() => (
         <Confirm
           title="가입 정보가 없습니다"
-          content={`로그인하신 계정으로 가입된 정보가 없습니다.\n회원가입 페이지로 이동하시겠습니까?`}
-          confirmButtonText="가입하기"
+          content={`계속하려면 계정을 만들어 주세요.`}
+          confirmButtonText="회원가입"
           cancelButtonText="취소"
           onConfirm={() => {
             router.push("/signup");
             dialog.close();
           }}
           onCancel={() => {
-            router.replace("/");
+            router.replace("/signin");
             dialog.close();
           }}
         />

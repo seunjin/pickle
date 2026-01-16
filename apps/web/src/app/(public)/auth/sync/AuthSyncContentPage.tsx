@@ -26,7 +26,7 @@ export default function AuthSyncPageContent() {
   const supabase = createClient();
 
   // Direct Login Handler
-  const handleLogin = async () => {
+  const _handleLogin = async () => {
     // Redirect back to this sync page after login
     const redirectTo = new URL(
       "/api/internal/auth/callback",

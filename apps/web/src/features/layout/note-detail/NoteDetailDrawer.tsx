@@ -43,14 +43,14 @@ interface NoteDetailDrawerProps {
   readOnly?: boolean;
 }
 
-const TYPE_LABELS: Record<string, string> = {
+const _TYPE_LABELS: Record<string, string> = {
   text: "TEXT",
   image: "IMAGE",
   capture: "CAPTURE",
   bookmark: "URL",
 } as const;
 
-const type_per_class: Record<
+const _type_per_class: Record<
   NoteWithAsset["type"],
   HTMLAttributes<"span">["className"]
 > = {
@@ -60,7 +60,7 @@ const type_per_class: Record<
   bookmark: "font-medium text-[14px] text-yellow-500 tracking-wider",
 };
 
-const type_per_icon: Record<
+const _type_per_icon: Record<
   NoteWithAsset["type"],
   HTMLAttributes<"span">["className"]
 > = {

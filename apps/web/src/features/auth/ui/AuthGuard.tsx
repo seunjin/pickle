@@ -4,7 +4,6 @@ import { Spinner } from "@pickle/ui";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useUser } from "@/features/auth/model/useUser";
-import { createClient } from "@/shared/lib/supabase/client";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, appUser, isLoading } = useUser();
@@ -12,21 +11,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading) {
-      // 1. 미로그인 상태 -> 랜딩 페이지로 이동
+      // 1. 미로그인 상태 -> 로그인 페이지로 이동
       if (!user) {
-        router.replace("/");
+        router.replace("/signin");
         return;
       }
 
-      // 2. 로그인했으나 프로필이 없는 상태 (예: 탈퇴 후 재로그인/DB 미동기화) -> 홈으로 보내서 확인창 띄움
+      // 2. 로그인했으나 프로필이 없는 상태 (예: 탈퇴 후 재로그인/DB 미동기화) -> 로그인 페이지로 보내서 확인창 띄움
       if (!appUser) {
-        router.replace("/?reason=no_profile");
+        router.replace("/signin?reason=no_profile");
         return;
       }
 
-      // 3. 로그인했으나 가입 대기 상태 (약관 미동의) -> 홈으로 보내서 확인창 띄움
+      // 3. 로그인했으나 가입 대기 상태 (약관 미동의) -> 로그인 페이지로 보내서 확인창 띄움
       if (appUser.status === "pending") {
-        router.replace("/?reason=no_profile");
+        router.replace("/signin?reason=no_profile");
         return;
       }
 

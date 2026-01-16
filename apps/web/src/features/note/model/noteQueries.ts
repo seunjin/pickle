@@ -1,4 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { queryOptions } from "@tanstack/react-query";
 import { type GetNotesParams, getNotes } from "../api/getNotes";
 import { getTrashNotes } from "../api/getTrashNotes";

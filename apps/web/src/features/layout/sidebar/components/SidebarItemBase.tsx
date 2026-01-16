@@ -1,4 +1,3 @@
-import { Icon } from "@pickle/icons";
 import { cn } from "@pickle/ui/lib/utils";
 import Link from "next/link";
 import type React from "react";

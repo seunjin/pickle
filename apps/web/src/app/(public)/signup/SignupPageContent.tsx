@@ -1,7 +1,8 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { Checkbox, toast, useDialog } from "@pickle/ui";
+import { Checkbox, useDialog } from "@pickle/ui";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "@/features/auth/model/useUser";
@@ -80,135 +81,149 @@ export default function SignupPageContent() {
         <div className="pb-10">
           <img src="/pickle-with-logo.svg" alt="pickle-with-logo" />
         </div>
-        {/* 회원가입 Card */}
-        <PickleCausticGlass className="h-100 w-full">
-          <div className="pb-11">
-            <h1 className="pb-1 font-bold text-[22px] leading-[1.3]">
-              Sign UP
-            </h1>
-            <p className="text-[15px] text-white/90 leading-[1.3]">
-              피클 서비스의 원활한 이용을 위해 <br />
-              약관에 동의해주세요.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 pb-11">
-            {/* 전체약관 동의 */}
-            <div className="border-base-border-light border-b pb-2">
-              <label
-                htmlFor="terms-all"
-                className="group inline-flex w-full cursor-pointer items-center gap-3"
-              >
-                <Checkbox
-                  id="terms-all"
-                  name="terms-all"
-                  checked={isAllAgreementsChecked}
-                  onChange={handleAllAgreementChange}
-                />{" "}
-                <span className="text-[14px] text-base-foreground">
-                  전체약관 동의
-                </span>
-              </label>
+        <div className="flex flex-col items-center gap-7.5">
+          {/* 회원가입 Card */}
+          <PickleCausticGlass className="h-100 w-full">
+            <div className="pb-11">
+              <h1 className="pb-1 font-bold text-[22px] leading-[1.3]">
+                Sign UP
+              </h1>
+              <p className="text-[15px] text-white/90 leading-[1.3]">
+                피클 서비스의 원활한 이용을 위해 <br />
+                약관에 동의해주세요.
+              </p>
             </div>
+            <div className="flex flex-col gap-3 pb-11">
+              {/* 전체약관 동의 */}
+              <div className="border-base-border-light border-b pb-2">
+                <label
+                  htmlFor="terms-all"
+                  className="group inline-flex w-full cursor-pointer items-center gap-3"
+                >
+                  <Checkbox
+                    id="terms-all"
+                    name="terms-all"
+                    checked={isAllAgreementsChecked}
+                    onChange={handleAllAgreementChange}
+                  />{" "}
+                  <span className="text-[14px] text-base-foreground">
+                    전체약관 동의
+                  </span>
+                </label>
+              </div>
 
-            {/* 이용약관 동의 */}
-            <div className="flex items-center gap-3">
-              <label
-                htmlFor="terms"
-                className="group inline-flex flex-1 cursor-pointer items-center gap-3"
-              >
-                <Checkbox
-                  id="terms"
-                  name="terms"
-                  checked={agreements.terms}
-                  onChange={handleAgreementChange}
-                />{" "}
-                <span className="inline-flex items-center gap-1 text-[14px]">
-                  <strong className="font-normal text-base-primary">
-                    [필수]
-                  </strong>{" "}
-                  서비스 이용약관 동의
-                </span>
-              </label>
-              <button
-                type="button"
-                onClick={() => handleTermsModalOpen("terms")}
-                className="text-neutral-600 transition-colors hover:text-base-muted"
-              >
-                <Icon name="arrow_right_16" className="text-inherit" />
-              </button>
-            </div>
+              {/* 이용약관 동의 */}
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor="terms"
+                  className="group inline-flex flex-1 cursor-pointer items-center gap-3"
+                >
+                  <Checkbox
+                    id="terms"
+                    name="terms"
+                    checked={agreements.terms}
+                    onChange={handleAgreementChange}
+                  />{" "}
+                  <span className="inline-flex items-center gap-1 text-[14px]">
+                    <strong className="font-normal text-base-primary">
+                      [필수]
+                    </strong>{" "}
+                    서비스 이용약관 동의
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleTermsModalOpen("terms")}
+                  className="text-neutral-600 transition-colors hover:text-base-muted"
+                >
+                  <Icon name="arrow_right_16" className="text-inherit" />
+                </button>
+              </div>
 
-            {/* 개인정보 수집 및 이용 동의 */}
-            <div className="flex items-center gap-3">
-              <label
-                htmlFor="privacy"
-                className="group inline-flex flex-1 cursor-pointer items-center gap-3"
-              >
-                <Checkbox
-                  id="privacy"
-                  name="privacy"
-                  checked={agreements.privacy}
-                  onChange={handleAgreementChange}
-                />{" "}
-                <span className="inline-flex items-center gap-1 text-[14px]">
-                  <strong className="font-normal text-base-primary">
-                    [필수]
-                  </strong>{" "}
-                  개인정보 수집 및 이용 동의
-                </span>
-              </label>
-              <button
-                type="button"
-                onClick={() => handleTermsModalOpen("privacy")}
-                className="text-neutral-600 transition-colors hover:text-base-muted"
-              >
-                <Icon name="arrow_right_16" className="text-inherit" />
-              </button>
-            </div>
+              {/* 개인정보 수집 및 이용 동의 */}
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor="privacy"
+                  className="group inline-flex flex-1 cursor-pointer items-center gap-3"
+                >
+                  <Checkbox
+                    id="privacy"
+                    name="privacy"
+                    checked={agreements.privacy}
+                    onChange={handleAgreementChange}
+                  />{" "}
+                  <span className="inline-flex items-center gap-1 text-[14px]">
+                    <strong className="font-normal text-base-primary">
+                      [필수]
+                    </strong>{" "}
+                    개인정보 수집 및 이용 동의
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleTermsModalOpen("privacy")}
+                  className="text-neutral-600 transition-colors hover:text-base-muted"
+                >
+                  <Icon name="arrow_right_16" className="text-inherit" />
+                </button>
+              </div>
 
-            {/* 마케팅 정보 수신 동의 */}
-            <div className="flex items-center gap-3">
-              <label
-                htmlFor="marketing"
-                className="group inline-flex flex-1 cursor-pointer items-center gap-3"
-              >
-                <Checkbox
-                  id="marketing"
-                  name="marketing"
-                  checked={agreements.marketing}
-                  onChange={handleAgreementChange}
-                />{" "}
-                <span className="inline-flex items-center gap-1 text-[14px]">
-                  <strong className="font-normal text-base-muted">
-                    [선택]
-                  </strong>{" "}
-                  마케팅 정보 수신 동의
-                </span>
-              </label>
-              <button
-                type="button"
-                onClick={() => handleTermsModalOpen("marketing")}
-                className="text-neutral-600 transition-colors hover:text-base-muted"
-              >
-                <Icon name="arrow_right_16" className="text-inherit" />
-              </button>
+              {/* 마케팅 정보 수신 동의 */}
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor="marketing"
+                  className="group inline-flex flex-1 cursor-pointer items-center gap-3"
+                >
+                  <Checkbox
+                    id="marketing"
+                    name="marketing"
+                    checked={agreements.marketing}
+                    onChange={handleAgreementChange}
+                  />{" "}
+                  <span className="inline-flex items-center gap-1 text-[14px]">
+                    <strong className="font-normal text-base-muted">
+                      [선택]
+                    </strong>{" "}
+                    마케팅 정보 수신 동의
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleTermsModalOpen("marketing")}
+                  className="text-neutral-600 transition-colors hover:text-base-muted"
+                >
+                  <Icon name="arrow_right_16" className="text-inherit" />
+                </button>
+              </div>
             </div>
+            <div className="flex items-center gap-3">
+              <GoogleAuthButton
+                next={next}
+                label="Google로 회원가입"
+                disabled={!agreements.terms || !agreements.privacy}
+                options={{
+                  data: {
+                    is_terms_agreed: agreements.terms,
+                    is_privacy_agreed: agreements.privacy,
+                    is_marketing_agreed: agreements.marketing,
+                  },
+                }}
+              />
+            </div>
+          </PickleCausticGlass>
+
+          <div className="flex items-center gap-[5px]">
+            <span className="text-[14px] text-gray-500 leading-none">
+              이미 계정이 있으신가요?
+            </span>
+            <Link
+              href="/signin"
+              className="font-medium text-[14px] text-base-muted-foreground leading-none transition-colors hover:text-base-primary"
+            >
+              로그인
+            </Link>
           </div>
-          <div className="flex items-center gap-3">
-            <GoogleAuthButton
-              next={next}
-              label="Google로 회원가입"
-              disabled={!agreements.terms || !agreements.privacy}
-              options={{
-                data: {
-                  is_terms_agreed: agreements.terms,
-                  is_privacy_agreed: agreements.privacy,
-                  is_marketing_agreed: agreements.marketing,
-                },
-              }}
-            />
-          </div>
-        </PickleCausticGlass>
+        </div>
       </div>
       <footer className="text-center text-gray-500 text-sm">
         © 2026 Pickle. All rights reserved.
