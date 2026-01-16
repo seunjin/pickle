@@ -5,7 +5,7 @@ import { Checkbox, useDialog } from "@pickle/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useUser } from "@/features/auth/model/useUser";
-import { GoogleLoginButton } from "@/features/auth/ui/GoogleLoginButton";
+import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
 import TermsArgreementModal, {
   type TermsType,
 } from "@/features/layout/terms/TermsArgreementModal";
@@ -194,8 +194,17 @@ export default function SignupPageContent() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <GoogleLoginButton
-              disabled={!agreements.terms && !agreements.privacy}
+            <GoogleAuthButton
+              next={next}
+              label="Google로 회원가입"
+              disabled={!agreements.terms || !agreements.privacy}
+              options={{
+                data: {
+                  is_terms_agreed: agreements.terms,
+                  is_privacy_agreed: agreements.privacy,
+                  is_marketing_agreed: agreements.marketing,
+                },
+              }}
             />
           </div>
         </PickleCausticGlass>

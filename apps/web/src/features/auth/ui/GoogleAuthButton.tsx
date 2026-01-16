@@ -4,7 +4,7 @@ import { Spinner, toast } from "@pickle/ui";
 import { useState } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 
-interface GoogleLoginButtonProps {
+interface GoogleAuthButtonProps {
   next?: string;
   label?: string;
   disabled?: boolean;
@@ -13,25 +13,74 @@ interface GoogleLoginButtonProps {
   };
 }
 
-export const GoogleLoginButton = ({
+/**
+ * 로그인과 회원가입을 모두 담당하는 통합 구글 인증 버튼
+ */
+export const GoogleAuthButton = ({
   next,
-  label = "Google로 회원가입",
+  label = "Google로 계속하기",
   disabled,
   options,
-}: GoogleLoginButtonProps) => {
-  const [isSignup, setIsSignup] = useState(false);
+}: GoogleAuthButtonProps) => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const supabase = createClient();
 
-  const handleSignup = async () => {};
+  const handleAuth = async () => {
+    if (isProcessing || disabled) return;
+
+    /**
+     * @TODO 추적 이벤트 연동
+     * isSignup: !!options?.data 여부로 판단하여 트래킹 가능
+     */
+
+    setIsProcessing(true);
+
+    const authPromise = (async () => {
+      const callbackUrl = new URL(
+        "/api/internal/auth/callback",
+        window.location.origin,
+      );
+      if (next) {
+        callbackUrl.searchParams.set("next", next);
+      }
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callbackUrl.toString(),
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+          data: options?.data,
+        } as any,
+      });
+
+      if (error) throw error;
+    })();
+
+    toast.promise(authPromise, {
+      loading: "Google 연결 중...",
+      success: "인증 페이지로 이동합니다.",
+      error: "인증에 실패했습니다. 다시 시도해 주세요.",
+    });
+
+    try {
+      await authPromise;
+    } catch (error) {
+      console.error("Auth failed:", error);
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <button
       type="button"
-      onClick={handleSignup}
-      disabled={isSignup || disabled}
+      onClick={handleAuth}
+      disabled={isProcessing || disabled}
       className="group flex h-12 w-[340px] items-center justify-center gap-1 rounded-full border border-neutral-300 bg-white font-semibold text-[15px] text-neutral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-60"
     >
-      {isSignup ? (
+      {isProcessing ? (
         <Spinner className="size-5" />
       ) : (
         <svg className="size-5" viewBox="0 0 24 24" role="img">

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
-import { LandingButtons } from "../../features/auth/ui/LandingButtons";
+import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
 
 export const metadata: Metadata = {
   title: "Pickle",
@@ -14,7 +15,12 @@ export default async function Home(props: {
   const searchParams = await props.searchParams;
   const next = searchParams?.next;
 
-  const { user, appUser } = await getServerAuth();
+  const { user } = await getServerAuth();
+
+  // 로그인 상태라면 대시보드로 자동 리다이렉트
+  if (user) {
+    redirect(next || "/dashboard");
+  }
 
   return (
     <div className="grid min-h-dvh grid-rows-[1fr_auto] py-10">
@@ -36,11 +42,7 @@ export default async function Home(props: {
         </div>
 
         <div className="pb-7.5">
-          <LandingButtons
-            next={next}
-            initialUser={user}
-            initialAppUser={appUser}
-          />
+          <GoogleAuthButton next={next} label="Google로 로그인" />
         </div>
 
         <div className="flex items-center gap-[5px]">
