@@ -25,8 +25,8 @@ export type ToastOptions = {
     | "bottom-center";
   className?: string;
   style?: CSSProperties;
-  onDismiss?: (toast: any) => void;
-  onAutoClose?: (toast: any) => void;
+  onDismiss?: (toast: unknown) => void;
+  onAutoClose?: (toast: unknown) => void;
 };
 
 export type ToastProps = {

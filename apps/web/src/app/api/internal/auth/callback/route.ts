@@ -76,11 +76,16 @@ export async function GET(request: Request) {
             );
           }
 
-          // 필수 약관 동의가 없거나 자동 생성이 실패한 경우 가입 페이지로 유도
-          return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
+          // [핵심] 가입 데이터가 없는데 프로필도 없다면, 세션을 유지하지 않고 로그아웃 처리
+          // 그래야 차후 /signup에서 깨끗한 상태로 가입 프로세스를 시작할 수 있음.
+          console.warn("No profile and no agreement data. Signing out...");
+          await supabase.auth.signOut();
+          return NextResponse.redirect(`${origin}/signin?reason=no_profile`);
         }
 
         if (userProfile.status === "pending") {
+          console.warn("User is pending. Signing out...");
+          await supabase.auth.signOut();
           return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
         }
       }

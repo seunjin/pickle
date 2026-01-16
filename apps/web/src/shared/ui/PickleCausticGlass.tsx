@@ -41,8 +41,6 @@ export const PickleCausticGlass = ({ children, className = "" }: Props) => {
             "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           WebkitMaskComposite: "xor",
           maskComposite: "exclude",
-          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskMode: "exclude",
         }}
       />
 

@@ -2,7 +2,6 @@
 
 import { Icon } from "@pickle/icons";
 import { Button } from "@pickle/ui";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PickleCausticGlass } from "@/shared/ui/PickleCausticGlass";
 
@@ -39,12 +38,16 @@ export default function SignupSuccessPage() {
           </div>
 
           <div className="w-full space-y-4">
-            <Link href="/dashboard" className="block w-full">
-              <Button className="h-12 w-full font-semibold text-lg" size="h38">
-                대시보드로 시작하기
-                <Icon name="arrow_right_16" className="ml-2 size-5" />
-              </Button>
-            </Link>
+            <Button
+              className="h-12 w-full font-semibold text-lg"
+              size="h38"
+              onClick={() => {
+                window.location.href = "/dashboard";
+              }}
+            >
+              대시보드로 시작하기
+              <Icon name="arrow_right_16" className="ml-2 size-5" />
+            </Button>
 
             <p className="text-base-content-tertiary text-sm">
               자동으로 대시보드 연결을 준비하고 있습니다.
