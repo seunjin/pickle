@@ -215,8 +215,8 @@ export default function SignupPageContent() {
                             marketing_agreed: agreements.marketing,
                           });
 
-                          // 성공 시 전용 성공 페이지로 이동
-                          router.push("/signup/success");
+                          // 성공 시 대시보드로 이동
+                          router.push("/dashboard");
                         } catch (error) {
                           // 실패 시 전용 에러 페이지로 이동
                           router.push(

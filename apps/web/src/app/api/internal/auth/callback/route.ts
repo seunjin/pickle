@@ -64,8 +64,8 @@ export async function GET(request: Request) {
             );
 
             if (!completeError) {
-              // 신규 가입 성공 시 전용 환영 페이지로 리다이렉트
-              return NextResponse.redirect(`${origin}/signup/success`);
+              // 신규 가입 성공 시 대시보드로 리다이렉트
+              return NextResponse.redirect(`${origin}/dashboard`);
             }
             console.error(
               "Failed to complete signup via callback:",

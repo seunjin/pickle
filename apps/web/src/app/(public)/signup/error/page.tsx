@@ -1,50 +1,67 @@
 "use client";
 
-import { Icon } from "@pickle/icons";
-import { Button } from "@pickle/ui";
+import { Button, toast } from "@pickle/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { PickleCausticGlass } from "@/shared/ui/PickleCausticGlass";
+import { useState } from "react";
+import { createClient } from "@/shared/lib/supabase/client";
 
 export default function SignupErrorPage() {
   const searchParams = useSearchParams();
-  const error = searchParams.get("error") || "알 수 없는 오류가 발생했습니다.";
+  const error = searchParams.get("error") || "알 수 없는 에러가 발생했습니다.";
+  const supabase = createClient();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleLogin = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/api/internal/auth/callback`,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+
+      if (authError) throw authError;
+    } catch (err) {
+      console.error("Login failed:", err);
+      toast.error({
+        title: "로그인 실패",
+        description: "Google 인증에 실패했습니다. 다시 시도해 주세요.",
+      });
+      setIsProcessing(false);
+    }
+  };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6">
-      <div className="relative w-full max-w-md">
-        <PickleCausticGlass className="flex flex-col items-center gap-8 border-red-500/20 p-12 text-center">
-          <div className="flex size-20 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-4 ring-red-500/5">
-            <Icon name="error_circle_16" className="size-10" />
-          </div>
-
-          <div className="space-y-3">
-            <h1 className="font-bold text-2xl text-base-content tracking-tight">
-              가입 처리에 실패했습니다
-            </h1>
-            <div className="break-all rounded-lg bg-base-surface/50 p-4 text-base-content-secondary text-sm">
-              {error}
-            </div>
-          </div>
-
-          <div className="w-full space-y-4">
-            <Link href="/signup" className="block w-full">
-              <Button
-                variant="secondary"
-                className="w-full py-6 font-semibold text-lg"
-              >
-                가입 페이지로 돌아가기
-              </Button>
-            </Link>
-
-            <Link
-              href="/signin"
-              className="block text-base-content-secondary text-sm underline underline-offset-4 hover:text-base-primary"
-            >
-              이미 계정이 있으신가요? 로그인하기
-            </Link>
-          </div>
-        </PickleCausticGlass>
+    <div className="effect-bg flex h-full min-h-dvh flex-col items-center justify-center py-10">
+      <div className="mb-3">
+        <img src="/user-error.svg" alt="" />
+      </div>
+      <h1 className="mb-3 font-bold text-[28px] text-white leading-[1.3]">
+        회원가입에 실패했어요!
+      </h1>
+      <p className="mb-10 w-[320px] text-center text-[16px] text-base-muted-foreground leading-[1.3]">
+        {error}
+      </p>
+      <div className="flex gap-2">
+        <Button
+          onClick={handleLogin}
+          disabled={isProcessing}
+          className="w-42"
+          variant="secondary"
+        >
+          다른 계정으로 로그인
+        </Button>
+        <Link href="/signup">
+          <Button className="w-42">회원가입</Button>
+        </Link>
       </div>
     </div>
   );
