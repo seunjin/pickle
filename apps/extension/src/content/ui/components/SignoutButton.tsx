@@ -13,7 +13,6 @@ export function SignoutButton() {
   const handleSignOut = () => {
     dialog.open(() => (
       <Confirm
-        title="로그아웃"
         content="로그아웃 하시겠습니까?"
         confirmButtonText="로그아웃"
         onConfirm={() => {
