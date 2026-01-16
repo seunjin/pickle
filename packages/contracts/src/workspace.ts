@@ -16,6 +16,7 @@ export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number];
 export const workspaceSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
+  storage_limit_bytes: z.number().nullable(),
   created_at: z.string(), // DbDate
   updated_at: z.string(), // DbDate
 });

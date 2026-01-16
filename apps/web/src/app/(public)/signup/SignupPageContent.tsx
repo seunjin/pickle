@@ -316,7 +316,7 @@ const PickleCausticGlass = ({ children, className = "" }: Props) => {
         className="pointer-events-none absolute inset-0 rounded-[20px]"
         style={{
           boxShadow: `
-            inset -10px -10px 30px -5px rgba(255, 255, 255, 0.1),
+            inset -5px -5px 10px -5px rgba(255, 255, 255, 0.1),
             inset -2px -2px 5px 0px rgba(255, 255, 255, 0.01)
           `,
         }}
