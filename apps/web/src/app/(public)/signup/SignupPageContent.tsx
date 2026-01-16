@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { Alert, Checkbox, useDialog } from "@pickle/ui";
+import { Checkbox, useDialog } from "@pickle/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ import TermsArgreementModal, {
   type TermsType,
 } from "@/features/layout/terms/TermsArgreementModal";
 import { PageSpinner } from "@/features/note/ui/PageSpinner";
+import { PickleCausticGlass } from "@/shared/ui/PickleCausticGlass";
 
 export default function SignupPageContent() {
   const { user, appUser, isLoading } = useUser();
@@ -214,22 +215,13 @@ export default function SignupPageContent() {
                             marketing_agreed: agreements.marketing,
                           });
 
-                          dialog.open(() => (
-                            <Alert
-                              title="가입 성공"
-                              content="회원가입에 성공했습니다."
-                            />
-                          ));
-
-                          // 인증 상태를 확실히 갱신하기 위해 전체 페이지 새로고침하며 이동
-                          window.location.href = next;
+                          // 성공 시 전용 성공 페이지로 이동
+                          router.push("/signup/success");
                         } catch (error) {
-                          dialog.open(() => (
-                            <Alert
-                              title="가입 실패"
-                              content={`회원가입에 실패했습니다.\n${error}`}
-                            />
-                          ));
+                          // 실패 시 전용 에러 페이지로 이동
+                          router.push(
+                            `/signup/error?error=${encodeURIComponent(String(error))}`,
+                          );
                           console.error(error);
                           setIsCompleting(false);
                         }
@@ -266,59 +258,3 @@ export default function SignupPageContent() {
     </div>
   );
 }
-
-interface Props {
-  children?: React.ReactNode;
-  className?: string;
-}
-
-const PickleCausticGlass = ({ children, className = "" }: Props) => {
-  return (
-    <div className={`group/glass relative isolate ${className}`}>
-      {/* 1. 베이스 (Deep & Dark) */}
-      <div className="absolute inset-0 overflow-hidden rounded-[20px] bg-neutral-950/5 backdrop-blur-xl" />
-
-      {/* 2. 빛의 맺힘 (Internal Reflection) */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-[20px]"
-        style={{
-          boxShadow: `
-            inset -5px -5px 15px -5px rgba(255, 255, 255, 0.1),
-            inset -2px -2px 5px 0px rgba(255, 255, 255, 0.01)
-          `,
-        }}
-      />
-
-      {/* 3. 엣지 하이라이트 */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-[20px]"
-        style={{
-          padding: "0.5px",
-          background: `linear-gradient(135deg, 
-              rgba(255,255,255,0.1) 0%,   /* 11시: 선명한 빛 시작 */
-              rgba(255,255,255,0.1) 20%,  /* 11시: 서서히 흐려짐 */
-              rgba(255,255,255,0) 25%,    /* [CUT] 1시/7시 구간 시작: 완전 투명 */
-              rgba(255,255,255,0) 75%,    /* [CUT] 1시/7시 구간 끝: 완전 투명 */
-              rgba(255,255,255,0.1) 80%,  /* 5시: 다시 은은하게 빛남 */
-              rgba(255,255,255,0.15) 100% /* 5시: 끝맺음 */
-            )`,
-          WebkitMask:
-            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor",
-          maskComposite: "exclude",
-        }}
-      />
-
-      {/* 4. 상단 컷팅 라인 */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-[20px] opacity-80"
-        style={{
-          boxShadow: "inset 1px 1px 0px 0px rgba(255,255,255,0.2)",
-        }}
-      />
-
-      {/* 컨텐츠 */}
-      <div className="relative z-10 h-full p-6 text-white/90">{children}</div>
-    </div>
-  );
-};

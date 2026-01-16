@@ -64,16 +64,19 @@ export async function GET(request: Request) {
             );
 
             if (!completeError) {
-              const destination = next === "/" ? "/dashboard" : next;
-              return NextResponse.redirect(`${origin}${destination}`);
+              // 신규 가입 성공 시 전용 환영 페이지로 리다이렉트
+              return NextResponse.redirect(`${origin}/signup/success`);
             }
             console.error(
               "Failed to complete signup via callback:",
               completeError,
             );
+            return NextResponse.redirect(
+              `${origin}/signup/error?error=signup_processing_failed`,
+            );
           }
 
-          // 필수 약관 동의가 없거나 자동 생성이 실패한 경우 가입 페이지로 유도 (이미 세션은 있음)
+          // 필수 약관 동의가 없거나 자동 생성이 실패한 경우 가입 페이지로 유도
           return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
         }
 
