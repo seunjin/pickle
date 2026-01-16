@@ -3,33 +3,37 @@ import type {
   CreateNoteInput,
   StoredNoteData,
 } from "@pickle/contracts/src/note";
-import { createClient, type Session } from "@supabase/supabase-js";
+import {
+  clearSession,
+  getValidSession,
+  refreshSession,
+} from "@shared/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 /**
  * Supabase에 노트를 직접 저장하는 API 함수입니다.
  *
  * 이 함수는 Extension Background(Service Worker)에서 실행됩니다.
  * HTTP API를 거치지 않고 직접 Supabase DB와 통신하므로 응답 속도가 빠릅니다.
+ *
+ * [리팩토링] 새로운 Supabase 래퍼 사용:
+ * - getValidSession(): 요청 전 토큰 유효성 검증 + 자동 갱신
+ * - 토큰 만료 시 Refresh Token으로 자동 갱신 시도
  */
 export async function saveNoteToSupabase(note: CreateNoteInput) {
   try {
-    // 1. 인증 토큰 가져오기 (from Local Storage)
-    // 웹에서 로그인할 때 동기화된 `access_token`을 꺼냅니다.
-    const result = await chrome.storage.local.get("supabaseSession");
-    const supabaseSession = result.supabaseSession as
-      | { access_token?: string }
-      | undefined;
+    // 1. 유효한 세션 가져오기 (만료 임박 시 자동 갱신)
+    const session = await getValidSession();
 
-    if (!supabaseSession?.access_token) {
+    if (!session?.access_token) {
       return {
         success: false,
         error: "Unauthorized: 로그인 세션이 없습니다.",
       };
     }
-
-    // 2. 환경 변수 로드 (Vite Define에 의해 빌드 시 주입됨)
-    const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
-    const SUPABASE_ANON_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       return {
@@ -38,35 +42,23 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       };
     }
 
-    // 3. Supabase 클라이언트 초기화
-    // 핵심: Authorization 헤더에 사용자의 access_token을 심어서 요청합니다.
-    // 이렇게 하면 Supabase가 사용자를 식별하고 RLS(Row Level Security) 정책을 적용할 수 있습니다.
+    // 2. 인증된 Supabase 클라이언트 생성
     const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
         headers: {
-          Authorization: `Bearer ${supabaseSession.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       },
     });
 
-    // 4. User ID 확인
-    const session = result.supabaseSession as Session | null;
-    let userId = session?.user?.id;
+    // 3. User ID 확인 (세션에서 직접 가져옴)
+    const userId = session.user?.id;
 
     if (!userId) {
-      // 만약 세션 객체에 ID가 없다면, 토큰을 이용해 서버에 물어봅니다 (Fallback)
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        return {
-          success: false,
-          error: "Unauthorized: 유효하지 않은 토큰입니다.",
-        };
-      }
-      userId = user.id;
+      return {
+        success: false,
+        error: "Unauthorized: 유효하지 않은 세션입니다.",
+      };
     }
 
     // 4-1. Workspace 조회
@@ -80,12 +72,22 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
     if (wsError) {
       console.error("Workspace Fetch Error:", wsError);
 
-      // 🚨 Auto-Recovery: 토큰 만료 시 세션 삭제 (재로그인 유도)
+      // 🚨 토큰 만료 시 자동 갱신 시도 (L2 전략)
       if (
         wsError.code === "PGRST301" ||
         wsError.message.includes("JWT expired")
       ) {
-        await chrome.storage.local.remove("supabaseSession");
+        console.log("[SaveNote] Token expired, attempting refresh...");
+        const newSession = await refreshSession();
+
+        if (newSession) {
+          // 새 토큰으로 재시도
+          console.log("[SaveNote] Token refreshed, retrying save...");
+          return saveNoteToSupabase(note);
+        }
+
+        // 갱신 실패 시 세션 삭제
+        await clearSession();
         return {
           success: false,
           error: "세션이 만료되었습니다. 다시 로그인해주세요.",

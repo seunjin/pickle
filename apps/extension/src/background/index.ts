@@ -3,6 +3,13 @@ import { startCaptureFlow } from "@features/capture/background";
 import { saveNoteToSupabase } from "@features/note/api/saveNote";
 import { clearNote, setNote, updateNote } from "@shared/storage";
 import type { CaptureData, PageMetadata, ViewType } from "@shared/types";
+import {
+  getCurrentUser,
+  getSession,
+  isLoggedIn,
+  launchOAuthFlow,
+  logout,
+} from "./auth";
 import { setupContextMenus } from "./contextMenus";
 import { sendMessageToContentScript } from "./messaging";
 
@@ -174,6 +181,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (sender.tab) {
       startCaptureFlow(sender.tab);
     }
+  }
+  // 4-4. 로그인 요청 (LOGIN)
+  else if (request.action === "LOGIN") {
+    launchOAuthFlow()
+      .then((session) => {
+        sendResponse({ success: !!session, session });
+      })
+      .catch((error) => {
+        console.error("Login failed:", error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // 비동기 응답 대기
+  }
+  // 4-5. 로그아웃 요청 (LOGOUT)
+  else if (request.action === "LOGOUT") {
+    logout()
+      .then(() => sendResponse({ success: true }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  // 4-6. 세션 조회 (GET_SESSION)
+  else if (request.action === "GET_SESSION") {
+    getSession()
+      .then((session) => sendResponse({ success: true, session }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  // 4-7. 사용자 정보 조회 (GET_USER)
+  else if (request.action === "GET_USER") {
+    getCurrentUser()
+      .then((user) => sendResponse({ success: true, user }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  // 4-8. 로그인 상태 확인 (IS_LOGGED_IN)
+  else if (request.action === "IS_LOGGED_IN") {
+    isLoggedIn()
+      .then((loggedIn) => sendResponse({ success: true, loggedIn }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
   }
 });
 

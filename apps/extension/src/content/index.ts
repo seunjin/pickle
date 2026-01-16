@@ -1,20 +1,8 @@
 console.log("Pickle Content Script Loaded");
 
-// Auth Sync Listener
-// Auth Sync Listener
-window.addEventListener("message", (event) => {
-  // Security check: Only accept messages from same window
-  if (event.source !== window) return;
-
-  if (event.data?.type === "PICKLE_SYNC_SESSION" && event.data?.session) {
-    console.log("[Pickle] Session synced for:", event.data.session.user.email);
-
-    chrome.storage.local.set({ supabaseSession: event.data.session }, () => {
-      // Send ACK back to page
-      window.postMessage({ type: "PICKLE_SYNC_ACK" }, "*");
-    });
-  }
-});
+// [REMOVED] 레거시 웹 브리지 세션 동기화 코드
+// 새 인증 플로우에서는 chrome.identity.launchWebAuthFlow를 사용하므로
+// postMessage 기반 세션 동기화가 더 이상 필요하지 않습니다.
 
 // 캡쳐 및 메타데이터 요청 수신
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {

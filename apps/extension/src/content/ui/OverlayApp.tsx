@@ -55,9 +55,20 @@ export default function OverlayApp({
           content="서비스를 이용하려면 로그인 해주세요."
           confirmButtonText="로그인하기"
           onConfirm={() => {
-            const appUrl =
-              import.meta.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-            window.open(`${appUrl}/auth/sync`, "_blank");
+            // 새 OAuth 플로우: Background에 로그인 요청
+            chrome.runtime.sendMessage({ action: "LOGIN" }, (response) => {
+              if (response?.success) {
+                console.log("[OverlayApp] Login successful");
+                // 세션이 저장되면 handleSessionRecovery가 자동으로 처리
+              } else {
+                console.error("[OverlayApp] Login failed:", response?.error);
+                showToast({
+                  title: response?.error || "로그인에 실패했습니다.",
+                  kind: "error",
+                  durationMs: 4000,
+                });
+              }
+            });
             setErrorMessage(null);
             dialog.close();
           }}
