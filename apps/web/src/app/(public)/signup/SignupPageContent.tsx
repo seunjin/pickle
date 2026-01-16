@@ -9,6 +9,7 @@ import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
 import TermsArgreementModal, {
   type TermsType,
 } from "@/features/layout/terms/TermsArgreementModal";
+import { PageSpinner } from "@/features/note/ui/PageSpinner";
 
 export default function SignupPageContent() {
   const { appUser, isLoading } = useUser();
@@ -27,6 +28,7 @@ export default function SignupPageContent() {
   useEffect(() => {
     if (!isLoading && appUser?.status === "active") {
       router.replace(next);
+      return;
     }
   }, [isLoading, appUser, router, next]);
 
@@ -68,11 +70,7 @@ export default function SignupPageContent() {
 
   // 로딩 중이거나 리다이렉트 중일 때 스켈레톤/로딩 표시
   if (isLoading || appUser?.status === "active") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (

@@ -7,14 +7,37 @@ import {
   Confirm,
   Modal,
   ScrollArea,
+  toast,
   useDialog,
 } from "@pickle/ui";
-import { useSessionContext, useSignOut } from "@/features/auth";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { deleteAccount, useSessionContext, useSignOut } from "@/features/auth";
 
 export function SettingContent() {
   const dialog = useDialog();
   const { user } = useSessionContext();
   const { signOut } = useSignOut();
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      toast.success({ title: "계정이 삭제되었습니다." });
+      router.replace("/");
+    } catch (error) {
+      toast.error({
+        title: "탈퇴 처리 중 오류가 발생했습니다.",
+        description:
+          error instanceof Error ? error.message : "잠시 후 다시 시도해주세요.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="h-full">
       <div className="mx-auto h-full w-[min(100%,800px)]">
@@ -76,11 +99,15 @@ export function SettingContent() {
               variant="secondary_line"
               size="h32"
               onClick={() =>
-                dialog.open(() => (
+                dialog.open(({ close }) => (
                   <Confirm
                     title="정말 탈퇴하시겠어요?"
                     content={`회원님의 모든 기록이 삭제됩니다.\n삭제된 정보는 복구할 수 없으니 신중하게 \n결정해주세요.`}
-                    onConfirm={() => {}}
+                    isPending={isDeleting}
+                    onConfirm={async () => {
+                      await handleDeleteAccount();
+                      close();
+                    }}
                     confirmButtonText="탈퇴하기"
                     confirmType="destructive"
                   />

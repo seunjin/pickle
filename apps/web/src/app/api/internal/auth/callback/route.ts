@@ -50,13 +50,13 @@ export async function GET(request: Request) {
 
           if (insertError) {
             console.error("Failed to recover user profile:", insertError);
-            return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+            return NextResponse.redirect(`${origin}/?error=recovery_failed`);
           }
-          return NextResponse.redirect(`${origin}/signup`);
+          return NextResponse.redirect(`${origin}/?reason=no_profile`);
         }
 
         if (userProfile.status === "pending") {
-          return NextResponse.redirect(`${origin}/signup`);
+          return NextResponse.redirect(`${origin}/?reason=no_profile`);
         }
       }
 
@@ -69,6 +69,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // 인증 코드 교환에 실패하거나 코드가 없는 경우 에러 페이지로 이동
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  // 인증 코드 교환에 실패하거나 코드가 없는 경우 에러 페이지 대신 홈으로 이동
+  return NextResponse.redirect(`${origin}/?error=auth_failed`);
 }

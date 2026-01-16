@@ -1,3 +1,4 @@
+export { deleteAccount } from "./api/deleteAccount";
 export { SessionProvider, useSessionContext } from "./model/SessionContext";
 export { useSignOut } from "./model/useSignOut";
 export { useUser } from "./model/useUser";

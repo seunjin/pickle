@@ -107,7 +107,7 @@ erDiagram
 - **data**: 노트 타입별 고유 데이터 (JSONB). 예: `capture`의 `display_width` 등.
 - **memo**: 사용자가 작성한 메모 (기존 `content` 컬럼).
 - **workspace_id**: 소속 워크스페이스
-- **user_id**: 작성자
+- **user_id**: 작성자 (**Cascade Delete**)
 
 ### 3.5 `assets`
 이미지 등 업로드된 파일의 메타데이터를 관리합니다.
@@ -145,6 +145,13 @@ erDiagram
     2. 상태를 `active`로 변경
     3. 기본 워크스페이스("내 워크스페이스") 생성 및 멤버십(`owner`) 부여
 - **호출**: 프론트엔드 회원가입 페이지에서 호출
+
+### 4.4 `delete_user_account` (RPC)
+- **동작**:
+    1. 현재 인증된 사용자의 이메일을 확인
+    2. 해당 사용자를 `auth.users`에서 삭제
+    3. 삭제 시 DB의 `ON DELETE CASCADE` 설정에 의해 연관 데이터(`public.users`, `notes`, `assets` 등)가 자동 삭제됨
+- **호출**: 설정 페이지의 '회원 탈퇴' 버튼을 통해 호출
 
 ## 5. 보안 정책 (RLS)
 

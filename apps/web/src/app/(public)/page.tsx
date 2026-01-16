@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
 import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
+import { LandingAuthHandler } from "./LandingAuthHandler";
 
 export const metadata: Metadata = {
   title: "Pickle",
@@ -15,15 +16,20 @@ export default async function Home(props: {
   const searchParams = await props.searchParams;
   const next = searchParams?.next;
 
-  const { user } = await getServerAuth();
+  const { user, appUser } = await getServerAuth();
 
-  // 로그인 상태라면 대시보드로 자동 리다이렉트
+  // 로그인 상태라면 적절한 페이지로 리다이렉트
   if (user) {
-    redirect(next || "/dashboard");
+    // 프로필도 정상적으로 있고 활성화된 경우만 대시보드로
+    if (appUser && appUser.status === "active") {
+      redirect(next || "/dashboard");
+    }
+    // 그 외(프로필 없음, pending 등)는 리다이렉트하지 않고 랜딩 페이지에서 처리
   }
 
   return (
     <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] py-10">
+      <LandingAuthHandler />
       <div className="flex flex-1 flex-col items-center justify-center pb-8">
         <div className="flex flex-col gap-6 pb-15 text-center">
           <div className="mx-auto flex size-12 items-center justify-center rounded-[10px] bg-green-400">

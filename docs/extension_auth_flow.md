@@ -41,6 +41,9 @@ sequenceDiagram
     end
 
     Ext->>User: 에러 메시지 자동 사라짐 (Auto-Recovery)
+
+> [!NOTE]
+> **Pending User Policy**: 구글 계정 인증은 되었으나 약관 미동의(`pending`) 상태인 유저는 웹 앱의 가입 가이드(Confirm Dialog)를 통해 먼저 가입을 완료해야 합니다. 미동의 상태에서도 인증 세션 동기화는 가능할 수 있으나, 서버 측 RLS 정책에 의해 실제 데이터 저장(노트 저장 등)은 제한될 수 있습니다.
 ```
 
 ### Scenario B: 세션 만료 및 재연결 (Re-auth)
