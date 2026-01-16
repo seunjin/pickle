@@ -209,9 +209,10 @@ export default function OverlayApp({
             type: "capture",
             data: {
               // [Transient] DB 저장 X. Storage 업로드용 Base64 데이터.
-              image_url: note.captureData?.image || "", // Base64 (fixed property name)
-              display_width: note.captureData?.area?.width || 0,
-              display_height: note.captureData?.area?.height || 0,
+              // currentNote 사용: finalData에서 전달된 크롭된 이미지 포함
+              image_url: currentNote.captureData?.image || "",
+              display_width: currentNote.captureData?.area?.width || 0,
+              display_height: currentNote.captureData?.area?.height || 0,
             },
           };
           break;

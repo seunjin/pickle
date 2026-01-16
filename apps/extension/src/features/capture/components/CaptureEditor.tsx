@@ -101,6 +101,13 @@ export function CaptureEditor({
     const finalData = {
       ...data,
       title: data.title.trim() || generateDefaultTitle(),
+      // 크롭된 이미지를 명시적으로 포함 (타이밍 문제 방지)
+      captureData: note.captureData
+        ? {
+            ...note.captureData,
+            image: processedImage || note.captureData.image,
+          }
+        : undefined,
     };
     onUpdate(finalData);
     onSave?.(finalData);
@@ -158,7 +165,16 @@ export function CaptureEditor({
                 captureData={note.captureData}
                 onReady={(processedUrl, blurUrl) => {
                   setProcessedImage(processedUrl);
-                  onUpdate({ blurDataUrl: blurUrl });
+                  // 크롭된 이미지를 captureData.image에 저장하여 서버 전송 시 사용
+                  if (note.captureData) {
+                    onUpdate({
+                      blurDataUrl: blurUrl,
+                      captureData: {
+                        ...note.captureData,
+                        image: processedUrl, // 전체 화면 → 크롭된 이미지로 교체
+                      },
+                    });
+                  }
                 }}
               />
             )}
