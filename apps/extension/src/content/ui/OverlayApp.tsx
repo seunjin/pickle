@@ -37,6 +37,20 @@ export default function OverlayApp({
 
   // State for saving
   const [isSaving, setIsSaving] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+
+  // 로더 깜빡임 방지: 200ms 이상 소요될 때만 로더 표시
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (isSaving) {
+      timer = setTimeout(() => setShowLoader(true), 200);
+    } else {
+      setShowLoader(false);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isSaving]);
 
   // Event handler that reads reactive 'view' state but remains stable
   const handleStorageChange = useEffectEvent(
@@ -306,7 +320,7 @@ export default function OverlayApp({
       </AnimatePresence>
 
       {/* Loading Overlay */}
-      {isSaving && (
+      {showLoader && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-base-dimed">
           <div className="flex flex-col items-center gap-1.5">
             <Spinner className="size-6 text-base-primary" />
