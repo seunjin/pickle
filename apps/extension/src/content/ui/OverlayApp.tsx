@@ -37,82 +37,6 @@ export default function OverlayApp({
 
   // State for saving
   const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // 0. Handle Errors (Auth via Dialog, others via Toast)
-  useEffect(() => {
-    if (!errorMessage) return;
-
-    const isAuthError =
-      errorMessage.includes("Unauthorized") ||
-      errorMessage.includes("만료") ||
-      errorMessage.includes("No Workspace");
-
-    const isStorageError = errorMessage.includes("스토리지 용량");
-
-    if (isAuthError) {
-      dialog.open(() => (
-        <Confirm
-          title="로그인 필요"
-          content="서비스를 이용하려면 로그인 해주세요."
-          confirmButtonText="로그인하기"
-          onConfirm={() => {
-            // 새 OAuth 플로우: Background에 로그인 요청
-            chrome.runtime.sendMessage({ action: "LOGIN" }, (response) => {
-              if (response?.success) {
-                console.log("[OverlayApp] Login successful");
-                // 세션이 저장되면 handleSessionRecovery가 자동으로 처리
-              } else {
-                console.error("[OverlayApp] Login failed:", response?.error);
-                showToast({
-                  title: response?.error || "로그인에 실패했습니다.",
-                  kind: "error",
-                  durationMs: 4000,
-                });
-              }
-            });
-            setErrorMessage(null);
-            dialog.close();
-          }}
-          onCancel={() => {
-            setErrorMessage(null);
-            dialog.close();
-          }}
-        />
-      ));
-    } else if (isStorageError) {
-      dialog.open(() => (
-        <Confirm
-          title="저장용량 부족"
-          content={`저장된 노트를 정리하거나\n
-플랜 업그레이드가 필요해요.`}
-          confirmButtonText="관리하기"
-          onConfirm={() => {
-            const appUrl =
-              import.meta.env.NEXT_PUBLIC_APP_URL ||
-              "https://picklenote.vercel.app";
-            chrome.runtime.sendMessage({
-              action: "OPEN_TAB",
-              url: `${appUrl}/settings`,
-            });
-            setErrorMessage(null);
-            dialog.close();
-          }}
-          onCancel={() => {
-            setErrorMessage(null);
-            dialog.close();
-          }}
-        />
-      ));
-    } else {
-      showToast({
-        title: errorMessage,
-        kind: "error",
-        durationMs: 4000,
-      });
-      setErrorMessage(null);
-    }
-  }, [errorMessage, dialog, showToast]);
 
   // Event handler that reads reactive 'view' state but remains stable
   const handleStorageChange = useEffectEvent(
@@ -158,7 +82,6 @@ export default function OverlayApp({
     ) => {
       if (areaName === "local" && changes.supabaseSession?.newValue) {
         console.log("Session recovered! Clearing error...");
-        setErrorMessage(null);
         dialog.closeAll(); // Close any login-related dialogs
         showToast({
           title: "로그인이 완료되었습니다.",
@@ -184,7 +107,6 @@ export default function OverlayApp({
     const currentNote = { ...note, ...finalData };
     console.log("Saving note (Overlay):", currentNote);
     setIsSaving(true);
-    setErrorMessage(null);
 
     try {
       // Construct CreateNoteInput from merged state
@@ -261,11 +183,70 @@ export default function OverlayApp({
       });
 
       onClose();
-      // Optional: Send success message to background to show notification?
     } catch (e: unknown) {
       console.error("Save failed:", e);
       const msg = e instanceof Error ? e.message : "Unknown error occurred";
-      setErrorMessage(msg);
+
+      const isAuthError =
+        msg.includes("Unauthorized") ||
+        msg.includes("만료") ||
+        msg.includes("No Workspace");
+
+      const isStorageError = msg.includes("스토리지 용량");
+
+      if (isAuthError) {
+        dialog.open(() => (
+          <Confirm
+            title="로그인 필요"
+            content="서비스를 이용하려면 로그인 해주세요."
+            confirmButtonText="로그인하기"
+            onConfirm={() => {
+              chrome.runtime.sendMessage({ action: "LOGIN" }, (response) => {
+                if (response?.success) {
+                  showToast({
+                    title: "로그인이 완료되었습니다.",
+                    kind: "success",
+                    durationMs: 4000,
+                  });
+                } else {
+                  showToast({
+                    title: response?.error || "로그인에 실패했습니다.",
+                    kind: "error",
+                    durationMs: 4000,
+                  });
+                }
+              });
+              dialog.close();
+            }}
+            onCancel={() => dialog.close()}
+          />
+        ));
+      } else if (isStorageError) {
+        dialog.open(() => (
+          <Confirm
+            title="저장용량 부족"
+            content={`저장된 노트를 정리하거나\n플랜 업그레이드가 필요해요.`}
+            confirmButtonText="관리하기"
+            onConfirm={() => {
+              const appUrl =
+                import.meta.env.NEXT_PUBLIC_APP_URL ||
+                "https://picklenote.vercel.app";
+              chrome.runtime.sendMessage({
+                action: "OPEN_TAB",
+                url: `${appUrl}/dashboard`,
+              });
+              dialog.close();
+            }}
+            onCancel={() => dialog.close()}
+          />
+        ));
+      } else {
+        showToast({
+          title: msg,
+          kind: "error",
+          durationMs: 4000,
+        });
+      }
     } finally {
       setIsSaving(false);
     }
