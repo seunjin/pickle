@@ -127,6 +127,12 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         limit_bytes: DEFAULT_STORAGE_LIMIT_BYTES,
       };
 
+      /**
+       * 테스트용: limit_bytes를 강제로 상수로 고정
+       */
+      // const { total_used_bytes } = usageInfo || { total_used_bytes: 0 };
+      // const limit_bytes = DEFAULT_STORAGE_LIMIT_BYTES; // 무조건 상수값 사용
+
       // 이미지/캡처의 경우 업로드할 파일 크기까지 미리 fetch해서 계산함
       let incomingSize = 0;
       let imageBlob: Blob | null = null;

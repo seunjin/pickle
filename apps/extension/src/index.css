@@ -1,5 +1,3 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
-/* Pretendard font is loaded via HTML <link> tag for performance, this is a fallback */
 @import "tailwindcss";
 @import "@pickle/ui/base.css";
 
