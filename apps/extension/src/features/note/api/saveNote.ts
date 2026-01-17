@@ -3,6 +3,7 @@ import type {
   CreateNoteInput,
   StoredNoteData,
 } from "@pickle/contracts/src/note";
+import { DEFAULT_STORAGE_LIMIT_BYTES } from "@pickle/contracts/src/storage";
 import {
   clearSession,
   getValidSession,
@@ -166,7 +167,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
           const usageInfo = Array.isArray(usage) ? usage[0] : usage;
           const { total_used_bytes, limit_bytes } = usageInfo || {
             total_used_bytes: 0,
-            limit_bytes: 52428800,
+            limit_bytes: DEFAULT_STORAGE_LIMIT_BYTES,
           };
 
           if (Number(total_used_bytes) + fileSize > Number(limit_bytes)) {
