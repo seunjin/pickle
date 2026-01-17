@@ -110,12 +110,62 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       };
     }
 
-    // 5. 이미지/캡처 업로드 처리
+    // 5. 스토리지 용량 사전 체크 (통합)
+    const { data: usage, error: usageError } = await supabase.rpc(
+      "get_workspace_storage_info" as "get_workspace_storage_info",
+      {
+        p_workspace_id: workspaceMember.workspace_id,
+      },
+    );
+
+    if (usageError) {
+      console.error("Storage usage check failed:", usageError);
+    } else {
+      const usageInfo = Array.isArray(usage) ? usage[0] : usage;
+      const { total_used_bytes, limit_bytes } = usageInfo || {
+        total_used_bytes: 0,
+        limit_bytes: DEFAULT_STORAGE_LIMIT_BYTES,
+      };
+
+      // 이미지/캡처의 경우 업로드할 파일 크기까지 미리 fetch해서 계산함
+      let incomingSize = 0;
+      let imageBlob: Blob | null = null;
+      let imageDimensions: { width: number; height: number } | null = null;
+
+      if (note.type === "image" || note.type === "capture") {
+        const imageUrl = note.data.image_url;
+        if (imageUrl) {
+          const res = await fetch(imageUrl);
+          imageBlob = await res.blob();
+          incomingSize = imageBlob.size;
+
+          // 실제 해상도 추출
+          const bitmap = await createImageBitmap(imageBlob);
+          imageDimensions = { width: bitmap.width, height: bitmap.height };
+          bitmap.close();
+        }
+      }
+
+      // 최종 용량 검증
+      if (Number(total_used_bytes) + incomingSize > Number(limit_bytes)) {
+        return {
+          success: false,
+          error: `스토리지 용량이 부족합니다. (한도: ${(Number(limit_bytes) / (1024 * 1024)).toFixed(0)}MB, 현재 ${(Number(total_used_bytes) / (1024 * 1024)).toFixed(1)}MB 사용 중)`,
+        };
+      }
+
+      // 이미지 데이터 세팅 (이후 로직에서 재사용)
+      if (imageBlob && imageDimensions) {
+        // @ts-expect-error - 로직 흐름상 아래에서 사용하기 위해 임시 할당 (리팩토링 시 구조 개선 가능)
+        note._prepared_blob = imageBlob;
+        // @ts-expect-error
+        note._prepared_dimensions = imageDimensions;
+      }
+    }
+
+    // 6. 이미지/캡처 업로드 처리
     let assetId: string | null = null;
     let filePath: string | undefined; // Debugging용 변수
-
-    // Meta 분리 로직 제거 -> Note.data 자체가 이미 Clean함 (CreateNoteInput 정의)
-    // 단, 이미지 처리를 위해 URL/Path 업데이트가 필요할 수 있음.
 
     // 기본적으로 note.data를 그대로 쓰되, 업로드 된 이미지 정보만 덮어씌움
     let storedData: StoredNoteData = note.data;
@@ -139,48 +189,18 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       }
     }
 
-    // Discriminated Union 덕분에 note.type 체크 시 note.data가 자동으로 Narrowing 됨
+    // 6-1. 실제 업로드 수행
     if (note.type === "image" || note.type === "capture") {
-      const imageUrl = note.data.image_url;
+      // @ts-expect-error
+      const blob = note._prepared_blob as Blob | undefined;
+      // @ts-expect-error
+      const dimensions = note._prepared_dimensions as
+        | { width: number; height: number }
+        | undefined;
 
-      if (imageUrl) {
-        // 5-1. Fetch Image
-        const res = await fetch(imageUrl);
-        const blob = await res.blob();
+      if (blob && dimensions) {
         const fileSize = blob.size;
-
-        // 이미지 실제 해상도 추출
-        const bitmap = await createImageBitmap(blob);
-        const { width, height } = bitmap;
-        bitmap.close();
-
-        const { data: usage, error: usageError } = await supabase.rpc(
-          "get_workspace_storage_info" as "get_workspace_storage_info",
-          {
-            p_workspace_id: workspaceMember.workspace_id,
-          },
-        );
-
-        if (usageError) {
-          console.error("Storage usage check failed:", usageError);
-        } else {
-          const usageInfo = Array.isArray(usage) ? usage[0] : usage;
-          const { total_used_bytes, limit_bytes } = usageInfo || {
-            total_used_bytes: 0,
-            limit_bytes: DEFAULT_STORAGE_LIMIT_BYTES,
-          };
-
-          if (Number(total_used_bytes) + fileSize > Number(limit_bytes)) {
-            return {
-              success: false,
-              error: `스토리지 용량이 부족합니다. (한도: ${(Number(limit_bytes) / (1024 * 1024)).toFixed(0)}MB, 현재 ${(Number(total_used_bytes) / (1024 * 1024)).toFixed(1)}MB 사용 중)`,
-            };
-          }
-        }
-
         const fileName = `${crypto.randomUUID()}.png`;
-
-        // Folder Structure: {workspace_id}/{user_id}/{filename}
         filePath = `${workspaceMember.workspace_id}/${userId}/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -194,7 +214,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
           throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
         }
 
-        // 5-2. Assets 테이블 Insert
+        // 6-2. Assets 테이블 Insert
         const { data: assetData, error: assetError } = await supabase
           .from("assets")
           .insert({
@@ -203,8 +223,8 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
             type: note.type,
             full_path: uploadData.path,
             full_size_bytes: fileSize,
-            width: width, // [NEW] 실제 너비 저장
-            height: height, // [NEW] 실제 높이 저장
+            width: dimensions.width,
+            height: dimensions.height,
             blur_data_url: note.blurDataUrl ?? null,
           })
           .select()
@@ -216,11 +236,9 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
 
         assetId = assetData.id;
 
-        // 5-3. storedData 업데이트 (Clean Data 유지)
+        // 6-3. storedData 업데이트
         if (note.type === "image") {
-          storedData = {
-            // [Refactor] Image data is empty
-          };
+          storedData = {};
         } else if (note.type === "capture") {
           storedData = {
             display_width: note.data.display_width,
@@ -230,7 +248,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       }
     }
 
-    // 6. DB InsertPayload 준비
+    // 7. DB InsertPayload 준비
     // 핵심 변경: meta를 별도 컬럼으로 저장 (Data에 중첩 X)
     const insertPayload: Database["public"]["Tables"]["notes"]["Insert"] = {
       workspace_id: workspaceMember.workspace_id,
