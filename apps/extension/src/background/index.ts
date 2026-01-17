@@ -222,6 +222,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
   }
+  // 4-9. 새 탭 열기 (OPEN_TAB)
+  else if (request.action === "OPEN_TAB") {
+    chrome.tabs.create({ url: request.url });
+    return false; // 동기 응답
+  }
 });
 
 /**

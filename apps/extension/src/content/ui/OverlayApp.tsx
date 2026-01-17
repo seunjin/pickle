@@ -48,6 +48,8 @@ export default function OverlayApp({
       errorMessage.includes("만료") ||
       errorMessage.includes("No Workspace");
 
+    const isStorageError = errorMessage.includes("스토리지 용량");
+
     if (isAuthError) {
       dialog.open(() => (
         <Confirm
@@ -68,6 +70,30 @@ export default function OverlayApp({
                   durationMs: 4000,
                 });
               }
+            });
+            setErrorMessage(null);
+            dialog.close();
+          }}
+          onCancel={() => {
+            setErrorMessage(null);
+            dialog.close();
+          }}
+        />
+      ));
+    } else if (isStorageError) {
+      dialog.open(() => (
+        <Confirm
+          title="저장용량 부족"
+          content={`저장된 노트를 정리하거나\n
+플랜 업그레이드가 필요해요.`}
+          confirmButtonText="관리하기"
+          onConfirm={() => {
+            const appUrl =
+              import.meta.env.NEXT_PUBLIC_APP_URL ||
+              "https://picklenote.vercel.app";
+            chrome.runtime.sendMessage({
+              action: "OPEN_TAB",
+              url: `${appUrl}/settings`,
             });
             setErrorMessage(null);
             dialog.close();
