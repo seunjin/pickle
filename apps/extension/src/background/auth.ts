@@ -29,7 +29,6 @@ export async function launchOAuthFlow(): Promise<Session | null> {
 
     // Chrome Extension의 redirect URL
     const redirectUrl = chrome.identity.getRedirectURL();
-    console.log("[Auth] Redirect URL:", redirectUrl);
 
     // Supabase OAuth URL 생성 (PKCE 모드)
     const { data, error } = await client.auth.signInWithOAuth({
@@ -44,8 +43,6 @@ export async function launchOAuthFlow(): Promise<Session | null> {
       console.error("[Auth] Failed to generate OAuth URL:", error);
       return null;
     }
-
-    console.log("[Auth] OAuth URL:", data.url);
 
     // launchWebAuthFlow로 로그인 팝업 표시
     const responseUrl = await new Promise<string>((resolve, reject) => {
@@ -67,8 +64,6 @@ export async function launchOAuthFlow(): Promise<Session | null> {
         },
       );
     });
-
-    console.log("[Auth] Response URL:", responseUrl);
 
     // 콜백 URL에서 code 추출
     const url = new URL(responseUrl);
@@ -117,7 +112,6 @@ export async function launchOAuthFlow(): Promise<Session | null> {
 
     // 세션 저장
     await setSession(sessionData.session);
-    console.log("[Auth] Login successful:", sessionData.session.user.email);
 
     return sessionData.session;
   } catch (error) {

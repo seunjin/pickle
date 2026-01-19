@@ -27,12 +27,6 @@ export async function sendMessageToContentScript(
           throw new Error("CANNOT_INJECT_RESTRICTED_URL");
         }
 
-        console.log("Attempting injection into tab:", tabId);
-
-        // manifest.json에서 content_scripts 파일 목록을 가져옵니다.
-        const manifest = chrome.runtime.getManifest();
-        const contentScripts = manifest.content_scripts?.[0]?.js;
-
         if (contentScripts && contentScripts.length > 0) {
           // 스크립트를 해당 탭에 강제로 주입(Execute)합니다.
           await chrome.scripting.executeScript({
@@ -40,7 +34,6 @@ export async function sendMessageToContentScript(
             files: contentScripts,
           });
 
-          console.log("Injection successful. Retrying message...");
           await new Promise((resolve) => setTimeout(resolve, 300));
           return await chrome.tabs.sendMessage(tabId, message);
         }
