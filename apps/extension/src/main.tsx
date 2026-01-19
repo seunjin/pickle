@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { DialogProvider } from "@pickle/ui";
-import App from "./App.tsx";
+import { PopupApp } from "./popup/PopupApp";
 import { DevLauncher } from "./shared/components/DevLauncher";
 
 const root = document.getElementById("root");
@@ -14,7 +14,7 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <DialogProvider>
-      <App />
+      <PopupApp />
       <DevLauncher />
     </DialogProvider>
   </StrictMode>,

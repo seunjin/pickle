@@ -182,6 +182,13 @@ export const extensionRuntime = {
     }
     return `/${path}`;
   },
+  openTab: (url: string) => {
+    if (getIsExtensionValid()) {
+      chrome.tabs.create({ url });
+    } else {
+      window.open(url, "_blank");
+    }
+  },
   onMessage: {
     addListener: (
       callback: (

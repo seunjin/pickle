@@ -10,13 +10,9 @@
     "service_worker": "src/background/index.ts",
     "type": "module"
   },
-  "side_panel": {
-    "default_path": "index.html"
-  },
   "permissions": [
     "contextMenus",
     "activeTab",
-    "sidePanel",
     "storage",
     "scripting",
     "identity"
