@@ -26,6 +26,7 @@ export function PopupApp() {
         if (!tab?.id) return;
         extensionRuntime.sendMessage(
           { action: "GET_SELECTION", tabId: tab.id },
+          // biome-ignore lint/suspicious/noExplicitAny: internal message response
           (response: any) => {
             if (response?.text) {
               setSelectedText(response.text);
@@ -54,6 +55,20 @@ export function PopupApp() {
   const startAction = (mode: "text" | "bookmark" | "capture" | "image") => {
     if (mode === "image") {
       setShowImageGuide(true);
+      return;
+    }
+
+    if (mode === "bookmark") {
+      extensionRuntime.sendMessage({ action: "RUN_BOOKMARK_FLOW" }, () => {
+        extensionRuntime.closePopup();
+      });
+      return;
+    }
+
+    if (mode === "capture") {
+      extensionRuntime.sendMessage({ action: "RUN_CAPTURE_FLOW" }, () => {
+        extensionRuntime.closePopup();
+      });
       return;
     }
 
@@ -207,16 +222,16 @@ export function PopupApp() {
 
       {/* Image Saving Guide Overlay */}
       {showImageGuide && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-6 text-center animate-in fade-in duration-200">
+        <div className="fade-in absolute inset-0 z-50 flex animate-in items-center justify-center bg-black/80 p-6 text-center duration-200">
           <div className="flex flex-col items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-400/20 text-orange-400">
               <IconPlus20 />
             </div>
             <div>
               <h3 className="mb-2 font-bold text-lg">이미지 저장 방법</h3>
-              <p className="text-neutral-400 text-sm leading-relaxed px-2">
+              <p className="px-2 text-neutral-400 text-sm leading-relaxed">
                 웹페이지의 이미지 위에서 <br />
-                <span className="text-white underline underline-offset-4 font-semibold">
+                <span className="font-semibold text-white underline underline-offset-4">
                   마우스 우클릭
                 </span>{" "}
                 후 <br />

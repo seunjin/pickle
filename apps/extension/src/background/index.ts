@@ -258,6 +258,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true;
     }
   }
+  // 4-12. 북마크 플로우 실행 (팝업용)
+  else if (request.action === "RUN_BOOKMARK_FLOW") {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (tab)
+        startBookmarkFlow(tab).then(() => sendResponse({ success: true }));
+    });
+    return true;
+  }
+  // 4-13. 캡처 플로우 실행 (팝업용)
+  else if (request.action === "RUN_CAPTURE_FLOW") {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (tab)
+        startCaptureFlow(tab).then(() => sendResponse({ success: true }));
+    });
+    return true;
+  }
 });
 
 /**
