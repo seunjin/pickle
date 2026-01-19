@@ -3,6 +3,8 @@ import { Select, type SelectOptionValue } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { TermsPrivacyContent } from "@/features/legal/ui/TermsPrivacyContent";
+import { TermsServiceContent } from "@/features/legal/ui/TermsServiceContent";
 
 const VersionOptions = [
   {
@@ -59,7 +61,13 @@ export function LegalContent() {
         </div>
       </div>
       {/* 약관 내용 */}
-      <div></div>
+      <div className="overflow-y-auto pr-2">
+        {tabParam === "privacy" ? (
+          <TermsPrivacyContent />
+        ) : (
+          <TermsServiceContent />
+        )}
+      </div>
       <footer className="pt-8 text-center text-neutral-500 text-xs">
         © 2026 Pickle. All rights reserved.
       </footer>
