@@ -20,10 +20,10 @@ export type SelectOption = {
 interface SelectProps {
   options: SelectOption[];
   disabled?: boolean;
-  defaultValue?: string;
+  defaultValue?: SelectOptionValue;
   placeholder?: React.ReactNode;
-  value?: string;
-  onValueChange?: (value: string) => void;
+  value?: SelectOptionValue;
+  onValueChange?: (value: SelectOptionValue) => void;
 }
 export function Select({
   options,

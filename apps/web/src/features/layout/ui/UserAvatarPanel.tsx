@@ -28,7 +28,6 @@ export function UserAvatarPanel() {
 
   const avatar_url = appUser?.avatar_url;
 
-  console.log({ appUser });
   if (!avatar_url) return null;
 
   return (
@@ -134,9 +133,11 @@ export function UserAvatarPanel() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <button type="button" className="flex w-full items-center gap-2">
-              <Icon name="document_16" /> 피클약관
-            </button>
+            <Link href="/legal">
+              <button type="button" className="flex w-full items-center gap-2">
+                <Icon name="document_16" /> 피클약관
+              </button>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <button
