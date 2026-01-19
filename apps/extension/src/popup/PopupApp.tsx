@@ -17,18 +17,22 @@ export function PopupApp() {
   const { isLoggedIn } = useSession();
   const [view, setView] = useState<ViewType>("main");
   const [selectedText, setSelectedText] = useState<string>("");
+  const [showImageGuide, setShowImageGuide] = useState(false);
 
   // 관련 탭에서 선택된 텍스트 가져오기
   useEffect(() => {
     if (isLoggedIn) {
-      extensionTabs.sendMessageToActiveTab(
-        { action: "GET_SELECTION" },
-        (response) => {
-          if (response?.text) {
-            setSelectedText(response.text);
-          }
-        },
-      );
+      extensionTabs.getCurrentActiveTab((tab) => {
+        if (!tab?.id) return;
+        extensionRuntime.sendMessage(
+          { action: "GET_SELECTION", tabId: tab.id },
+          (response: any) => {
+            if (response?.text) {
+              setSelectedText(response.text);
+            }
+          },
+        );
+      });
     }
   }, [isLoggedIn]);
 
@@ -48,6 +52,11 @@ export function PopupApp() {
   };
 
   const startAction = (mode: "text" | "bookmark" | "capture" | "image") => {
+    if (mode === "image") {
+      setShowImageGuide(true);
+      return;
+    }
+
     extensionTabs.getCurrentActiveTab(async (tab) => {
       if (!tab?.id) return;
 
@@ -63,22 +72,30 @@ export function PopupApp() {
         noteData.text = selectedText;
       }
 
-      // 1. 스토리지에 데이터 저장 (Content Script와 공유)
-      extensionRuntime.sendMessage({
-        action: "SAVE_TO_STORAGE", // background에서 처리하도록 메시지 전송 로직이 필요할 수 있음
-        tabId: tab.id,
-        data: noteData,
-      });
-
-      // 2. 오버레이 열기 메시지 전송
-      extensionTabs.sendMessageToActiveTab({
-        action: "OPEN_OVERLAY",
-        mode: mode,
-        tabId: tab.id,
-      });
-
-      // 팝업 닫기
-      extensionRuntime.closePopup();
+      // 1. 스토리지에 데이터 저장 (Background 행)
+      extensionRuntime.sendMessage(
+        {
+          action: "SAVE_TO_STORAGE",
+          tabId: tab.id,
+          data: noteData,
+        },
+        () => {
+          // 2. 저장 완료 후 오버레이 열기 메시지 전송 (Background Proxy 활용)
+          extensionRuntime.sendMessage(
+            {
+              action: "OPEN_OVERLAY",
+              mode: mode,
+              tabId: tab.id,
+            },
+            () => {
+              // 처리가 완료된 후 팝업 닫기
+              setTimeout(() => {
+                extensionRuntime.closePopup();
+              }, 100);
+            },
+          );
+        },
+      );
     });
   };
 
@@ -115,7 +132,7 @@ export function PopupApp() {
   }
 
   return (
-    <div className="flex h-[400px] w-[320px] flex-col bg-neutral-950 text-white">
+    <div className="relative flex h-[400px] w-[320px] flex-col bg-neutral-950 text-white">
       {/* Header */}
       <div className="flex items-center justify-between p-5 pb-2">
         <div className="flex items-center gap-2">
@@ -187,6 +204,37 @@ export function PopupApp() {
           <span className="opacity-50">→</span>
         </button>
       </div>
+
+      {/* Image Saving Guide Overlay */}
+      {showImageGuide && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-6 text-center animate-in fade-in duration-200">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-400/20 text-orange-400">
+              <IconPlus20 />
+            </div>
+            <div>
+              <h3 className="mb-2 font-bold text-lg">이미지 저장 방법</h3>
+              <p className="text-neutral-400 text-sm leading-relaxed px-2">
+                웹페이지의 이미지 위에서 <br />
+                <span className="text-white underline underline-offset-4 font-semibold">
+                  마우스 우클릭
+                </span>{" "}
+                후 <br />
+                <span className="text-indigo-400">'Pickle에 이미지 저장'</span>
+                을 <br />
+                선택해 주세요.
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              className="mt-2 w-full"
+              onClick={() => setShowImageGuide(false)}
+            >
+              확인했어요
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

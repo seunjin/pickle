@@ -235,6 +235,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.tabs.create({ url: request.url });
     return false; // 동기 응답
   }
+  // 4-10. 오버레이 열기 중계 (OPEN_OVERLAY)
+  // 팝업에서 호출 시 Content Script가 로드되었는지 확인하고 안전하게 보냅니다.
+  else if (request.action === "OPEN_OVERLAY") {
+    const tabId = request.tabId;
+    if (tabId) {
+      sendMessageToContentScript(tabId, {
+        action: "OPEN_OVERLAY",
+        mode: request.mode,
+        tabId: tabId,
+      }).then((response) => sendResponse(response));
+      return true;
+    }
+  }
+  // 4-11. 텍스트 선택 정보 중계 (GET_SELECTION)
+  else if (request.action === "GET_SELECTION") {
+    const tabId = request.tabId;
+    if (tabId) {
+      sendMessageToContentScript(tabId, { action: "GET_SELECTION" }).then(
+        (response) => sendResponse(response),
+      );
+      return true;
+    }
+  }
 });
 
 /**
