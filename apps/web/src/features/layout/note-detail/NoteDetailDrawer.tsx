@@ -272,12 +272,15 @@ export default function NoteDetailDrawer({
           />
           {/* Thumbnail Detail */}
           <motion.div
-            className="relative z-20 flex h-[calc(100%-30px)] w-full justify-end gap-[15px] px-[15px]"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ duration: 0.3 }}
+            className="relative z-20 flex h-[calc(100%-30px)] w-[calc(calc(100dvh-30px)+15px+360px+15px)] justify-end gap-[15px] px-[15px]"
+            initial={
+              thumbnailDetailOpen ? { opacity: 0, x: "100%" } : undefined
+            }
+            animate={thumbnailDetailOpen ? { opacity: 1, x: 0 } : undefined}
+            exit={thumbnailDetailOpen ? { opacity: 0, x: "100%" } : undefined}
+            transition={thumbnailDetailOpen ? { duration: 0.5 } : undefined}
             onClick={(_e) => {
+              setThumbnailDetailOpen(false);
               handleClose();
             }}
           >
@@ -314,10 +317,14 @@ export default function NoteDetailDrawer({
             {/* drawer */}
             <motion.div
               className="relative z-30 grid h-full w-90 shrink-0 grid-rows-[auto_1fr_auto] rounded-[16px] border border-base-border-light bg-base-foreground-background py-5 shadow-standard"
-              initial={{ opacity: 0, x: "100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
-              transition={{ duration: 0.3 }}
+              initial={
+                !thumbnailDetailOpen ? { opacity: 0, x: "100%" } : undefined
+              }
+              animate={!thumbnailDetailOpen ? { opacity: 1, x: 0 } : undefined}
+              exit={
+                !thumbnailDetailOpen ? { opacity: 0, x: "100%" } : undefined
+              }
+              transition={!thumbnailDetailOpen ? { duration: 0.3 } : undefined}
               onClick={(e) => {
                 e.stopPropagation();
               }}
