@@ -43,20 +43,27 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
         const widthWithGap =
           currentWidth + tagWidth + (newVisibleCount > 0 ? gap : 0);
 
-        // 마지막 태그가 아니거나, 오버플로우가 이미 발생한 경우 카운터 공간 고려
+        // 첫 번째 태그는 무조건 포함하지만, 2개 이상의 태그가 있을 때는 카운터 공간을 미리 고려합니다.
+        const isFirstTag = i === 0;
         const spaceNeeded =
           widthWithGap + (i < tags.length - 1 ? gap + counterWidth : 0);
 
-        if (spaceNeeded <= containerWidth) {
+        if (isFirstTag || spaceNeeded <= containerWidth) {
           currentWidth = widthWithGap;
           newVisibleCount++;
+
+          // 첫 번째 태그가 길어서 이미 공간을 다 차지했고 뒤에 태그가 더 있다면 오버플로우로 간주
+          if (isFirstTag && spaceNeeded > containerWidth && tags.length > 1) {
+            hasOverflow = true;
+            break;
+          }
         } else {
           hasOverflow = true;
           break;
         }
       }
 
-      if (!hasOverflow) {
+      if (!hasOverflow && newVisibleCount === tags.length) {
         setVisibleCount(tags.length);
         setOverflowCount(0);
       } else {
@@ -107,18 +114,20 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
 
       {/* 실제 노출되는 태그 */}
       <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
-        {tags.slice(0, visibleCount).map((tag) => {
+        {tags.slice(0, visibleCount).map((tag, index) => {
           const style = TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
+          const isFirst = index === 0;
           return (
             <span
               key={tag.id}
               className={cn(
-                "inline-flex h-[22px] shrink-0 items-center gap-1 rounded-[4px] border px-[7px] text-[12px]",
+                "inline-flex h-[22px] items-center gap-1 rounded-[4px] border px-[7px] text-[12px]",
+                isFirst && tags.length > 1 ? "min-w-0 shrink" : "shrink-0",
                 style.paletteColor,
                 style.tagColor,
               )}
             >
-              #{tag.name}
+              <span className="truncate">#{tag.name}</span>
             </span>
           );
         })}
