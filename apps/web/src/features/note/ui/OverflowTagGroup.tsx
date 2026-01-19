@@ -113,24 +113,31 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
       </div>
 
       {/* 실제 노출되는 태그 */}
-      <div className="flex flex-nowrap items-center gap-2 overflow-hidden">
-        {tags.slice(0, visibleCount).map((tag, index) => {
-          const style = TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
-          const isFirst = index === 0;
-          return (
-            <span
-              key={tag.id}
-              className={cn(
-                "inline-flex h-[22px] items-center gap-1 rounded-[4px] border px-[7px] text-[12px]",
-                isFirst && tags.length > 1 ? "min-w-0 shrink" : "shrink-0",
-                style.paletteColor,
-                style.tagColor,
-              )}
-            >
-              <span className="truncate">#{tag.name}</span>
-            </span>
-          );
-        })}
+      <div
+        className={cn(
+          "grid w-full items-center gap-2",
+          overflowCount > 0 ? "grid-cols-[auto_1fr]" : "grid-cols-1",
+        )}
+      >
+        <div className="flex min-w-0 items-center gap-1">
+          {tags.slice(0, visibleCount).map((tag, index) => {
+            const style = TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
+            const isFirst = index === 0;
+            return (
+              <div
+                key={tag.id}
+                className={cn(
+                  "flex h-[22px] items-center rounded-[4px] border px-[7px] text-[12px]",
+                  isFirst ? "min-w-0 shrink" : "shrink-0",
+                  style.paletteColor,
+                  style.tagColor,
+                )}
+              >
+                <div className="truncate">#{tag.name}</div>
+              </div>
+            );
+          })}
+        </div>
         {overflowCount > 0 && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -141,6 +148,7 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
             <TooltipContent
               side="bottom"
               align="start"
+              sideOffset={5}
               className="flex flex-wrap gap-1 border border-base-border-light bg-base-foreground-background p-[5px] shadow-standard"
               style={{ width: `${containerRef.current?.offsetWidth}px` }}
             >
@@ -148,16 +156,18 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
                 const style =
                   TAG_VARIANTS[tag.style as keyof typeof TAG_VARIANTS];
                 return (
-                  <span
+                  <div
                     key={tag.id}
                     className={cn(
-                      "inline-flex h-[22px] items-center gap-1 rounded-[4px] border px-[7px] text-[12px]",
+                      "flex h-[22px] min-w-0 items-center rounded-[4px] border px-[7px]",
                       style.paletteColor,
                       style.tagColor,
                     )}
                   >
-                    #{tag.name}
-                  </span>
+                    <span className="block truncate text-[12px]">
+                      #{tag.name}
+                    </span>
+                  </div>
                 );
               })}
             </TooltipContent>
