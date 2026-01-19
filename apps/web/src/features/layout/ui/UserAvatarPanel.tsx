@@ -28,6 +28,7 @@ export function UserAvatarPanel() {
 
   const avatar_url = appUser?.avatar_url;
 
+  console.log({ appUser });
   if (!avatar_url) return null;
 
   return (
@@ -112,6 +113,19 @@ export function UserAvatarPanel() {
         <DropdownMenuSeparator className="-mx-2" />
 
         <div className="flex flex-col gap-[5px] pt-2">
+          {(appUser.authority === "super_admin" ||
+            appUser.authority === "admin") && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2"
+                >
+                  <Icon name="setting_16" /> 관리자 설정
+                </button>
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <button type="button" className="flex w-full items-center gap-2">
