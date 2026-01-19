@@ -65,7 +65,7 @@ export const AssetImage = ({
 
   return (
     <div
-      className={`relative h-full w-full overflow-hidden ${className || ""}`}
+      className={`relative h-full w-full overflow-hidden ${className || ""} transition-transform duration-300 ease-in-out group-hover/note-card:scale-105`}
     >
       {/* 블러 플레이스홀더 (100ms 후에만 표시) */}
       {blurDataUrl && showPlaceholder && !isLoaded && (

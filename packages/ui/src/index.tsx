@@ -14,3 +14,4 @@ export * from "./tag";
 export * from "./tag/TagMaker";
 export * from "./textarea";
 export * from "./toast";
+export * from "./tooltip";

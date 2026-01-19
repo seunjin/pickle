@@ -34,7 +34,11 @@ export const Thumbnail = ({
           <img
             src={note.meta.image}
             alt={note.meta?.description}
-            className={cn("h-full w-full", objectFitClass[objectFit])}
+            className={cn(
+              "h-full w-full",
+              objectFitClass[objectFit],
+              "transition-transform duration-300 ease-in-out group-hover/note-card:scale-105",
+            )}
             loading="lazy"
             width={note.meta.image_width}
             height={note.meta.image_height}

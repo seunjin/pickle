@@ -39,7 +39,7 @@ export function NoteListFilter({
   )?.label;
 
   return (
-    <div className="flex items-center justify-between pb-7.5">
+    <div className="flex items-center justify-between pb-3">
       <div className="flex items-center gap-2">
         <Select
           value={selectedType}
