@@ -1,18 +1,21 @@
 # 익스텐션 아키텍처 및 통합 가이드
 
-## 1. 인증 동기화 (Auth Sync)
-웹 애플리케이션(Supabase)과 크롬 익스텐션 간의 로그인 세션을 공유하기 위해 "브리지 페이지(Bridge Page)" 패턴을 사용합니다.
+## 1. 인증 플로우 (Auth Flow)
+크롬 익스텐션은 `chrome.identity.launchWebAuthFlow`를 사용하여 Google OAuth 로그인을 직접 처리합니다.
 
 ### 동작 흐름
-1. **사용자 액션**: 익스텐션에서 "Connect Account" 클릭 또는 `/auth/sync` 페이지 직접 방문.
-2. **웹 앱 (`/auth/sync`)**:
-   - 현재 활성화된 Supabase 세션을 확인합니다.
-   - `window.postMessage({ type: "PICKLE_SYNC_SESSION", session }, "*")`를 통해 세션 정보를 브로드캐스트합니다.
-3. **익스텐션 (`content/index.ts`)**:
-   - `/auth/sync` 페이지에 주입된 Content Script가 메시지를 수신합니다.
-   - 수신한 세션 식별자(`PICKLE_SYNC_SESSION`)를 확인하고 `chrome.storage.local`에 저장합니다.
-4. **익스텐션 (`background/index.ts`)**:
-   - API 호출 시 `chrome.storage.local`에서 `access_token`을 꺼내 인증 헤더에 추가합니다.
+1. **사용자 액션**: 익스텐션(팝업 또는 설정)에서 "로그인" 버튼 클릭.
+2. **Background (`background/auth.ts`)**:
+   - Supabase OAuth URL을 생성하고 PKCE 코드 챌린지를 준비합니다.
+   - `chrome.identity.launchWebAuthFlow`를 호출하여 로그인 위젯을 띄웁니다.
+3. **인증 완료**:
+   - 리다이렉트 URL에서 인증 코드를 추출하여 Supabase 세션으로 교환합니다.
+   - 획득한 세션(Access/Refresh Token)을 `chrome.storage.local`에 저장합니다.
+4. **API 호출**:
+   - `background/index.ts`를 통해 Supabase DB에 직접 접근하며, RLS 정책에 따라 권한이 제어됩니다.
+
+> [!NOTE]
+> 상세한 인증 및 세션 갱신 로직은 [extension_auth_flow.md](./extension_auth_flow.md)를 참고하세요.
 
 ## 2. 데이터 접근 (Direct DB Access via Background)
 웹과 동일하게 **Supabase DB에 직접 접근**합니다. 단, 보안과 세션 관리를 위해 모든 쓰기(Write) 작업은 **Background Service Worker**에서 수행합니다.
@@ -28,7 +31,29 @@
 
 > **이유**: `api/internal` 같은 중간 레이어를 제거하여 아키텍처를 단순화하고, `supabase-js`의 이점(타입, DX)을 그대로 활용합니다.
 
-## 3. 메타데이터 추출 (Metadata Extraction)
+## 3. 에셋 및 이미지 처리 파이프라인 (Asset Pipeline)
+이미지 및 캡처 저장 시, 익스텐션 백그라운드는 데이터 무결성과 성능을 위해 특정 처리 과정을 거칩니다.
+
+### 동작 흐름
+1. **데이터 획득**: 
+   - 캡처: `chrome.tabs.captureVisibleTab` (Base64)
+   - 이미지: 우클릭한 이미지의 `srcUrl` (Remote URL)
+2. **바이너리 변환 (Background)**:
+   - `fetch`를 통해 이미지 데이터를 `Blob`으로 변환합니다.
+   - `createImageBitmap`을 사용하여 이미지의 실제 해상도(Width/Height)를 추출합니다.
+   - 이 과정에서 스토리지 용량 체크를 위한 `fileSize`를 미리 확보합니다.
+3. **용량 검증**:
+   - `get_workspace_storage_info` RPC를 통해 현재 사용량과 새로운 이미지 크기를 합산하여 워크스페이스 한도를 체크합니다.
+4. **업로드 및 에셋 등록**:
+   - Supabase Storage (`bitmaps` 버킷)에 파일을 업로드합니다.
+   - `assets` 테이블에 메타데이터(경로, 크기, 해상도 등)를 기록하고 `asset_id`를 생성합니다.
+5. **노트 연동**:
+   - 생성된 `asset_id`를 `notes` 테이블의 외래키로 연결하여 최종 저장합니다.
+
+> [!TIP]
+> 백그라운드에서 모든 바이너리 처리를 수행함으로써 콘텐츠 스크립트의 부하를 줄이고, 네트워크 지연 시간 동안 사용자에게 즉각적인 로딩 상태를 제공할 수 있습니다.
+
+## 4. 메타데이터 추출 (Metadata Extraction)
 캡처, 북마크 등 모든 모드에서 페이지 메타데이터(`PageMetadata`: 제목, 파비콘, OG 태그 등)를 수집하여 저장합니다.
 
 ### 캡처 모드 흐름

@@ -7,7 +7,8 @@ Pickle은 사용자에게 제한된 자원을 공정하고 효율적으로 제�
 ## 1. 정책 개요
 사용자는 워크스페이스별로 정해진 용량 한도 내에서 데이터를 저장할 수 있습니다. 한도는 파일(이미지, 캡처)뿐만 아니라 DB에 저장되는 텍스트 및 북마크 데이터의 실제 크기를 모두 포함합니다.
 
-- **기본 한도**: 50MB (워크스페이스별 가변 설정 가능)
+- **기본 한도**: 50MB (기본값)
+  - 이 상수들은 `@pickle/contracts/src/storage.ts`에 정의되어 관리됩니다.
 - **대상 데이터**: 
   - **Assets**: 원본 파일 및 썸네일 (Storage 점유)
   - **Notes**: 텍스트 본문, 메타데이터, 북마크 정보 (DB 점유)
@@ -28,6 +29,12 @@ PostgreSQL의 `pg_column_size()` 함수를 사용하여 `notes` 테이블의 각
 ### 2.3 통합 계산 (RPC)
 성능과 정확도를 위해 서버 사이드(PostgreSQL RPC)에서 위 항목들을 합산하여 반환합니다.
 - **함수명**: `get_workspace_storage_info(p_workspace_id)`
+- **반환 구조 (`WorkspaceStorageUsage`)**:
+  - `asset_bytes`: 파일 데이터 총합
+  - `bookmark_bytes`: 북마크 타입 데이터 총합
+  - `text_bytes`: 텍스트 타입 데이터 총합
+  - `total_used_bytes`: 위 3개 항목의 총합
+  - `limit_bytes`: 워크스페이스에 할당된 한도
 
 ---
 
