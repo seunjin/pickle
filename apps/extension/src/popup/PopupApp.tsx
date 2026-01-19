@@ -18,6 +18,7 @@ export function PopupApp() {
   const [view, setView] = useState<ViewType>("main");
   const [selectedText, setSelectedText] = useState<string>("");
   const [showImageGuide, setShowImageGuide] = useState(false);
+  const [showTextGuide, setShowTextGuide] = useState(false);
 
   // 관련 탭에서 선택된 텍스트 가져오기
   useEffect(() => {
@@ -58,22 +59,33 @@ export function PopupApp() {
       return;
     }
 
-    if (mode === "bookmark") {
-      extensionRuntime.sendMessage({ action: "RUN_BOOKMARK_FLOW" }, () => {
-        extensionRuntime.closePopup();
-      });
-      return;
-    }
-
-    if (mode === "capture") {
-      extensionRuntime.sendMessage({ action: "RUN_CAPTURE_FLOW" }, () => {
-        extensionRuntime.closePopup();
-      });
+    if (mode === "text" && !selectedText) {
+      setShowTextGuide(true);
       return;
     }
 
     extensionTabs.getCurrentActiveTab(async (tab) => {
       if (!tab?.id) return;
+
+      if (mode === "bookmark") {
+        extensionRuntime.sendMessage(
+          { action: "RUN_BOOKMARK_FLOW", tabId: tab.id },
+          () => {
+            extensionRuntime.closePopup();
+          },
+        );
+        return;
+      }
+
+      if (mode === "capture") {
+        extensionRuntime.sendMessage(
+          { action: "RUN_CAPTURE_FLOW", tabId: tab.id },
+          () => {
+            extensionRuntime.closePopup();
+          },
+        );
+        return;
+      }
 
       // 액션에 필요한 초기 데이터 설정
       // biome-ignore lint/suspicious/noExplicitAny: generic note data
@@ -244,6 +256,35 @@ export function PopupApp() {
               variant="secondary"
               className="mt-2 w-full"
               onClick={() => setShowImageGuide(false)}
+            >
+              확인했어요
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Text Selection Guide Overlay */}
+      {showTextGuide && (
+        <div className="fade-in absolute inset-0 z-50 flex animate-in items-center justify-center bg-black/80 p-6 text-center duration-200">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-400/20 text-blue-400">
+              <IconDocument16 />
+            </div>
+            <div>
+              <h3 className="mb-2 font-bold text-lg">텍스트 저장 방법</h3>
+              <p className="px-2 text-neutral-400 text-sm leading-relaxed">
+                수집하고 싶은 텍스트를 <br />
+                <span className="font-semibold text-white underline underline-offset-4">
+                  드래그(선택)
+                </span>
+                한 뒤 <br />
+                다시 팝업을 열어 버튼을 눌러주세요.
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              className="mt-2 w-full"
+              onClick={() => setShowTextGuide(false)}
             >
               확인했어요
             </Button>

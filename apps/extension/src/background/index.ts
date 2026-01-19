@@ -260,18 +260,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   // 4-12. 북마크 플로우 실행 (팝업용)
   else if (request.action === "RUN_BOOKMARK_FLOW") {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (tab)
+    const tabId = request.tabId;
+    if (tabId) {
+      chrome.tabs.get(tabId, (tab) => {
+        if (chrome.runtime.lastError || !tab) {
+          sendResponse({ success: false, error: "Tab not found" });
+          return;
+        }
         startBookmarkFlow(tab).then(() => sendResponse({ success: true }));
-    });
+      });
+      return true;
+    }
+    sendResponse({ success: false, error: "No tabId provided" });
     return true;
   }
   // 4-13. 캡처 플로우 실행 (팝업용)
   else if (request.action === "RUN_CAPTURE_FLOW") {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (tab)
+    const tabId = request.tabId;
+    if (tabId) {
+      chrome.tabs.get(tabId, (tab) => {
+        if (chrome.runtime.lastError || !tab) {
+          sendResponse({ success: false, error: "Tab not found" });
+          return;
+        }
         startCaptureFlow(tab).then(() => sendResponse({ success: true }));
-    });
+      });
+      return true;
+    }
+    sendResponse({ success: false, error: "No tabId provided" });
     return true;
   }
 });
