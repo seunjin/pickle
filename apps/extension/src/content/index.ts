@@ -19,6 +19,8 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       console.error("Metadata extraction failed:", e);
       sendResponse(null);
     }
+  } else if (request.action === "GET_SELECTION") {
+    sendResponse({ text: window.getSelection()?.toString() || "" });
   }
 });
 

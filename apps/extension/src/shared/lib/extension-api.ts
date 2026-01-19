@@ -29,6 +29,7 @@ export const extensionStorage = {
       try {
         chrome.storage.local.get(
           key,
+          // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
           callback as (items: Record<string, any>) => void,
         );
       } catch (_e) {
@@ -115,6 +116,7 @@ export const extensionStorage = {
         ) => {
           callback(e.detail || {}, "local");
         };
+        // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
         (callback as any)._handler = handler;
         window.addEventListener("extension-storage-changed", handler);
       }
@@ -132,6 +134,7 @@ export const extensionStorage = {
           console.warn("[Pickle] Extension context invalidated.");
         }
       } else {
+        // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
         const handler = (callback as any)._handler;
         if (handler) {
           window.removeEventListener("extension-storage-changed", handler);
@@ -162,6 +165,28 @@ export const extensionTabs = {
       }
     } else {
       callback({ id: 99999, url: window.location.href });
+    }
+  },
+  sendMessageToActiveTab: (
+    message: unknown,
+    // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
+    callback?: (response: any) => void,
+  ) => {
+    if (getIsExtensionValid()) {
+      try {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          const tabId = tabs[0]?.id;
+          if (typeof tabId === "number") {
+            chrome.tabs.sendMessage(tabId, message, callback || (() => {}));
+          } else {
+            callback?.(null);
+          }
+        });
+      } catch (_e) {
+        callback?.(null);
+      }
+    } else {
+      callback?.(null);
     }
   },
 };
@@ -231,6 +256,7 @@ export const extensionRuntime = {
             }
           });
         };
+        // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
         (callback as any)._messageHandler = handler;
         window.addEventListener("extension-on-message", handler);
       }
@@ -249,6 +275,7 @@ export const extensionRuntime = {
           console.warn("[Pickle] Extension context invalidated.");
         }
       } else {
+        // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
         const handler = (callback as any)._messageHandler;
         if (handler) {
           window.removeEventListener("extension-on-message", handler);

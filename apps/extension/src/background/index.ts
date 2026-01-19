@@ -176,7 +176,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     saveNoteToSupabase(request.note).then((result) => sendResponse(result));
     return true; // 비동기 응답(sendResponse)을 위해 true 반환 필수
   }
-  // 4-3. 재캡쳐 요청 (RE_CAPTURE)
+  // 4-3. 스토리지 직접 저장 요청 (SAVE_TO_STORAGE)
+  // 팝업 등에서 특정 탭의 데이터를 즉시 동기화할 때 사용합니다.
+  else if (request.action === "SAVE_TO_STORAGE") {
+    setNote(request.tabId, request.data).then(() =>
+      sendResponse({ success: true }),
+    );
+    return true;
+  }
+  // 4-4. 재캡쳐 요청 (RE_CAPTURE)
   else if (request.action === "RE_CAPTURE") {
     if (sender.tab) {
       startCaptureFlow(sender.tab);
