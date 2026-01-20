@@ -2,6 +2,7 @@
 
 import { Spinner, toast } from "@pickle/ui";
 import { useState } from "react";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 interface AuthOptions {
@@ -87,7 +88,7 @@ export const GoogleAuthButton = ({
 
       if (error) throw error;
     } catch (error) {
-      console.error("Auth failed:", error);
+      logger.error("Auth failed", { error });
       toast.error({
         title: "인증 실패",
         description: "Google 인증에 실패했습니다. 다시 시도해 주세요.",

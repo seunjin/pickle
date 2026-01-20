@@ -47,25 +47,17 @@ export const SessionProvider = ({
 
     async function fetchAppUser(currentUser: User) {
       if (!mounted) return;
-      console.log("[SessionContext] Fetching app user...");
+
       const data = await getUser(supabase, currentUser.id);
       if (mounted) {
-        console.log("[SessionContext] App user fetched.");
         setAppUser(data);
       }
     }
-
-    console.log("[SessionContext] Setting up auth listener...");
 
     // onAuthStateChange fires immediately with the current session (INITIAL_SESSION)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(
-        `[SessionContext] Auth Event: ${event}`,
-        session?.user?.email,
-      );
-
       if (!mounted) return;
 
       const currentUser = session?.user ?? null;
@@ -86,10 +78,6 @@ export const SessionProvider = ({
           fetchPromises.push(
             getUserWorkspaces(supabase, currentUser.id).then((workspaces) => {
               if (mounted && workspaces.length > 0) {
-                console.log(
-                  "[SessionContext] Workspaces fetched:",
-                  workspaces.length,
-                );
                 setWorkspace(workspaces[0]);
               }
             }),

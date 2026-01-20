@@ -1,5 +1,6 @@
 import type { Database, Workspace } from "@pickle/contracts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/shared/lib/logger";
 
 export async function getUserWorkspaces(
   supabase: SupabaseClient<Database>,
@@ -12,7 +13,7 @@ export async function getUserWorkspaces(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("Error fetching workspaces:", error);
+    logger.error("Error fetching workspaces", { userId, error });
     return [];
   }
 

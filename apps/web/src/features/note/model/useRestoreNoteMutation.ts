@@ -1,5 +1,6 @@
 import { useToast } from "@pickle/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { logger } from "@/shared/lib/logger";
 import { restoreNote } from "../api/restoreNote";
 
 export function useRestoreNoteMutation() {
@@ -15,7 +16,7 @@ export function useRestoreNoteMutation() {
       });
     },
     onError: (error) => {
-      console.error("Failed to restore note:", error);
+      logger.error("Failed to restore note", { error });
       toast.error({
         title: "복원에 실패했습니다.",
         description: error.message,

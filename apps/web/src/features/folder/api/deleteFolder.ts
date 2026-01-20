@@ -1,5 +1,6 @@
 import type { Database } from "@pickle/contracts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/shared/lib/logger";
 
 export async function deleteFolder({
   client,
@@ -18,7 +19,10 @@ export async function deleteFolder({
     .eq("folder_id", folderId);
 
   if (notesError) {
-    console.error("Failed to move folder notes to trash:", notesError);
+    logger.error("Failed to move folder notes to trash", {
+      folderId,
+      error: notesError,
+    });
   }
 
   // 2. 폴더 자체를 소프트 딜리트

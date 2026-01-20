@@ -6,6 +6,7 @@ import { cn } from "@pickle/ui/lib/utils";
 import { useEffect, useState } from "react";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
 import { useDebouncedCallback } from "@/shared/hooks/useDebouncedCallback";
+import { logger } from "@/shared/lib/logger";
 
 interface BookmarkButtonProps {
   noteId: NoteWithAsset["id"];
@@ -45,7 +46,7 @@ export function BookmarkButton({
           toast.error({
             title: "북마크 상태 업데이트에 실패했습니다.",
           });
-          console.error("Bookmark update failed:", err);
+          logger.error("Bookmark update failed", { noteId, error: err });
         },
       },
     );

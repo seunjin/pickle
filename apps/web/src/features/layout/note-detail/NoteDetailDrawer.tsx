@@ -36,6 +36,7 @@ import { updateTag as updateTagApi } from "@/features/tag/api/updateTag";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { formatDate } from "@/shared/lib/date";
 import { formatBytes } from "@/shared/lib/file";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 import { BookmarkButton } from "../ui/BookmarkButton";
 
@@ -229,7 +230,7 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
       setHasChanges(false);
       close(); // 저장 완료 후 닫기
     } catch (error) {
-      console.error("Failed to save note:", error);
+      logger.error("Failed to save note", { noteId: currentNote.id, error });
     }
   };
 
@@ -251,7 +252,6 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
   const noteThumbnailWidth = width ? `${width}px` : "auto";
   const noteThumbnailHeight = height ? `${height}px` : "auto";
 
-  console.log({ noteThumbnailWidth, noteThumbnailHeight });
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -581,7 +581,10 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
                               await deleteNote(note.id);
                               close();
                             } catch (error) {
-                              console.error("Failed to delete note:", error);
+                              logger.error("Failed to delete note", {
+                                noteId: note.id,
+                                error,
+                              });
                             }
                           }}
                         />

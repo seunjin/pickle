@@ -9,6 +9,7 @@ import { useCreateFolder } from "@/features/folder/model/folderMutations";
 import { folderQueries } from "@/features/folder/model/folderQueries";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import { tagQueries } from "@/features/tag/model/tagQueries";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
@@ -58,7 +59,7 @@ export const Sidebar = () => {
       { name },
       {
         onError: (error) => {
-          console.error("Failed to create folder:", error);
+          logger.error("Failed to create folder", { error });
           // TODO: Toast 에러 메시지 표시
         },
       },

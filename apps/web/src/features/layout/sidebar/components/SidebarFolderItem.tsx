@@ -17,6 +17,7 @@ import {
   useDeleteFolder,
   useUpdateFolder,
 } from "@/features/folder/model/folderMutations";
+import { logger } from "@/shared/lib/logger";
 import { useFolderNameInput } from "../hooks/useFolderNameInput";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 
@@ -84,7 +85,7 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
               router.push("/dashboard");
             }
           } catch (error) {
-            console.error("Failed to delete folder:", error);
+            logger.error("Failed to delete folder", { folderId, error });
             toast.error({
               title: "폴더 삭제에 실패했습니다.",
             });

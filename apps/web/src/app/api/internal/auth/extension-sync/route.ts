@@ -11,6 +11,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (error) {
-      console.error("[ExtensionSync] Session set error:", error);
+      logger.error("[ExtensionSync] Session set error", { error });
       return NextResponse.redirect(
         new URL(
           `/auth/error?message=${encodeURIComponent(error.message)}`,
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
     // 성공 시 메인 페이지로 리다이렉트
     return NextResponse.redirect(new URL(next, request.url));
   } catch (error) {
-    console.error("[ExtensionSync] Unexpected error:", error);
+    logger.error("[ExtensionSync] Unexpected error", { error });
     return NextResponse.redirect(
       new URL("/auth/error?message=unexpected_error", request.url),
     );

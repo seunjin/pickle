@@ -1,3 +1,4 @@
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 /**
@@ -20,10 +21,10 @@ export async function permanentlyDeleteNote(noteId: string) {
       .remove([note.assets.full_path]);
 
     if (storageError) {
-      console.error(
-        "Failed to delete storage file in permanent delete:",
-        storageError,
-      );
+      logger.error("Failed to delete storage file in permanent delete", {
+        noteId,
+        error: storageError,
+      });
     }
   }
 

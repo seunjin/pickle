@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/server";
 
 /**
@@ -27,8 +28,6 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      console.log("Auth callback success: Session created");
-
       // Check user status (pending vs active)
       const {
         data: { user: currentUser },
@@ -43,8 +42,8 @@ export async function GET(request: Request) {
 
         // 프로필이 없는 경우 메타데이터 또는 URL 파라미터를 확인하여 즉시 생성 시도
         if (!userProfile) {
-          console.warn(
-            "User profile missing, checking values for automatic signup...",
+          logger.warn(
+            "User profile missing, checking values for automatic signup",
           );
           const meta = currentUser.user_metadata;
           const isTermsAgreed =
@@ -55,7 +54,6 @@ export async function GET(request: Request) {
             isMarketingViaUrl || String(meta?.is_marketing_agreed) === "true";
 
           if (isTermsAgreed && isPrivacyAgreed) {
-            console.log("Agreement data found, completing signup...");
             const { error: completeError } = await supabase.rpc(
               "complete_signup",
               {
@@ -67,10 +65,9 @@ export async function GET(request: Request) {
               // 신규 가입 성공 시 대시보드로 리다이렉트
               return NextResponse.redirect(`${origin}/dashboard`);
             }
-            console.error(
-              "Failed to complete signup via callback:",
-              completeError,
-            );
+            logger.error("Failed to complete signup via callback", {
+              error: completeError,
+            });
             return NextResponse.redirect(
               `${origin}/signup/error?error=signup_processing_failed`,
             );
@@ -78,13 +75,13 @@ export async function GET(request: Request) {
 
           // [핵심] 가입 데이터가 없는데 프로필도 없다면, 세션을 유지하지 않고 로그아웃 처리
           // 그래야 차후 /signup에서 깨끗한 상태로 가입 프로세스를 시작할 수 있음.
-          console.warn("No profile and no agreement data. Signing out...");
+          logger.warn("No profile and no agreement data. Signing out");
           await supabase.auth.signOut();
           return NextResponse.redirect(`${origin}/signin?reason=no_profile`);
         }
 
         if (userProfile.status === "pending") {
-          console.warn("User is pending. Signing out...");
+          logger.warn("User is pending. Signing out");
           await supabase.auth.signOut();
           return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
         }
@@ -95,7 +92,7 @@ export async function GET(request: Request) {
       const destination = next === "/" ? "/dashboard" : next;
       return NextResponse.redirect(`${origin}${destination}`);
     } else {
-      console.error("Auth callback error:", error);
+      logger.error("Auth callback error", { error });
     }
   }
 

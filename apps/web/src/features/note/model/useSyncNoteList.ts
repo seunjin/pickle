@@ -17,7 +17,6 @@ export function useSyncNoteList() {
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === "PICKLE_NOTE_SAVED") {
-        console.log("Sync signal received: Invalidating note list...");
         // 노트 관련 모든 쿼리 무효화
         queryClient.invalidateQueries({
           queryKey: noteKeys.all,

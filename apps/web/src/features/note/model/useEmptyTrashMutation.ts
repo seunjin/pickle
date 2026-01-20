@@ -1,5 +1,6 @@
 import { useDialog, useToast } from "@pickle/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { logger } from "@/shared/lib/logger";
 import { permanentlyDeleteAllTrashNotes } from "../api/permanentlyDeleteAllTrashNotes";
 
 export function useEmptyTrashMutation() {
@@ -18,7 +19,7 @@ export function useEmptyTrashMutation() {
       });
     },
     onError: (error) => {
-      console.error("Failed to empty trash:", error);
+      logger.error("Failed to empty trash", { error });
       dialog.close();
       toast.error({
         title: "휴지통 비우기에 실패했습니다.",

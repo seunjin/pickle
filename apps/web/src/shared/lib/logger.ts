@@ -1,5 +1,6 @@
 // shared/lib/logger.ts
 // CONVENTIONS.md §6 Console 로깅 정책에 따른 통일된 로거 유틸리티
+// biome-ignore-all lint/suspicious/noConsole: 이 파일은 console wrapper이므로 예외
 
 type LogContext = Record<string, unknown>;
 

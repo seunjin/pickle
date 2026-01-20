@@ -13,6 +13,7 @@ import {
   type TermsType,
 } from "@/features/layout/terms/TermsArgreementModal";
 import { PageSpinner } from "@/features/note/ui/PageSpinner";
+import { logger } from "@/shared/lib/logger";
 import { PickleCausticGlass } from "@/shared/ui/PickleCausticGlass";
 
 export default function SignupPageContent() {
@@ -223,7 +224,7 @@ export default function SignupPageContent() {
                           router.push(
                             `/signup/error?error=${encodeURIComponent(String(error))}`,
                           );
-                          console.error(error);
+                          logger.error("Signup completion failed", { error });
                           setIsCompleting(false);
                         }
                       }

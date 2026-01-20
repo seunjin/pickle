@@ -4,6 +4,7 @@ import {
   noteWithAssetSchema,
 } from "@pickle/contracts/src/note";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 import { transformNoteTagList } from "../lib/transformNoteTagList";
 
@@ -118,7 +119,9 @@ export const getNotes = async (
   const parsed = noteWithAssetSchema.array().safeParse(transformedData);
 
   if (!parsed.success) {
-    console.error("Notes fetch validation failed:", parsed.error.format());
+    logger.error("Notes fetch validation failed", {
+      error: parsed.error.format(),
+    });
     return { notes: [], totalCount: 0 };
   }
 

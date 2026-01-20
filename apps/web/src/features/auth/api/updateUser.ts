@@ -1,5 +1,6 @@
 import type { AppUser, Database } from "@pickle/contracts";
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/shared/lib/logger";
 
 export const updateUser = async (
   supabase: SupabaseClient<Database>,
@@ -14,7 +15,7 @@ export const updateUser = async (
     .single();
 
   if (error) {
-    console.error("Error updating user:", error);
+    logger.error("Error updating user", { userId, error });
   }
 
   return { data: data as AppUser | null, error };

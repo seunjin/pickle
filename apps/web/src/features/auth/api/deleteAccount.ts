@@ -1,3 +1,4 @@
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 /**
@@ -30,10 +31,10 @@ export async function deleteAccount() {
 
     if (storageError) {
       // 스토리지 삭제 실패는 로깅만 하고 진행 (이미 계정 탈퇴를 결정한 상태이므로)
-      console.error(
-        "Failed to cleanup storage before account deletion:",
-        storageError,
-      );
+      logger.error("Failed to cleanup storage before account deletion", {
+        userId: user.id,
+        error: storageError,
+      });
     }
   }
 

@@ -4,6 +4,7 @@ import {
   type Note,
   noteSchema,
 } from "@pickle/contracts/src/note";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 export const createNote = async (newNote: CreateNoteInput): Promise<Note> => {
@@ -50,7 +51,7 @@ export const createNote = async (newNote: CreateNoteInput): Promise<Note> => {
   const parsed = noteSchema.safeParse(data);
 
   if (!parsed.success) {
-    console.error("Note creation validation failed:", parsed.error);
+    logger.error("Note creation validation failed", { error: parsed.error });
     throw new Error("Invalid note data returned from database");
   }
 

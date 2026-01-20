@@ -18,6 +18,7 @@ import { deleteAccount } from "@/features/auth/api/deleteAccount";
 import { updateUser } from "@/features/auth/api/updateUser";
 import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { useSignOut } from "@/features/auth/model/useSignOut";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 export function SettingContent() {
@@ -135,10 +136,9 @@ export function SettingContent() {
                               toast.error({
                                 title: "마케팅 수신 설정 저장에 실패했습니다.",
                               });
-                              console.error(
-                                "Failed to update agreement:",
-                                _error,
-                              );
+                              logger.error("Failed to update agreement", {
+                                error: _error,
+                              });
                             } finally {
                               setIsUpdatingAgreement(false);
                             }

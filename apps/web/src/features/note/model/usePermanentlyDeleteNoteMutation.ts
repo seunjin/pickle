@@ -1,5 +1,6 @@
 import { useToast } from "@pickle/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { logger } from "@/shared/lib/logger";
 import { permanentlyDeleteNote } from "../api/permanentlyDeleteNote";
 
 export function usePermanentlyDeleteNoteMutation() {
@@ -16,7 +17,7 @@ export function usePermanentlyDeleteNoteMutation() {
       });
     },
     onError: (error) => {
-      console.error("Failed to permanently delete note:", error);
+      logger.error("Failed to permanently delete note", { error });
       toast.error({
         title: "영구 삭제에 실패했습니다.",
         description: error.message,

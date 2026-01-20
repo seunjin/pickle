@@ -1,5 +1,6 @@
 import { type AppUser, appUserSchema, type Database } from "@pickle/contracts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/shared/lib/logger";
 
 export const getUser = async (
   supabase: SupabaseClient<Database>,
@@ -14,7 +15,7 @@ export const getUser = async (
   if (error) {
     if (error.code !== "PGRST116") {
       // PGRST116: JSON 객체 반환을 요청했으나 결과가 없거나 여러 개일 때 발생하는 에러
-      console.error("Error fetching user:", error);
+      logger.error("Error fetching user", { userId, error });
     }
     return null;
   }
@@ -24,7 +25,7 @@ export const getUser = async (
   const result = appUserSchema.safeParse(data);
 
   if (!result.success) {
-    console.warn("User data validation failed:", result.error);
+    logger.warn("User data validation failed", { userId, error: result.error });
     return null;
   }
 

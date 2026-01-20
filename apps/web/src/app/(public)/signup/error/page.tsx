@@ -4,6 +4,7 @@ import { Button, toast } from "@pickle/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 export default function SignupErrorPage() {
@@ -30,7 +31,7 @@ export default function SignupErrorPage() {
 
       if (authError) throw authError;
     } catch (err) {
-      console.error("Login failed:", err);
+      logger.error("Login failed", { error: err });
       toast.error({
         title: "로그인 실패",
         description: "Google 인증에 실패했습니다. 다시 시도해 주세요.",

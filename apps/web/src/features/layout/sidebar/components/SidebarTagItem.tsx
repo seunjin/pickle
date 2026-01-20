@@ -16,6 +16,7 @@ import {
 import { cn } from "@pickle/ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useDeleteTag, useUpdateTag } from "@/features/tag/model/tagMutations";
+import { logger } from "@/shared/lib/logger";
 import { useTagNameInput } from "../hooks/useTagNameInput";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 
@@ -100,7 +101,7 @@ export const SidebarTagItem = (props: SidebarTagItemProps) => {
             });
             dialog.close();
           } catch (error) {
-            console.error("Failed to delete tag:", error);
+            logger.error("Failed to delete tag", { tagId, error });
             toast.error({
               title: "태그 삭제에 실패했습니다.",
             });

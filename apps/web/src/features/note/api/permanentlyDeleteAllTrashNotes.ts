@@ -1,3 +1,4 @@
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 /**
@@ -25,10 +26,9 @@ export async function permanentlyDeleteAllTrashNotes() {
       .remove(fullPaths);
 
     if (storageError) {
-      console.error(
-        "Failed to delete storage files in empty trash:",
-        storageError,
-      );
+      logger.error("Failed to delete storage files in empty trash", {
+        error: storageError,
+      });
     }
   }
 

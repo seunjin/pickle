@@ -1,3 +1,4 @@
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 export async function completeSignup(params: { marketing_agreed: boolean }) {
@@ -8,7 +9,7 @@ export async function completeSignup(params: { marketing_agreed: boolean }) {
   });
 
   if (error) {
-    console.error("Failed to complete signup:", error);
+    logger.error("Failed to complete signup", { error });
     throw error;
   }
 
