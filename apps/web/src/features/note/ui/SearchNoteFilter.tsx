@@ -34,6 +34,7 @@ interface SearchNoteFilterProps {
   sort: "latest" | "oldest";
   onSortChange: (value: "latest" | "oldest") => void;
   totalCount?: number;
+  query?: string;
 }
 
 export function SearchNoteFilter({
@@ -46,6 +47,7 @@ export function SearchNoteFilter({
   sort,
   onSortChange,
   totalCount = 0,
+  query = "",
 }: SearchNoteFilterProps) {
   const client = createClient();
   const { workspace } = useSessionContext();
@@ -96,7 +98,12 @@ export function SearchNoteFilter({
 
   return (
     <div>
-      <div className="flex items-center justify-between pb-4">
+      <div>
+        <h1 className="pb-10 font-medium text-[20px] text-neutral-200">
+          "{query}" 검색 결과 ({totalCount})
+        </h1>
+      </div>
+      <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
           {/* 타입 필터 */}
           <Select
@@ -117,7 +124,7 @@ export function SearchNoteFilter({
 
         <div className="flex items-center gap-3">
           <span className="font-medium text-[14px] text-base-muted">
-            검색 결과 {totalCount}개
+            총 {totalCount}개
           </span>
 
           <UtilButton
@@ -132,7 +139,7 @@ export function SearchNoteFilter({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex flex-wrap gap-2.5 pb-6">
         {/* 태그 선택 드롭다운 */}
         <DropdownMenu open={tagFilterOpen} onOpenChange={setTagFilterOpen}>
           <DropdownMenuTrigger asChild>

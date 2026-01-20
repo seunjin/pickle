@@ -4,7 +4,7 @@ import { Icon } from "@pickle/icons";
 import { InputWithAddon } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { folderQueries } from "@/features/folder";
 import { tagQueries } from "@/features/tag/model/tagQueries";
@@ -28,6 +28,7 @@ const ROUTE_CONFIG: Record<string, { title: string }> = {
 
 export function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const client = createClient();
 
@@ -41,6 +42,12 @@ export function AppHeader() {
   // 데이터 조회 (캐시 활용)
   const { data: folders = [] } = useQuery(folderQueries.list(client));
   const { data: tags = [] } = useQuery(tagQueries.list());
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && search.trim() !== "") {
+      router.push(`/search?q=${encodeURIComponent(search.trim())}`);
+    }
+  };
 
   // 현재 컨텍스트에 따른 타이틀 및 아이콘 결정
   let displayTitle =
@@ -88,6 +95,7 @@ export function AppHeader() {
           ref={searchRef}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={handleSearch}
           containerClassName="group w-80 rounded-[8px]"
           placeholder="검색어를 입력해 주세요."
           startAddon={
