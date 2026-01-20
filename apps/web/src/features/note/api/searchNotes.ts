@@ -16,12 +16,13 @@ export interface SearchNotesParams {
     tagIds?: string[];
   };
   sort?: "latest" | "oldest";
+  signal?: AbortSignal;
 }
 
 export const searchNotes = async (
   params: SearchNotesParams = {},
 ): Promise<NoteWithAsset[]> => {
-  const { client, query: q, filter, sort = "latest" } = params;
+  const { client, query: q, filter, sort = "latest", signal } = params;
   const supabase = client ?? createClient();
 
   let currentWorkspaceId = params.workspaceId;
@@ -54,11 +55,18 @@ export const searchNotes = async (
     .eq("workspace_id", currentWorkspaceId)
     .is("deleted_at", null);
 
+  if (signal) {
+    query = query.abortSignal(signal);
+  }
+
   // 3. 필터링 적용
 
-  // 텍스트 검색 (Title OR URL)
+  // 텍스트 검색 (Full-Text Search)
   if (q && q.trim() !== "") {
-    query = query.or(`title.ilike.%${q}%,url.ilike.%${q}%`);
+    query = query.textSearch("fts_tokens", q, {
+      config: "simple",
+      type: "plain",
+    });
   }
 
   // 타입 필터

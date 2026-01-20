@@ -29,7 +29,7 @@ export const noteQueries = {
         params.filter,
         params.sort,
       ],
-      queryFn: () => searchNotes(params),
+      queryFn: ({ signal }) => searchNotes({ ...params, signal }),
       staleTime: 0,
     }),
   trash: (client?: SupabaseClient<Database>, workspaceId?: string) =>
