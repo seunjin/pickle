@@ -150,7 +150,7 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
               align="start"
               sideOffset={5}
               className="flex flex-wrap gap-1 border border-base-border-light bg-base-foreground-background p-[5px] shadow-standard"
-              style={{ width: `${containerRef.current?.offsetWidth}px` }}
+              style={{ maxWidth: `${containerRef.current?.offsetWidth}px` }}
             >
               {tags.slice(visibleCount).map((tag) => {
                 const style =
