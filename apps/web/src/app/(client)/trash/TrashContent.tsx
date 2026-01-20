@@ -3,10 +3,10 @@
 import { Spinner, UtilButton } from "@pickle/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSessionContext } from "@/features/auth";
-import { NoteList } from "@/features/note";
+import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { noteQueries } from "@/features/note/model/noteQueries";
-import EmptyTrashButton from "@/features/note/ui/EmptyTrashButton";
+import { EmptyTrashButton } from "@/features/note/ui/EmptyTrashButton";
+import { NoteList } from "@/features/note/ui/NoteList";
 
 export function TrashContent() {
   const { workspace } = useSessionContext();

@@ -1,12 +1,21 @@
 "use client";
+import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { type SelectOptionValue, Spinner } from "@pickle/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useSessionContext } from "@/features/auth";
+import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import { NoteList } from "@/features/note/ui/NoteList";
 import { SearchNoteFilter } from "@/features/note/ui/SearchNoteFilter";
+
+// 유효한 노트 타입 정의
+const NOTE_TYPES = ["text", "image", "capture", "bookmark"] as const;
+type NoteType = NoteWithAsset["type"];
+
+function isValidNoteType(value: string): value is NoteType {
+  return NOTE_TYPES.includes(value as NoteType);
+}
 
 export function SearchContent() {
   const router = useRouter();
@@ -56,7 +65,12 @@ export function SearchContent() {
         workspaceId: workspace?.id,
         query: query,
         filter: {
-          type: selectedType === "all" ? undefined : (selectedType as any),
+          type:
+            selectedType === "all"
+              ? undefined
+              : isValidNoteType(selectedType as string)
+                ? (selectedType as NoteType)
+                : undefined,
           folderId:
             selectedFolderId === "all"
               ? undefined

@@ -1,10 +1,9 @@
-import type { Database } from "@pickle/contracts";
 import {
   type NoteWithAsset,
   noteWithAssetSchema,
 } from "@pickle/contracts/src/note";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createBrowserClient } from "@/shared/lib/supabase/client";
+import { transformNoteTagList } from "../lib/transformNoteTagList";
 
 import type { GetNotesParams } from "./getNotes";
 
@@ -62,15 +61,8 @@ export async function getTrashNotes(
     throw new Error(error.message);
   }
 
-  const transformedData = (
-    data as unknown as Array<Record<string, unknown>> | null
-  )?.map((note) => ({
-    ...note,
-    tag_list:
-      (note.tag_list as Array<{ tag: unknown }> | undefined)
-        ?.map((item) => item.tag)
-        .filter(Boolean) || [],
-  }));
+  // tag_list 정규화
+  const transformedData = transformNoteTagList(data);
 
   const parsed = noteWithAssetSchema.array().safeParse(transformedData);
 

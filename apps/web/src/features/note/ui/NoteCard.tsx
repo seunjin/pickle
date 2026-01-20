@@ -3,7 +3,7 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { useDialog } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
-import NoteDetailDrawer from "@/features/layout/note-detail/NoteDetailDrawer";
+import { NoteDetailDrawer } from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
 import { OverflowTagGroup } from "./OverflowTagGroup";
 import { Thumbnail } from "./thumbnail/Thumbnail";

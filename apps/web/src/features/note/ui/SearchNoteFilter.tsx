@@ -18,9 +18,9 @@ import {
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
-import { useSessionContext } from "@/features/auth";
-import { folderQueries } from "@/features/folder";
-import { tagQueries } from "@/features/tag";
+import { useSessionContext } from "@/features/auth/model/SessionContext";
+import { folderQueries } from "@/features/folder/model/folderQueries";
+import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
 import { NOTE_FILTER_TYPES } from "./NoteListFilter";
 

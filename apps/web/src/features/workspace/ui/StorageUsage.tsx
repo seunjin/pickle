@@ -3,7 +3,7 @@
 import { STORAGE_WARNING_THRESHOLD } from "@pickle/contracts";
 import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useSessionContext } from "@/features/auth";
+import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { formatBytes } from "@/shared/lib/file";
 import { workspaceQueries } from "../model/workspaceQueries";
 

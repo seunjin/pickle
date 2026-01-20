@@ -3,7 +3,7 @@ import { Icon } from "@pickle/icons";
 import { Button, Confirm, useDialog } from "@pickle/ui";
 import { useEmptyTrashMutation } from "@/features/note/model/useEmptyTrashMutation";
 
-export default function EmptyTrashButton() {
+export function EmptyTrashButton() {
   const dialog = useDialog();
   const { mutate: emptyTrash, isPending } = useEmptyTrashMutation();
   const handleEmptyTrash = () => {

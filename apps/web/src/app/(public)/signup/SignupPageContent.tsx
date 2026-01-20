@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import { completeSignup } from "@/features/auth/api/completeSignup";
 import { useUser } from "@/features/auth/model/useUser";
 import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
-import TermsArgreementModal, {
+import {
+  TermsArgreementModal,
   type TermsType,
 } from "@/features/layout/terms/TermsArgreementModal";
 import { PageSpinner } from "@/features/note/ui/PageSpinner";

@@ -6,7 +6,7 @@ import { cn } from "@pickle/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
-import { folderQueries } from "@/features/folder";
+import { folderQueries } from "@/features/folder/model/folderQueries";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
 import { UserAvatarPanel } from "./UserAvatarPanel";

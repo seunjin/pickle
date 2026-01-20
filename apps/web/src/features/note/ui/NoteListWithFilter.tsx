@@ -4,7 +4,7 @@ import { type SelectOptionValue, Spinner } from "@pickle/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { NodataType } from "@/app/(client)/NoteNodata";
-import { useSessionContext } from "@/features/auth";
+import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { noteQueries } from "../model/noteQueries";
 import { useSyncNoteList } from "../model/useSyncNoteList";
 import { NoteList } from "./NoteList";

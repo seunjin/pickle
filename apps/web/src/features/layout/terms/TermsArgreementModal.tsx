@@ -5,7 +5,7 @@ interface TermsArgreementModalProps {
   type: TermsType;
   onAgree: () => void;
 }
-export default function TermsArgreementModal({
+export function TermsArgreementModal({
   type,
   onAgree,
 }: TermsArgreementModalProps) {

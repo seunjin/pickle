@@ -14,12 +14,10 @@ import {
 import { cn } from "@pickle/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { Activity, useState } from "react";
-import {
-  deleteAccount,
-  updateUser,
-  useSessionContext,
-  useSignOut,
-} from "@/features/auth";
+import { deleteAccount } from "@/features/auth/api/deleteAccount";
+import { updateUser } from "@/features/auth/api/updateUser";
+import { useSessionContext } from "@/features/auth/model/SessionContext";
+import { useSignOut } from "@/features/auth/model/useSignOut";
 import { createClient } from "@/shared/lib/supabase/client";
 
 export function SettingContent() {

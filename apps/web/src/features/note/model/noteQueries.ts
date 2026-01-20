@@ -1,5 +1,3 @@
-import type { Database } from "@pickle/contracts";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { type GetNotesParams, getNotes } from "../api/getNotes";
 import { getTrashNotes } from "../api/getTrashNotes";

@@ -23,7 +23,7 @@ import {
 } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { folderQueries } from "@/features/folder";
+import { folderQueries } from "@/features/folder/model/folderQueries";
 import { getNote } from "@/features/note/api/getNote";
 import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
@@ -44,10 +44,7 @@ interface NoteDetailDrawerProps {
   readOnly?: boolean;
 }
 
-export default function NoteDetailDrawer({
-  note,
-  readOnly,
-}: NoteDetailDrawerProps) {
+export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
   const { isOpen, zIndex, unmount, close } = useDialogController();
   const dialog = useDialog();
   const queryClient = useQueryClient();

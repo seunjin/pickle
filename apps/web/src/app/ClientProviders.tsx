@@ -9,8 +9,8 @@ import { DialogProvider, Toaster, TooltipProvider } from "@pickle/ui";
  */
 import type { User } from "@supabase/supabase-js";
 import type { ReactNode } from "react";
-import { SessionProvider } from "@/features/auth";
-import QueryProvider from "@/shared/providers/QueryProvider";
+import { SessionProvider } from "@/features/auth/model/SessionContext";
+import { QueryProvider } from "@/shared/providers/QueryProvider";
 
 interface ClientProvidersProps {
   children: ReactNode;
