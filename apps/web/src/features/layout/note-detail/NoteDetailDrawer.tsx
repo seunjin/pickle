@@ -37,6 +37,7 @@ import { tagQueries } from "@/features/tag/model/tagQueries";
 import { formatDate } from "@/shared/lib/date";
 import { formatBytes } from "@/shared/lib/file";
 import { createClient } from "@/shared/lib/supabase/client";
+import { BookmarkButton } from "../ui/BookmarkButton";
 
 interface NoteDetailDrawerProps {
   note: NoteWithAsset;
@@ -356,30 +357,10 @@ export default function NoteDetailDrawer({
 
                     {/* 북마크 버튼 - 즉시 저장 유지 */}
                     {!readOnly && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const isBookmarked = !!currentNote.bookmarked_at;
-                          const newBookmarkedAt = isBookmarked
-                            ? null
-                            : new Date().toISOString();
-                          // 북마크는 updateNoteAsync를 기다리지 않고 낙관적으로 처리될 수 있음
-                          updateNote({
-                            noteId: currentNote.id,
-                            payload: { bookmarked_at: newBookmarkedAt },
-                          });
-                        }}
-                      >
-                        <Icon
-                          name="bookmark_20"
-                          className={cn(
-                            "transition-colors",
-                            currentNote.bookmarked_at
-                              ? "text-base-primary"
-                              : "text-neutral-500",
-                          )}
-                        />
-                      </button>
+                      <BookmarkButton
+                        noteId={note.id}
+                        active={!!currentNote.bookmarked_at}
+                      />
                     )}
                   </div>
 

@@ -146,10 +146,18 @@ export const ExampleComponent = ({ title }: Props) => {
 - **Server Actions**: 데이터 변형(Mutation) 로직은 API 라우트보다 **Server Actions**를 우선하여 사용합니다.
 - **New Hooks**:
   - `use`: Promise나 Context를 읽을 때 사용 (비동기 처리 간소화).
-  - `useOptimistic`: 낙관적 UI 업데이트 구현 시 필수 사용.
+  - **`useOptimistic` + React Query 조합**: 
+    - 클릭 즉시 반응이 필요한 UI(좋아요, 북마크 등)에서는 `useOptimistic`으로 로컬 상태를 먼저 갱신하고,
+    - 백그라운드에서는 React Query의 `onMutate`를 통해 전역 캐시의 정합성을 맞춥니다.
+    - [더 자세한 가이드](file:///Users/jin/Desktop/dev/pickle-note/docs/react_19_guidelines.md)를 참고하세요.
   - `useFormStatus`: 폼 제출 상태 관리 시 사용.
 
-### 4.5 Import Order
+### 4.5 Type-Safe Optimistic Updates (Mutation)
+- **No `any` in Cache Update**: `onMutate` 내부에서 캐시를 직접 수정할 때 `any` 타입을 사용하는 대신, 공용 제네릭 유틸리티를 사용합니다.
+- **Generic Utility**: `updateCacheItem<T>`와 같은 유틸리티를 통해 업데이트 페이로드의 타입 안전성을 보장합니다.
+  - 위치: `src/shared/lib/react-query/optimistic.ts`
+
+### 4.6 Import Order
 1. 외부 패키지 (`react`, `react-dom`, 등)
 2. 내부 라이브러리/유틸리티 (`@/shared/*`, `@/features/*`)
 3. 상대 경로 컴포넌트 (`./Button`)

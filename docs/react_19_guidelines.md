@@ -36,11 +36,29 @@
 ### `useOptimistic`
 - **설명**: 비동기 작업이 완료되기 전에 UI를 미리 업데이트하여 반응성을 높입니다.
 - **사용 규칙**:
-  - 댓글 작성, 좋아요 버튼 등 즉각적인 피드백이 중요한 UX에서 사용합니다.
-- **예시**:
+  - 댓글 작성, 좋아요 버튼, 북마크 등 즉각적인 피드백이 중요한 UX에서 필수적으로 사용합니다.
+  - **React Query와의 연동**: `useOptimistic`은 로컬 컴포넌트의 즉각적인 반응을 담당하고, `useMutation`의 `onMutate`는 앱 전체 캐시의 정합성을 담당합니다.
+- **예시 (북마크 버튼)**:
   ```tsx
-  const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (state, newMsg) => [...state, newMsg]);
+  const [optimisticActive, setOptimisticActive] = useOptimistic(
+    active,
+    (_, nextStatus: boolean) => nextStatus,
+  );
+
+  const handleToggle = () => {
+    const nextStatus = !optimisticActive;
+    
+    // 1. UI 즉시 반영 (리액트가 관리)
+    startTransition(() => {
+      setOptimisticActive(nextStatus);
+    });
+    
+    // 2. 서버 및 전역 캐시 업데이트 (React Query가 관리)
+    updateNote({ noteId, payload: { bookmarked_at: nextStatus ? ... : null } });
+  };
   ```
+  > [!TIP]
+  > `useOptimistic`은 반드시 `startTransition` 또는 `Action` 내부에서 사용해야 리액트 엔진이 상태를 올바르게 추적합니다.
 
 ### `useEffectEvent`
 - **설명**: `useEffect` 내부에서 반응형 값(state, props)을 읽어야 하지만, 그 값의 변경이 Effect를 재실행시키지 않기를 원할 때 사용합니다.

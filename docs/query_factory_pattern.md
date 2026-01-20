@@ -146,20 +146,45 @@ export default async function DashboardPage() {
 
 ---
 
-## 6. Mutation과 캐시 무효화
+## 6. Mutation과 낙관적 업데이트
+
+뮤테이션 수행 시, 관련 쿼리를 단순히 무효화(`invalidateQueries`)하는 것을 넘어 사용자 경험을 위해 **낙관적 업데이트(Optimistic Update)**를 구현하는 것을 권장합니다.
+
+### 추천 패턴: 전용 Mutation 훅 + 공용 유틸리티
 
 ```tsx
-// features/note/api/createNote.ts
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { noteKeys } from "../model/noteQueries";
+// features/note/model/useUpdateNoteMutation.ts
+import { updateCacheItem } from "@/shared/lib/react-query/optimistic";
 
-export function useCreateNote() {
+export function useUpdateNoteMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (note: NoteInsert) => createNote(note),
-    onSuccess: () => {
-      // 노트 목록 캐시 무효화 → 자동 리페치
+    mutationFn: ({ noteId, payload }) => updateNote(noteId, payload),
+    onMutate: async ({ noteId, payload }) => {
+      // 1. 진행 중인 쿼리 취소
+      await queryClient.cancelQueries({ queryKey: noteKeys.all });
+      
+      // 2. 이전 데이터 스냅샷
+      const previousData = queryClient.getQueriesData({ queryKey: noteKeys.all });
+
+      // 3. ✅ 캐시 아이템 업데이트 유틸리티 사용 (타입 안전)
+      queryClient.setQueriesData({ queryKey: noteKeys.all }, (old) => 
+        updateCacheItem<NoteWithAsset>(old, noteId, payload)
+      );
+
+      return { previousData };
+    },
+    onError: (_err, _vars, context) => {
+      // 4. 에러 시 롤백
+      if (context?.previousData) {
+        for (const [key, data] of context.previousData) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+    },
+    onSettled: () => {
+      // 5. 서버와 동기화
       queryClient.invalidateQueries({ queryKey: noteKeys.all });
     },
   });

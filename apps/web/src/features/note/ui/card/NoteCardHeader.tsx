@@ -8,9 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@pickle/ui";
 import { useState } from "react";
+import { BookmarkButton } from "@/features/layout/ui/BookmarkButton";
 import { useDeleteNoteMutation } from "../../model/useDeleteNoteMutation";
 import { useRestoreNoteMutation } from "../../model/useRestoreNoteMutation";
-import { useUpdateNoteMutation } from "../../model/useUpdateNoteMutation";
 import { TypeLabel } from "../TypeLabel";
 
 interface NoteCardHeaderProps {
@@ -21,20 +21,10 @@ interface NoteCardHeaderProps {
 
 export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const { mutate: updateNote } = useUpdateNoteMutation();
   const { mutate: deleteNote } = useDeleteNoteMutation();
   const { mutate: restoreNote } = useRestoreNoteMutation();
 
   const isBookmarked = !!note.bookmarked_at;
-  const handleBookmarkToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newBookmarkedAt = isBookmarked ? null : new Date().toISOString();
-
-    updateNote({
-      noteId: note.id,
-      payload: { bookmarked_at: newBookmarkedAt },
-    });
-  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -101,14 +91,10 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
           </DropdownMenu>
           {/* 북마크 버튼 */}
           {!readOnly && (
-            <ActionButton
-              icon={"bookmark_16"}
-              variant="action"
-              disabled={readOnly}
-              className={
-                isBookmarked ? "text-base-primary hover:text-base-primary" : ""
-              }
-              onClick={handleBookmarkToggle}
+            <BookmarkButton
+              noteId={note.id}
+              active={isBookmarked}
+              readonly={readOnly}
             />
           )}
         </div>
