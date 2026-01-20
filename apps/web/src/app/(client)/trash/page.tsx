@@ -8,8 +8,10 @@ export default async function TrashPage() {
   const supabase = await createClient();
   const queryClient = getQueryClient();
 
-  // 서버에서 데이터 프리페치 (Non-blocking)
-  queryClient.prefetchQuery(noteQueries.trash(supabase));
+  // 서버에서 데이터 프리페치
+  await queryClient.prefetchInfiniteQuery(
+    noteQueries.trashInfinite({ client: supabase }),
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
