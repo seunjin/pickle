@@ -14,9 +14,12 @@ export default async function BookmarksPage() {
   const supabase = await createClient();
   const queryClient = getQueryClient();
 
-  // Server에서 데이터 Prefetch 시작 (await 없이 실행하여 Blocking 방지)
-  queryClient.prefetchQuery(
-    noteQueries.list({ client: supabase, filter: { onlyBookmarked: true } }),
+  // Server에서 데이터 Prefetch 시작
+  await queryClient.prefetchInfiniteQuery(
+    noteQueries.listInfinite({
+      client: supabase,
+      filter: { onlyBookmarked: true },
+    }),
   );
 
   return (

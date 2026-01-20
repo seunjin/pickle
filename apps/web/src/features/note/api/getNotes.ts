@@ -8,22 +8,25 @@ import { createClient } from "@/shared/lib/supabase/client";
 
 export interface GetNotesParams {
   client?: SupabaseClient<Database>;
-  workspaceId?: string; // ✅ 중복 조회 방지용
+  workspaceId?: string;
   filter?: {
     onlyBookmarked?: boolean;
-    folderId?: string | null; // ✅ 폴더 필터
-    tagId?: string; // ✅ 태그 필터 추가
+    folderId?: string | null;
+    tagId?: string;
     type?: NoteWithAsset["type"];
   };
+  page?: number;
+  pageSize?: number;
+  sort?: "latest" | "oldest";
+  signal?: AbortSignal;
 }
 
 export const getNotes = async (
   params: GetNotesParams = {},
-): Promise<NoteWithAsset[]> => {
-  const { client, filter } = params;
+): Promise<{ notes: NoteWithAsset[]; totalCount: number }> => {
+  const { client, filter, page, pageSize, sort = "latest", signal } = params;
   const supabase = client ?? createClient();
 
-  // ✅ workspaceId가 주입된 경우 중복 조회 방지
   let currentWorkspaceId = params.workspaceId;
 
   if (!currentWorkspaceId) {
@@ -33,12 +36,11 @@ export const getNotes = async (
       .limit(1)
       .single();
 
-    if (!workspace) return [];
+    if (!workspace) return { notes: [], totalCount: 0 };
     currentWorkspaceId = workspace.workspace_id;
   }
 
-  // 1. SELECT 절 구성 (태그 필터링 여부에 따라 동적 변경)
-  // !inner 조인을 사용하면 해당 관계가 존재하는 행만 남습니다.
+  // 1. SELECT 절 구성
   const selectQuery = `
     *,
     assets(*),
@@ -51,51 +53,65 @@ export const getNotes = async (
   `;
 
   // 2. 쿼리 빌더 생성
-  let query = supabase
+  let queryBuilder = supabase
     .from("notes")
-    .select(selectQuery)
+    .select(selectQuery, { count: "exact" })
     .eq("workspace_id", currentWorkspaceId)
-    .is("deleted_at", null); // ✅ 소프트 딜리트된 항목 제외
+    .is("deleted_at", null);
 
-  // 3. 필터링 및 정렬 적용
+  if (signal) {
+    queryBuilder = queryBuilder.abortSignal(signal);
+  }
+
+  // 3. 필터링 로직
   if (filter?.tagId) {
-    query = query.eq("note_tags.tag_id", filter.tagId);
+    queryBuilder = queryBuilder.eq("note_tags.tag_id", filter.tagId);
   }
 
   if (filter?.onlyBookmarked) {
-    query = query.not("bookmarked_at", "is", null);
+    queryBuilder = queryBuilder.not("bookmarked_at", "is", null);
   }
 
   if (filter?.type) {
     if (filter.type === "image") {
-      query = query.in("type", ["image", "capture"]);
+      queryBuilder = queryBuilder.in("type", ["image", "capture"]);
     } else {
-      query = query.eq("type", filter.type);
+      queryBuilder = queryBuilder.eq("type", filter.type);
     }
   }
 
-  // ✅ 폴더 필터링
   if (filter?.folderId !== undefined) {
     if (filter.folderId === null) {
-      query = query.is("folder_id", null);
+      queryBuilder = queryBuilder.is("folder_id", null);
     } else {
-      query = query.eq("folder_id", filter.folderId);
+      queryBuilder = queryBuilder.eq("folder_id", filter.folderId);
     }
   }
 
+  // 4. 정렬 및 페이지네이션
   if (filter?.onlyBookmarked) {
-    query = query.order("bookmarked_at", { ascending: false });
+    queryBuilder = queryBuilder.order("bookmarked_at", {
+      ascending: sort === "oldest",
+    });
   } else {
-    query = query.order("created_at", { ascending: false });
+    queryBuilder = queryBuilder.order("created_at", {
+      ascending: sort === "oldest",
+    });
   }
 
-  const { data: notesData, error: notesError } = await query;
+  if (page !== undefined && pageSize !== undefined) {
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+    queryBuilder = queryBuilder.range(from, to);
+  }
+
+  const { data: notesData, error: notesError, count } = await queryBuilder;
 
   if (notesError) {
     throw new Error(notesError.message);
   }
 
-  // 중첩된 tag 구조를 평탄화 (tag_list: [{ tag: { ... } }] -> tag_list: [{ ... }])
+  // 5. 후처리
   const transformedData = (
     notesData as unknown as Array<Record<string, unknown>> | null
   )?.map((note) => ({
@@ -106,14 +122,15 @@ export const getNotes = async (
         .filter(Boolean) || [],
   }));
 
-  // Zod 스키마를 확장하여 Note + Assets + Tags 구조를 정의합니다.
   const parsed = noteWithAssetSchema.array().safeParse(transformedData);
 
   if (!parsed.success) {
     console.error("Notes fetch validation failed:", parsed.error.format());
-    console.error("Failed raw data sample:", transformedData?.[0]);
-    return [];
+    return { notes: [], totalCount: 0 };
   }
 
-  return parsed.data;
+  return {
+    notes: parsed.data,
+    totalCount: count || 0,
+  };
 };

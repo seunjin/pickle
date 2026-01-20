@@ -6,16 +6,17 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createBrowserClient } from "@/shared/lib/supabase/client";
 
+import type { GetNotesParams } from "./getNotes";
+
 /**
  * 휴지통에 있는 (deleted_at 이 존재하는) 노트 목록을 가져옵니다.
  */
 export async function getTrashNotes(
-  client?: SupabaseClient<Database>,
-  workspaceId?: string,
-): Promise<NoteWithAsset[]> {
+  params: GetNotesParams = {},
+): Promise<{ notes: NoteWithAsset[]; totalCount: number }> {
+  const { client, workspaceId, page, pageSize, signal } = params;
   const supabase = client ?? createBrowserClient();
 
-  // ✅ workspaceId가 주입된 경우 중복 조회 방지
   let currentWorkspaceId = workspaceId;
 
   if (!currentWorkspaceId) {
@@ -25,7 +26,7 @@ export async function getTrashNotes(
       .limit(1)
       .single();
 
-    if (!workspace) return [];
+    if (!workspace) return { notes: [], totalCount: 0 };
     currentWorkspaceId = workspace.workspace_id;
   }
 
@@ -37,18 +38,30 @@ export async function getTrashNotes(
     )
   `;
 
-  const { data, error } = await supabase
+  let queryBuilder = supabase
     .from("notes")
-    .select(selectQuery)
+    .select(selectQuery, { count: "exact" })
     .eq("workspace_id", currentWorkspaceId)
-    .not("deleted_at", "is", null) // ✅ 휴지통 필터
-    .order("deleted_at", { ascending: false });
+    .not("deleted_at", "is", null);
+
+  if (signal) {
+    queryBuilder = queryBuilder.abortSignal(signal);
+  }
+
+  if (page !== undefined && pageSize !== undefined) {
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+    queryBuilder = queryBuilder.range(from, to);
+  }
+
+  const { data, error, count } = await queryBuilder.order("deleted_at", {
+    ascending: false,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  // 평탄화 로직 (getNotes와 동일)
   const transformedData = (
     data as unknown as Array<Record<string, unknown>> | null
   )?.map((note) => ({
@@ -60,5 +73,13 @@ export async function getTrashNotes(
   }));
 
   const parsed = noteWithAssetSchema.array().safeParse(transformedData);
-  return parsed.success ? parsed.data : [];
+
+  if (!parsed.success) {
+    return { notes: [], totalCount: 0 };
+  }
+
+  return {
+    notes: parsed.data,
+    totalCount: count || 0,
+  };
 }

@@ -50,10 +50,42 @@ export const noteQueries = {
       },
       initialPageParam: 0,
     }),
-  trash: (client?: SupabaseClient<Database>, workspaceId?: string) =>
+  listInfinite: (params: GetNotesParams = {}, pageSize = 20) =>
+    infiniteQueryOptions({
+      queryKey: [
+        "notes",
+        "list",
+        "infinite",
+        params.workspaceId,
+        params.filter,
+        params.sort,
+      ],
+      queryFn: ({ pageParam = 0, signal }) =>
+        getNotes({ ...params, page: pageParam as number, pageSize, signal }),
+      getNextPageParam: (lastPage, allPages) => {
+        return lastPage.notes.length === pageSize ? allPages.length : undefined;
+      },
+      initialPageParam: 0,
+    }),
+  trashInfinite: (params: GetNotesParams = {}, pageSize = 20) =>
+    infiniteQueryOptions({
+      queryKey: ["notes", "trash", "infinite", params.workspaceId, params.sort],
+      queryFn: ({ pageParam = 0, signal }) =>
+        getTrashNotes({
+          ...params,
+          page: pageParam as number,
+          pageSize,
+          signal,
+        }),
+      getNextPageParam: (lastPage, allPages) => {
+        return lastPage.notes.length === pageSize ? allPages.length : undefined;
+      },
+      initialPageParam: 0,
+    }),
+  trash: (params: GetNotesParams = {}) =>
     queryOptions({
-      queryKey: ["notes", "trash", workspaceId],
-      queryFn: () => getTrashNotes(client, workspaceId),
+      queryKey: ["notes", "trash", params.workspaceId],
+      queryFn: () => getTrashNotes(params),
       staleTime: 0,
     }),
 };

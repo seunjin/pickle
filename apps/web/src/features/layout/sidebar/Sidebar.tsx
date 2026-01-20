@@ -40,13 +40,15 @@ export const Sidebar = () => {
   });
 
   // Inbox 노트 목록 조회 (뱃지용, workspace 로드 후에만 실행)
-  const { data: inboxNotes = [] } = useQuery({
+  const { data: inboxData } = useQuery({
     ...noteQueries.list({
       workspaceId,
       filter: { folderId: null },
     }),
     enabled: !!workspaceId,
   });
+
+  const inboxTotalCount = inboxData?.totalCount || 0;
 
   const handleCreateFolder = (name: string) => {
     setIsCreatingFolder(false);
@@ -81,7 +83,7 @@ export const Sidebar = () => {
                 href="/dashboard"
                 icon="inbox_16"
                 label="Inbox"
-                badge={inboxNotes.length}
+                badge={inboxTotalCount}
                 active={
                   pathname === "/dashboard" &&
                   !searchParams.get("folderId") &&
