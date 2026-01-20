@@ -488,7 +488,7 @@ export default function NoteDetailDrawer({
                               style.tagColor,
                             )}
                           >
-                            <span className="truncate text-[13px]">
+                            <span className="truncate text-[12px]">
                               #{tag.name}
                             </span>
                             <button

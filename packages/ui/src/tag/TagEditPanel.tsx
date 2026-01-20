@@ -5,7 +5,6 @@ import { TAG_COLORS, TAG_VARIANTS, type TagColor } from "../constants/tag";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -122,8 +121,6 @@ export function TagEditPanel({
               );
             })}
           </div>
-
-          <DropdownMenuItem asChild />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

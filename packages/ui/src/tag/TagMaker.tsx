@@ -179,9 +179,7 @@ const TagMaker = ({
               variant={"ghost"}
               size={"mini"}
               placeholder={
-                localSelectedTagIds.length === 0
-                  ? "Search or create tag..."
-                  : ""
+                localSelectedTagIds.length === 0 ? "태그 추가 및 검색" : ""
               }
               value={search}
               maxLength={MAX_TAG_NAME_LENGTH}
@@ -240,7 +238,7 @@ const TagMaker = ({
                     <li
                       key={tag.id}
                       className={cn(
-                        "group flex h-[30px] items-center gap-2 rounded-[4px] px-1 transition-colors hover:bg-neutral-700",
+                        "group flex h-[30px] items-center gap-0 rounded-[4px] px-1 transition-colors hover:bg-neutral-700",
                         (isActive || isSelected) && "bg-neutral-700",
                       )}
                     >
@@ -276,66 +274,63 @@ const TagMaker = ({
                       >
                         <div
                           className={cn(
-                            "flex h-6 min-w-0 cursor-pointer items-center gap-0.5 rounded-[4px] border px-1.5 text-[13px] transition-colors duration-200",
+                            "flex h-6 min-w-0 cursor-pointer items-center gap-0.5 rounded-[4px] border px-1.5 text-[12px] transition-colors duration-200",
                             displayStyle.tagColor,
                           )}
                         >
                           <span className="truncate">#{tag.name}</span>
                         </div>
-                        <div className="ml-auto size-4">
-                          {isSelected && (
-                            <Icon
-                              name="check_16"
-                              className="text-base-primary"
-                            />
-                          )}
+                        <div className="ml-auto">
+                          <TagEditPanel
+                            trigger={
+                              <ActionButton
+                                icon="ellipsis_16"
+                                variant="subAction"
+                                forceFocus={isActive}
+                                className={cn(
+                                  "opacity-0 group-hover:opacity-100",
+                                  isActive && "opacity-100",
+                                )}
+                              />
+                            }
+                            name={isEditing ? editingTag.name : tag.name}
+                            color={isEditing ? editingTag.style : tag.style}
+                            onNameChange={(newName) => {
+                              if (newName.length > MAX_TAG_NAME_LENGTH) return;
+                              setEditingTag((prev) =>
+                                prev ? { ...prev, name: newName } : null,
+                              );
+                            }}
+                            onColorChange={(newColor) =>
+                              setEditingTag((prev) =>
+                                prev ? { ...prev, style: newColor } : null,
+                              )
+                            }
+                            onDeleteTag={() => onDeleteTag(tag.id)}
+                            onSave={handleSave}
+                            onOpenChange={(isOpen) => {
+                              setActivePaletteId(isOpen ? tag.id : null);
+                              if (isOpen) {
+                                // 열릴 때 현재 상태 복사 및 저장 기록 초기화
+                                lastSavedTagRef.current = null;
+                                setEditingTag({
+                                  id: tag.id,
+                                  name: tag.name,
+                                  style: tag.style,
+                                });
+                              } else {
+                                // 닫힐 때 변경사항이 있다면 저장 로직 수행
+                                handleSave();
+                              }
+                            }}
+                          />
                         </div>
                       </div>
 
-                      <div className="ml-auto flex shrink-0 items-center gap-2">
-                        <TagEditPanel
-                          trigger={
-                            <ActionButton
-                              icon="ellipsis_16"
-                              variant="subAction"
-                              forceFocus={isActive}
-                              className={cn(
-                                "opacity-0 group-hover:opacity-100",
-                                isActive && "opacity-100",
-                              )}
-                            />
-                          }
-                          name={isEditing ? editingTag.name : tag.name}
-                          color={isEditing ? editingTag.style : tag.style}
-                          onNameChange={(newName) => {
-                            if (newName.length > MAX_TAG_NAME_LENGTH) return;
-                            setEditingTag((prev) =>
-                              prev ? { ...prev, name: newName } : null,
-                            );
-                          }}
-                          onColorChange={(newColor) =>
-                            setEditingTag((prev) =>
-                              prev ? { ...prev, style: newColor } : null,
-                            )
-                          }
-                          onDeleteTag={() => onDeleteTag(tag.id)}
-                          onSave={handleSave}
-                          onOpenChange={(isOpen) => {
-                            setActivePaletteId(isOpen ? tag.id : null);
-                            if (isOpen) {
-                              // 열릴 때 현재 상태 복사 및 저장 기록 초기화
-                              lastSavedTagRef.current = null;
-                              setEditingTag({
-                                id: tag.id,
-                                name: tag.name,
-                                style: tag.style,
-                              });
-                            } else {
-                              // 닫힐 때 변경사항이 있다면 저장 로직 수행
-                              handleSave();
-                            }
-                          }}
-                        />
+                      <div className="ml-auto flex size-6.5 shrink-0 items-center justify-center gap-2">
+                        {isSelected && (
+                          <Icon name="check_16" className="text-base-primary" />
+                        )}
                       </div>
                     </li>
                   );

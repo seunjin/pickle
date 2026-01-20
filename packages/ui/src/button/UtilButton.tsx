@@ -21,8 +21,8 @@ const utilButtonVariants = cva(
         ghost: "text-base-muted-foreground hover:text-base-foreground",
       },
       size: {
-        h24: "h-[24px] rounded-[6px] px-1.5 text-[12px]",
-        h28: "h-[28px] rounded-[6px] px-1.5 text-[13px]",
+        h24: "h-[24px] rounded-[6px] px-[6px_8px] text-[12px]",
+        h28: "h-[28px] rounded-[6px] px-[6px_8px] text-[13px]",
       },
     },
     defaultVariants: {
