@@ -1,3 +1,5 @@
+import { SearchContent } from "./SearchContent";
+
 export default function SearchPage() {
-  return <div>SearchPage</div>;
+  return <SearchContent />;
 }

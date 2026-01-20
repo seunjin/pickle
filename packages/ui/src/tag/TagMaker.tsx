@@ -140,7 +140,7 @@ const TagMaker = ({
         align="end"
         side="bottom"
         className={cn(
-          "z-[10000] h-auto max-h-[400px] w-[360px] p-0",
+          "z-10000 h-auto max-h-[400px] w-[360px] p-0",
           "border border-base-border-light bg-neutral-850 shadow-standard",
         )}
       >
