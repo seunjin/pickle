@@ -10,18 +10,12 @@ import {
   Input,
   ScrollArea,
   Select,
-  type SelectOption,
   type SelectOptionValue,
   TAG_VARIANTS,
   UtilButton,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
-import { useSessionContext } from "@/features/auth/model/SessionContext";
-import { folderQueries } from "@/features/folder/model/folderQueries";
-import { tagQueries } from "@/features/tag/model/tagQueries";
-import { createClient } from "@/shared/lib/supabase/client";
+import { useSearchNoteFilter } from "../model/useSearchNoteFilter";
 import { NOTE_FILTER_TYPES } from "./NoteListFilter";
 
 interface SearchNoteFilterProps {
@@ -37,6 +31,9 @@ interface SearchNoteFilterProps {
   query?: string;
 }
 
+/**
+ * 검색 결과 페이지의 필터링 및 정렬을 담당하는 컴포넌트
+ */
 export function SearchNoteFilter({
   selectedType,
   onTypeChange,
@@ -49,53 +46,22 @@ export function SearchNoteFilter({
   totalCount = 0,
   query = "",
 }: SearchNoteFilterProps) {
-  const client = createClient();
-  const { workspace } = useSessionContext();
-  const workspaceId = workspace?.id;
-
-  const [tagFilterOpen, setTagFilterOpen] = useState<boolean>(false);
-  const [search, setSearch] = useState<string>("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // 폴더 목록 조회
-  const { data: folders = [] } = useQuery(folderQueries.list(client));
-
-  // 태그 목록 조회
-  const { data: tags = [] } = useQuery({
-    ...tagQueries.list({ client, workspaceId }),
-    enabled: !!workspaceId,
+  // 3-1. Hooks
+  const {
+    tags, // ✅ 전체 태그 목록 추가 추출
+    folderOptions,
+    filteredTags,
+    tagFilterOpen,
+    setTagFilterOpen,
+    search,
+    setSearch,
+    handleTagToggle,
+  } = useSearchNoteFilter({
+    selectedTagIds,
+    onTagsChange,
   });
 
-  // 폴더 옵션 구성
-  const folderOptions = useMemo<SelectOption[]>(() => {
-    const defaultOptions: SelectOption[] = [
-      { value: "all", label: "All Folders" },
-      { value: "inbox", label: "Inbox" },
-    ];
-
-    const folderItems = folders.map((f) => ({
-      value: f.id,
-      label: f.name,
-    }));
-
-    return [...defaultOptions, ...folderItems];
-  }, [folders]);
-
-  // 검색 필터링된 태그 목록
-  const filteredTags = useMemo<Tag[]>(() => {
-    return tags.filter((tag) =>
-      tag.name.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [tags, search]);
-
-  const handleTagToggle = (tagId: string) => {
-    if (selectedTagIds.includes(tagId)) {
-      onTagsChange(selectedTagIds.filter((id) => id !== tagId));
-    } else {
-      onTagsChange([...selectedTagIds, tagId]);
-    }
-  };
-
+  // 3-4. JSX Render
   return (
     <div>
       <div>
@@ -149,7 +115,8 @@ export function SearchNoteFilter({
                 "group/tag-filter",
                 "inline-flex h-7 items-center gap-0.5 rounded-md border border-base-border-light bg-base-foreground-background px-[6px_8px] text-[13px] text-muted-foreground transition-colors",
                 "hover:border-neutral-650 hover:bg-neutral-800 hover:text-base-foreground",
-                tagFilterOpen &&
+                // ✅ 수정: 태그가 선택되어 있거나 드롭다운이 열려있을 때 스타일 유지
+                (tagFilterOpen || selectedTagIds.length > 0) &&
                   "border-neutral-500 bg-neutral-700 text-base-foreground",
               )}
             >
@@ -173,10 +140,9 @@ export function SearchNoteFilter({
           >
             <div className="flex min-h-9 flex-wrap items-center gap-1 border-base-border-light border-b bg-neutral-800 px-2 py-1.5 transition-all">
               <Input
-                ref={inputRef}
                 variant={"ghost"}
                 size={"mini"}
-                placeholder="태그 추가 및 검색"
+                placeholder="태그 검색"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-5 min-w-[60px] flex-1 border-none bg-transparent p-0 text-[13px] focus-visible:ring-0"
@@ -242,6 +208,7 @@ export function SearchNoteFilter({
 
         {/* 선택된 태그 나열 */}
         {selectedTagIds.map((id) => {
+          // ✅ 수정: 검색 필터와 관계없이 전체 태그 목록에서 검색하여 표시
           const tag = (tags as Tag[]).find((t) => t.id === id);
           if (!tag) return null;
           const style = TAG_VARIANTS[tag.style];

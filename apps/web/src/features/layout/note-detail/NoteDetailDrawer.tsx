@@ -249,8 +249,8 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
       ? note.meta?.image_height
       : null;
 
-  const noteThumbnailWidth = width ? `${width}px` : "auto";
-  const noteThumbnailHeight = height ? `${height}px` : "auto";
+  const _noteThumbnailWidth = width ? `${width}px` : "auto";
+  const _noteThumbnailHeight = height ? `${height}px` : "auto";
 
   return (
     <AnimatePresence onExitComplete={unmount}>

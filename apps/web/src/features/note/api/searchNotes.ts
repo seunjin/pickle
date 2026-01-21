@@ -70,7 +70,36 @@ export const searchNotes = async (
     queryBuilder = queryBuilder.abortSignal(signal);
   }
 
-  // 3. 필터링 적용
+  // 3. 필터링 적용 (태그 필터 선적용)
+  if (filter?.tagIds && filter.tagIds.length > 0) {
+    // 여러 태그를 모두 가진 노드를 찾기 위한 로직 (AND 필터)
+    const { data: noteIdsData, error: tagError } = await supabase
+      .from("note_tags")
+      .select("note_id")
+      .in("tag_id", filter.tagIds);
+
+    if (tagError) {
+      throw new Error(`Tag filtering failed: ${tagError.message}`);
+    }
+
+    // 각 노드별로 매칭된 태그 개수 카운트
+    const tagCountMap = new Map<string, number>();
+    for (const item of noteIdsData) {
+      tagCountMap.set(item.note_id, (tagCountMap.get(item.note_id) || 0) + 1);
+    }
+
+    // 모든 선택된 태그를 가진 노드 ID만 추출
+    const matchedNoteIds = Array.from(tagCountMap.entries())
+      .filter(([_, count]) => count === filter.tagIds?.length)
+      .map(([id]) => id);
+
+    if (matchedNoteIds.length === 0) {
+      return { notes: [], totalCount: 0 };
+    }
+
+    queryBuilder = queryBuilder.in("id", matchedNoteIds);
+  }
+
   if (q && q.trim() !== "") {
     queryBuilder = queryBuilder.textSearch("fts_tokens", q, {
       config: "simple",
@@ -114,20 +143,9 @@ export const searchNotes = async (
   }
 
   // 5. 후처리: tag_list 정규화
-  const transformedData = transformNoteTagList(notesData);
+  const transformedData = transformNoteTagList(notesData) || [];
 
-  // 클라이언트 사이드 태그 멀티 필터링
-  let filteredData = transformedData || [];
-  if (filter?.tagIds && filter.tagIds.length > 0) {
-    filteredData = filteredData.filter((note) => {
-      const noteTagIds = (note.tag_list as Array<{ id: string }>).map(
-        (t) => t.id,
-      );
-      return filter.tagIds?.every((id) => noteTagIds.includes(id));
-    });
-  }
-
-  const parsed = noteWithAssetSchema.array().safeParse(filteredData);
+  const parsed = noteWithAssetSchema.array().safeParse(transformedData);
 
   if (!parsed.success) {
     logger.error("Search notes fetch validation failed", {

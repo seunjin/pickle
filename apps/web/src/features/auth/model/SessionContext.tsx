@@ -57,7 +57,7 @@ export const SessionProvider = ({
     // onAuthStateChange fires immediately with the current session (INITIAL_SESSION)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
 
       const currentUser = session?.user ?? null;

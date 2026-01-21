@@ -53,7 +53,7 @@ export function SearchContent() {
         }
       }
 
-      router.push(`/search?${params.toString()}`);
+      router.replace(`/search?${params.toString()}`, { scroll: false });
     },
     [searchParams, router],
   );
