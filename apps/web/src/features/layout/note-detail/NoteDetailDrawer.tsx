@@ -252,6 +252,38 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
   const _noteThumbnailWidth = width ? `${width}px` : "auto";
   const _noteThumbnailHeight = height ? `${height}px` : "auto";
 
+  const handleDownload = async () => {
+    if (!hasAssetType || !note.assets) return;
+
+    try {
+      const { data } = client.storage
+        .from("bitmaps")
+        .getPublicUrl(note.assets.full_path);
+
+      if (!data.publicUrl) throw new Error("Public URL not found");
+
+      const response = await fetch(data.publicUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `pickle-note-${note.id}.webp`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      logger.error("Failed to download image", { noteId: note.id, error });
+      toast.error({
+        title: "다운로드 실패",
+        description: "이미지를 다운로드하는 중 오류가 발생했습니다.",
+      });
+    }
+  };
+
+  const canExpandThumbnail = hasAssetType;
+
   return (
     <AnimatePresence onExitComplete={unmount}>
       {isOpen && (
@@ -278,9 +310,24 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
             exit={thumbnailDetailOpen ? { opacity: 0, x: "100%" } : undefined}
             transition={thumbnailDetailOpen ? { duration: 0.5 } : undefined}
             onClick={(_e) => {
-              setThumbnailDetailOpen(false);
-              handleClose();
+              if (thumbnailDetailOpen) {
+                setThumbnailDetailOpen(false);
+              } else {
+                handleClose();
+              }
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                if (thumbnailDetailOpen) {
+                  setThumbnailDetailOpen(false);
+                } else {
+                  handleClose();
+                }
+              }
+            }}
+            role="button"
+            tabIndex={-1}
+            aria-label="닫기"
           >
             <AnimatePresence>
               {thumbnailDetailOpen && (
@@ -293,9 +340,15 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
+                  role="presentation"
                 >
                   <header className="absolute top-3 right-3 z-10 flex items-center justify-end gap-2">
-                    <ActionButton icon="download_16" />
+                    {hasAssetType && (
+                      <ActionButton
+                        icon="download_16"
+                        onClick={handleDownload}
+                      />
+                    )}
                     <ActionButton
                       icon="delete_16"
                       onClick={() => setThumbnailDetailOpen(false)}
@@ -326,18 +379,21 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
               onClick={(e) => {
                 e.stopPropagation();
               }}
+              role="presentation"
             >
               {/* drawer content */}
               <ScrollArea className="h-full overflow-auto">
                 <div className="px-5">
                   {/* type : image | capture | bookmark 일때 썸네일 */}
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    className="cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-base-primary"
-                    onClick={() => setThumbnailDetailOpen(!thumbnailDetailOpen)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
+                  <button
+                    type="button"
+                    disabled={!canExpandThumbnail}
+                    className={cn(
+                      "w-full rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-base-primary",
+                      canExpandThumbnail ? "cursor-pointer" : "cursor-default",
+                    )}
+                    onClick={() => {
+                      if (canExpandThumbnail) {
                         setThumbnailDetailOpen(!thumbnailDetailOpen);
                       }
                     }}
@@ -346,7 +402,7 @@ export function NoteDetailDrawer({ note, readOnly }: NoteDetailDrawerProps) {
                       note={note}
                       className="mb-5 h-[200px] overflow-clip rounded-xl"
                     />
-                  </div>
+                  </button>
 
                   {/* 라벨 및 북마크 버튼 */}
                   <div className="flex items-center justify-between pb-3">
