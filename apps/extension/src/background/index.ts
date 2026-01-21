@@ -94,29 +94,6 @@ chrome.contextMenus.onClicked.addListener(
 );
 
 /**
- * 3. Command Handler (키보드 단축키)
- * manifest.json에 정의된 단축키(commands)가 입력되었을 때 실행됩니다.
- */
-chrome.commands.onCommand.addListener(async (command, tab) => {
-  if (command === "run-capture") {
-    let targetTab = tab;
-    // 활성화된 탭이 없는 경우 현재 창의 활성 탭을 찾습니다.
-    if (!targetTab || !targetTab.id) {
-      const [activeTab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      targetTab = activeTab;
-    }
-
-    if (targetTab?.id) {
-      logger.debug("Starting capture flow (shortcut)", { tabId: targetTab.id });
-      await startCaptureFlow(targetTab);
-    }
-  }
-});
-
-/**
  * 4. Message Handler (내부 메시지 수신)
  * Content Script나 Popup, Sidepanel 등에서 보낸 메시지를 처리합니다.
  */
@@ -261,9 +238,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true;
     }
   }
-  // 4-12. 북마크 플로우 실행 (팝업용)
+  // 4-12. 북마크 플로우 실행 (팝업 및 단축키용)
   else if (request.action === "RUN_BOOKMARK_FLOW") {
-    const tabId = request.tabId;
+    const tabId = request.tabId || sender.tab?.id;
     if (tabId) {
       chrome.tabs.get(tabId, (tab) => {
         if (chrome.runtime.lastError || !tab) {
@@ -277,9 +254,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: false, error: "No tabId provided" });
     return true;
   }
-  // 4-13. 캡처 플로우 실행 (팝업용)
+  // 4-13. 캡처 플로우 실행 (팝업 및 단축키용)
   else if (request.action === "RUN_CAPTURE_FLOW") {
-    const tabId = request.tabId;
+    const tabId = request.tabId || sender.tab?.id;
     if (tabId) {
       chrome.tabs.get(tabId, (tab) => {
         if (chrome.runtime.lastError || !tab) {
@@ -292,6 +269,57 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     sendResponse({ success: false, error: "No tabId provided" });
     return true;
+  }
+  // 4-14. 텍스트 저장 플로우 (단축키용)
+  else if (request.action === "RUN_TEXT_FLOW") {
+    const tabId = sender.tab?.id;
+    if (tabId) {
+      // 텍스트 선택 정보 가져오기 시도
+      sendMessageToContentScript(tabId, { action: "GET_SELECTION" }).then(
+        (response) => {
+          const text = response?.text || "";
+          if (text) {
+            setNote(tabId, {
+              text,
+              url: sender.tab?.url,
+              timestamp: Date.now(),
+              mode: "text",
+            }).then(() => {
+              sendMessageToContentScript(tabId, {
+                action: "OPEN_OVERLAY",
+                mode: "text",
+                tabId: tabId,
+              });
+            });
+          } else {
+            logger.debug("No text selected for shortcut");
+          }
+        },
+      );
+    }
+  }
+  // 4-15. 이미지 저장 플로우 (단축키용)
+  else if (request.action === "RUN_IMAGE_FLOW") {
+    const tabId = sender.tab?.id;
+    const imageData = request.imageData;
+
+    if (tabId && imageData) {
+      setNote(tabId, {
+        srcUrl: imageData.src,
+        altText: imageData.alt,
+        url: sender.tab?.url,
+        timestamp: Date.now(),
+        mode: "image",
+      }).then(() => {
+        sendMessageToContentScript(tabId, {
+          action: "OPEN_OVERLAY",
+          mode: "image",
+          tabId: tabId,
+        });
+      });
+    } else {
+      logger.debug("No hovered image data for shortcut");
+    }
   }
 });
 

@@ -35,3 +35,36 @@ export async function clearNote(tabId: number) {
   const key = getNoteKey(tabId);
   await chrome.storage.local.remove(key);
 }
+
+// [NEW] Shortcut Storage Utilities
+import { getOSDefaultShortcuts, type ShortcutSettings } from "./types";
+
+const SHORTCUTS_KEY = "user_shortcuts";
+
+export async function getShortcuts(): Promise<ShortcutSettings> {
+  const result = await chrome.storage.sync.get(SHORTCUTS_KEY);
+  const data = result[SHORTCUTS_KEY];
+  if (!data || typeof data !== "object") return getOSDefaultShortcuts();
+  return data as ShortcutSettings;
+}
+
+export async function setShortcuts(shortcuts: ShortcutSettings): Promise<void> {
+  await chrome.storage.sync.set({ [SHORTCUTS_KEY]: shortcuts });
+}
+
+export async function updateShortcut(
+  action: string,
+  keyCombo: string,
+): Promise<void> {
+  const current = await getShortcuts();
+  await setShortcuts({
+    ...current,
+    [action]: keyCombo,
+  });
+}
+
+export async function resetShortcuts(): Promise<ShortcutSettings> {
+  const defaults = getOSDefaultShortcuts();
+  await setShortcuts(defaults);
+  return defaults;
+}

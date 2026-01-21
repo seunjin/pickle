@@ -1,6 +1,113 @@
 import { logger } from "@shared/lib/logger";
+import { formatShortcut } from "@shared/lib/shortcuts";
+import { getShortcuts } from "@shared/storage";
+import type { ShortcutAction } from "@shared/types";
 
 logger.info("Pickle Content Script Loaded");
+
+// 단축키 감시 및 실행
+async function initShortcutListener() {
+  let shortcuts = await getShortcuts();
+  let lastHoveredImage: { src: string; alt: string } | null = null;
+
+  // 실시간 단축키 업데이트 감지
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === "sync" && changes.user_shortcuts) {
+      shortcuts = changes.user_shortcuts.newValue as typeof shortcuts;
+      logger.info("Shortcuts updated in real-time", shortcuts);
+    }
+  });
+
+  // 이미지 호버 추적
+  window.addEventListener(
+    "mouseover",
+    (e) => {
+      const target = e.target as HTMLElement;
+      if (target instanceof HTMLImageElement) {
+        lastHoveredImage = {
+          src: target.src,
+          alt: target.alt || target.title || "",
+        };
+      }
+    },
+    { passive: true },
+  );
+
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      // 입력 필드(input, textarea)나 contenteditable 요소에서는 단축키 무시
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      const currentCombo = formatShortcut(e);
+      logger.info("Key pressed", { combo: currentCombo });
+
+      // 매칭되는 단축키 찾기
+      const action = Object.entries(shortcuts).find(([_, combo]) => {
+        if (typeof combo !== "string") return false;
+        // Mac/Windows 간의 Ctrl/Cmd 호환성 처리 (저장된 값이 Ctrl이어도 Mac에서는 Cmd로 매칭 허용)
+        const normalizedCombo = combo.replace("Ctrl+", "Cmd+");
+        const normalizedCurrent = currentCombo.replace("Ctrl+", "Cmd+");
+        return normalizedCombo === normalizedCurrent || combo === currentCombo;
+      })?.[0] as ShortcutAction | undefined;
+
+      if (action) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        logger.debug("Shortcut matched", { action, combo: currentCombo });
+
+        const message: {
+          action: string;
+          fromShortcut: boolean;
+          imageData?: { src: string; alt: string };
+        } = {
+          action: `RUN_${action.toUpperCase()}_FLOW`,
+          fromShortcut: true,
+        };
+
+        // 이미지 저장 단축키인 경우 호버된 이미지 정보 포함
+        if (action === "image" && lastHoveredImage) {
+          message.imageData = lastHoveredImage;
+        }
+
+        // 백그라운드에 액션 요청
+        try {
+          chrome.runtime.sendMessage(message, (response) => {
+            if (chrome.runtime.lastError) {
+              logger.warn(
+                "Extension connection lost. Please refresh the page.",
+                {
+                  error: chrome.runtime.lastError.message,
+                },
+              );
+            } else {
+              logger.info("Action requested successfully", {
+                action,
+                response,
+              });
+            }
+          });
+        } catch (err) {
+          logger.error("Failed to send message to extension", { error: err });
+          logger.info(
+            "TIP: If you just updated the extension, please refresh this tab.",
+          );
+        }
+      }
+    },
+    true, // capture phase에서 먼저 낚아챔
+  );
+}
+
+initShortcutListener();
 
 // [REMOVED] 레거시 웹 브리지 세션 동기화 코드
 // 새 인증 플로우에서는 chrome.identity.launchWebAuthFlow를 사용하므로

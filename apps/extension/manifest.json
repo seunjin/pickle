@@ -36,13 +36,6 @@
         "default": "Ctrl+Shift+Y",
         "mac": "MacCtrl+Shift+Y"
       }
-    },
-    "run-capture": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+E",
-        "mac": "MacCtrl+Shift+E"
-      },
-      "description": "Start Capture Area"
     }
   },
   "externally_connectable": {

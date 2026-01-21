@@ -35,3 +35,26 @@ export interface NoteData {
   siteName?: string;
   memo?: string;
 }
+
+// [NEW] Shortcut types
+export type ShortcutAction = "text" | "image" | "capture" | "bookmark";
+
+export interface ShortcutSettings {
+  [key: string]: string; // action -> key combination (e.g., "capture" -> "Ctrl+Shift+E")
+}
+
+export const isMac =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+
+export const getOSDefaultShortcuts = (): ShortcutSettings => {
+  const prefix = isMac ? "Cmd" : "Ctrl";
+  return {
+    text: `${prefix}+N`,
+    bookmark: `${prefix}+B`,
+    capture: `${prefix}+E`,
+    image: `${prefix}+I`,
+  };
+};
+
+export const DEFAULT_SHORTCUTS: ShortcutSettings = getOSDefaultShortcuts();

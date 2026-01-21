@@ -128,7 +128,7 @@ export function PopupApp() {
 
   if (!isLoggedIn) {
     return (
-      <div className="flex h-[400px] w-[320px] flex-col items-center justify-center bg-neutral-900 p-6 text-center text-white">
+      <div className="flex h-[400px] w-[360px] flex-col items-center justify-center bg-neutral-900 p-6 text-center text-white">
         <div className="mb-6 flex flex-col items-center gap-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 font-bold text-2xl shadow-indigo-600/20 shadow-lg">
             P
@@ -152,14 +152,14 @@ export function PopupApp() {
 
   if (view === "settings") {
     return (
-      <div className="h-[400px] w-[320px]">
+      <div className="h-[400px] w-[360px]">
         <SettingsPanel onBack={() => setView("main")} onLogout={handleLogout} />
       </div>
     );
   }
 
   return (
-    <div className="relative flex h-[400px] w-[320px] flex-col bg-neutral-950 text-white">
+    <div className="relative flex h-[400px] w-[360px] flex-col bg-neutral-950 text-white">
       {/* Header */}
       <div className="flex items-center justify-between p-5 pb-2">
         <div className="flex items-center gap-2">
