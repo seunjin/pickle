@@ -22,7 +22,7 @@ export function NoteThumbnailView({
         disabled={!canExpand}
         className={cn(
           "w-full rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-base-primary",
-          canExpand ? "cursor-pointer" : "cursor-default",
+          canExpand ? "cursor-pointer" : "cursor-default!",
         )}
         onClick={onExpand}
       >

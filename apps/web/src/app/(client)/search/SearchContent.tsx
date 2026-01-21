@@ -108,7 +108,7 @@ export function SearchContent() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="grid h-full grid-rows-[auto_1fr]">
       <SearchNoteFilter
         selectedType={selectedType}
         onTypeChange={(val) => updateUrl({ type: val as string })}
@@ -122,9 +122,9 @@ export function SearchContent() {
         query={query}
       />
 
-      <div className="relative flex-1">
+      <div className="relative">
         {isLoading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-base-background/50">
+          <div className="flex h-full flex-col items-center justify-center gap-2 pb-[calc(var(--web-header-height)*3)]">
             <Spinner className="size-8 text-base-primary" />
             <span className="text-[14px] text-base-primary">검색중...</span>
           </div>

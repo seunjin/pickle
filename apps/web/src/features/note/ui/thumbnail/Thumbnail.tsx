@@ -75,7 +75,10 @@ export const Thumbnail = ({
   };
 
   return renderThumbnail() ? (
-    <div style={style} className={className}>
+    <div
+      style={style}
+      className={cn("relative h-full w-full overflow-clip", className)}
+    >
       {renderThumbnail()}
     </div>
   ) : null;

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
+import { PageSpinner } from "@/features/note/ui/PageSpinner";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
 
@@ -25,13 +26,7 @@ export default async function BookmarksPage() {
   return (
     <div className="h-full">
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center py-16 text-base-muted">
-              Loading bookmarks...
-            </div>
-          }
-        >
+        <Suspense fallback={<PageSpinner pageType="client" />}>
           <NoteListWithFilter onlyBookmarked nodataType="bookmarks" />
         </Suspense>
       </HydrationBoundary>

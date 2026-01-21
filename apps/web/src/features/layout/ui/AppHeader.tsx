@@ -1,11 +1,11 @@
 "use client";
 
 import { Icon } from "@pickle/icons";
-import { InputWithAddon } from "@pickle/ui";
+import { InputWithAddon, Spinner } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { folderQueries } from "@/features/folder/model/folderQueries";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -24,6 +24,12 @@ const ROUTE_CONFIG: Record<string, { title: string }> = {
   "/settings": {
     title: "계정 설정",
   },
+  "/search": {
+    title: "",
+  },
+  "/legal": {
+    title: "피클 약관",
+  },
 };
 
 export function AppHeader() {
@@ -34,10 +40,42 @@ export function AppHeader() {
 
   const folderId = searchParams.get("folderId");
   const tagId = searchParams.get("tagId");
+  const currentQuery = searchParams.get("q");
 
-  // 검색어 조회
+  // 검색어 입력 상태
   const searchRef = useRef<HTMLInputElement | null>(null);
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>(currentQuery || "");
+
+  // ✅ 정교한 검색 로딩 상태 관리
+  // 1. 전역 검색 데이터 페칭 여부 확인
+  const isFetchingSearch =
+    useIsFetching({
+      queryKey: ["notes", "search"],
+    }) > 0;
+
+  const [isInitialSearch, setIsInitialSearch] = useState(false);
+  const prevQuery = useRef(currentQuery);
+
+  // 2. 검색어(q) 파라미터가 실제로 변했을 때만 로딩 모드 진입
+  useEffect(() => {
+    if (currentQuery !== prevQuery.current) {
+      setIsInitialSearch(true);
+      prevQuery.current = currentQuery;
+      // URL 파라미터 변화에 맞춰 입력창 텍스트 동기화 (필요시)
+      setSearch(currentQuery || "");
+    }
+  }, [currentQuery]);
+
+  // 3. 데이터 페칭이 끝나면 로딩 모드 해제
+  useEffect(() => {
+    if (!isFetchingSearch) {
+      setIsInitialSearch(false);
+    }
+  }, [isFetchingSearch]);
+
+  // 4. 최종 로딩 표시 조건: '새 검색어 유입' + '페칭 중' + '검색 페이지'
+  const isLoading =
+    isInitialSearch && isFetchingSearch && pathname === "/search";
 
   // 데이터 조회 (캐시 활용)
   const { data: folders = [] } = useQuery(folderQueries.list(client));
@@ -50,8 +88,7 @@ export function AppHeader() {
   };
 
   // 현재 컨텍스트에 따른 타이틀 및 아이콘 결정
-  let displayTitle =
-    ROUTE_CONFIG[pathname]?.title || ROUTE_CONFIG["/dashboard"].title;
+  let displayTitle = ROUTE_CONFIG[pathname]?.title || "";
 
   let category: "FOLDERS" | "TAGS" | null = null;
 
@@ -99,10 +136,14 @@ export function AppHeader() {
           containerClassName="group w-80 rounded-[8px]"
           placeholder="검색어를 입력해 주세요."
           startAddon={
-            <Icon
-              name="search_16"
-              className="transition-colors group-focus-within:text-base-primary"
-            />
+            isLoading ? (
+              <Spinner className="text-base-primary" />
+            ) : (
+              <Icon
+                name="search_16"
+                className="transition-colors group-focus-within:text-base-primary"
+              />
+            )
           }
           endAddon={
             search.length > 0 && (
