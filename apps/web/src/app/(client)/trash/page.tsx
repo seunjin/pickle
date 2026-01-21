@@ -1,8 +1,13 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import type { Metadata } from "next";
 import { noteQueries } from "@/features/note/model/noteQueries";
 import { getQueryClient } from "@/shared/lib/react-query/getQueryClient";
 import { createClient } from "@/shared/lib/supabase/server";
 import { TrashContent } from "./TrashContent";
+
+export const metadata: Metadata = {
+  title: "Trash | Pickle",
+};
 
 export default async function TrashPage() {
   const supabase = await createClient();

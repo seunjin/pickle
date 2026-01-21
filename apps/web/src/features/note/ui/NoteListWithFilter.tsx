@@ -79,7 +79,7 @@ export function NoteListWithFilter({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <>
+    <div className="grid h-full grid-rows-[auto_1fr]">
       <NoteListFilter
         selectedType={selectedType}
         onTypeChange={setSelectedType}
@@ -91,7 +91,7 @@ export function NoteListWithFilter({
 
       <div className="relative">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-16">
+          <div className="flex h-full flex-col items-center justify-center gap-2 py-16">
             <Spinner className="size-8 text-base-primary" />
             <span className="text-[14px] text-base-muted">
               노트를 불러오는 중...
@@ -110,6 +110,6 @@ export function NoteListWithFilter({
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }

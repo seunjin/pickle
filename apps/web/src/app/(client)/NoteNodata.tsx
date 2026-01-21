@@ -40,7 +40,7 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
         );
       case "trash":
         return (
-          <div className="flex flex-col items-center">
+          <div className="flex h-full flex-col items-center justify-center">
             <img
               src={`/nodata-${type}.svg`}
               alt={`nodata-${type}`}
@@ -58,7 +58,7 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
         return (
           <div className="flex flex-col items-center">
             <img
-              src="/nodata-default.svg"
+              src="/nodata-search.svg"
               alt="nodata-search"
               className="mb-6 size-[38px]"
             />
@@ -66,7 +66,7 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
               검색 결과가 없어요 🙂
             </p>
             <p className="text-[15px] text-neutral-500 leading-none">
-              다른 검색어나 필터를 사용해 보세요.
+              다른 키워드나 필터로 다시 검색해보세요.
             </p>
           </div>
         );
