@@ -9,6 +9,9 @@ interface NoteMetadataViewProps {
 }
 
 export function NoteMetadataView({ note }: NoteMetadataViewProps) {
+  const extension =
+    note.assets?.full_path.split(".").pop()?.toUpperCase() || "IMG";
+
   return (
     <div className="px-5 pb-20">
       <div className="mb-[8.5px] flex h-9 items-center justify-between">
@@ -24,7 +27,7 @@ export function NoteMetadataView({ note }: NoteMetadataViewProps) {
                 파일 종류
               </dt>
               <dd className="text-[13px] text-neutral-500 leading-none">
-                webp 이미지
+                {extension} 이미지
               </dd>
             </dl>
             <dl className="flex items-center">

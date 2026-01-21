@@ -128,12 +128,6 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
         limit_bytes: DEFAULT_STORAGE_LIMIT_BYTES,
       };
 
-      /**
-       * 테스트용: limit_bytes를 강제로 상수로 고정
-       */
-      // const { total_used_bytes } = usageInfo || { total_used_bytes: 0 };
-      // const limit_bytes = DEFAULT_STORAGE_LIMIT_BYTES; // 무조건 상수값 사용
-
       // 이미지/캡처의 경우 업로드할 파일 크기까지 미리 fetch해서 계산함
       let incomingSize = 0;
       let imageBlob: Blob | null = null;
@@ -206,13 +200,66 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
 
       if (blob && dimensions) {
         const fileSize = blob.size;
-        const fileName = `${crypto.randomUUID()}.png`;
+        // 1. MIME 타입 정규화 (파라미터 제거: image/png;charset=utf-8 -> image/png)
+        const mimeType = (blob.type || "image/png").split(";")[0].toLowerCase();
+
+        logger.debug("[SaveNote] Processing bitmap upload", {
+          type: note.type,
+          mimeType,
+          fileSize,
+          dimensions,
+          url: note.data.image_url?.substring(0, 100),
+        });
+
+        // 2. MIME 타입에 따른 확장자 결정
+        const extensionMap: Record<string, string> = {
+          "image/png": "png",
+          "image/jpeg": "jpg",
+          "image/jpg": "jpg",
+          "image/gif": "gif",
+          "image/webp": "webp",
+          "image/svg+xml": "svg",
+        };
+
+        let extension = extensionMap[mimeType];
+
+        // 3. Fallback: MIME 타입이 매핑되지 않은 경우 URL에서 확장자 추론 시도
+        if (!extension && note.data.image_url) {
+          try {
+            const urlPath = new URL(note.data.image_url).pathname;
+            const urlExt = urlPath.split(".").pop()?.toLowerCase();
+            if (
+              urlExt &&
+              ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(urlExt)
+            ) {
+              extension = urlExt === "jpeg" ? "jpg" : urlExt;
+              logger.debug("[SaveNote] Extension inferred from URL", {
+                extension,
+              });
+            }
+          } catch (e) {
+            logger.warn("[SaveNote] Failed to infer extension from URL", {
+              error: e,
+            });
+          }
+        }
+
+        // 4. 최종 Fallback: PNG
+        if (!extension) {
+          extension = "png";
+          logger.warn(
+            "[SaveNote] Unrecognized MIME type, falling back to png",
+            { mimeType },
+          );
+        }
+
+        const fileName = `${crypto.randomUUID()}.${extension}`;
         filePath = `${workspaceMember.workspace_id}/${userId}/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("bitmaps")
           .upload(filePath, blob, {
-            contentType: "image/png",
+            contentType: mimeType,
             upsert: false,
           });
 
@@ -255,13 +302,12 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
     }
 
     // 7. DB InsertPayload 준비
-    // 핵심 변경: meta를 별도 컬럼으로 저장 (Data에 중첩 X)
     const insertPayload: Database["public"]["Tables"]["notes"]["Insert"] = {
       workspace_id: workspaceMember.workspace_id,
       user_id: userId,
       asset_id: assetId,
       type: note.type,
-      title: note.title ?? null, // [Refactor] Add title mapping
+      title: note.title ?? null,
       url: note.meta.url,
       meta: note.meta,
       memo: note.memo ?? null,
@@ -269,21 +315,21 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       tags: note.tags ?? [],
     };
 
-    // 7. Insert 실행
-    const { data, error } = await supabase
+    // 8. Insert 실행
+    const { data: insertedNote, error: insertError } = await supabase
       .from("notes")
       .insert(insertPayload)
       .select()
       .single();
 
-    if (error) {
-      logger.error("Supabase Write Error", { error });
-      return { success: false, error: error.message };
+    if (insertError) {
+      logger.error("Supabase Write Error", { error: insertError });
+      return { success: false, error: insertError.message };
     }
 
     return {
       success: true,
-      data: data,
+      data: insertedNote,
       debug: { filePath, workspaceId: workspaceMember.workspace_id },
     };
   } catch (error) {

@@ -229,9 +229,12 @@ export function useNoteDetail({ note }: UseNoteDetailProps) {
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
 
+      // 파일 확장자 추출 (원본 포맷 유지)
+      const extension = note.assets.full_path.split(".").pop() || "png";
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `pickle-note-${note.id}.webp`;
+      link.download = `pickle-note-${note.id}.${extension}`;
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
