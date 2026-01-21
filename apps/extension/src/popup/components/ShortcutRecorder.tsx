@@ -2,14 +2,15 @@ import { logger } from "@shared/lib/logger";
 import { formatShortcut, isValidShortcut } from "@shared/lib/shortcuts";
 import { updateShortcut } from "@shared/storage";
 import { useEffect, useRef, useState } from "react";
+import { NoteIcon, type NoteIconType } from "./NoteIcon";
 
 interface ShortcutRecorderProps {
-  action: string;
+  action: NoteIconType;
   initialValue: string;
   label: string;
   onUpdate: () => void;
-  icon: React.ReactNode;
-  defaultShortcut: string;
+  // 디자이너 요청으로 일단 임시 optional 처리
+  defaultShortcut?: string;
 }
 
 export function ShortcutRecorder({
@@ -17,8 +18,6 @@ export function ShortcutRecorder({
   initialValue,
   label,
   onUpdate,
-  icon,
-  defaultShortcut,
 }: ShortcutRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [combo, setCombo] = useState(initialValue);
@@ -71,10 +70,7 @@ export function ShortcutRecorder({
   }, [isRecording]);
 
   const renderKey = (key: string) => (
-    <kbd
-      key={key}
-      className="mx-0.5 inline-flex min-w-[20px] items-center justify-center rounded border border-neutral-700 bg-neutral-800 px-1.5 py-0.5 font-medium font-mono text-[10px] text-neutral-200 shadow-[0_1px_0_rgba(255,255,255,0.1)]"
-    >
+    <kbd key={key} className="text-[13px] text-base-foreground">
       {key}
     </kbd>
   );
@@ -82,11 +78,11 @@ export function ShortcutRecorder({
   return (
     <div className="flex flex-col gap-1">
       <div className="group flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-neutral-800 p-2 text-neutral-400 transition-colors group-hover:text-white">
-            {icon}
-          </div>
-          <span className="font-medium text-neutral-300 text-sm">{label}</span>
+        <div className="flex items-center gap-2">
+          <NoteIcon type={action} />{" "}
+          <span className="text-[13px] text-base-muted-foreground">
+            {label}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -98,26 +94,25 @@ export function ShortcutRecorder({
               tabIndex={0} // Make div focusable
               onKeyDown={handleKeyDown}
               onBlur={cancelRecording} // Cancel recording if focus is lost
-              className="flex animate-pulse items-center rounded-md border border-indigo-500/50 bg-indigo-500/20 px-3 py-1.5 font-medium text-[10px] text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="flex h-7.5 w-40 items-center rounded-md border border-base-border bg-neutral-900 px-3 text-[13px] text-form-input-placeholder"
             >
-              키를 입력하세요...
+              키를 입력해주세요.
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={startRecording}
-              className="flex items-center gap-1 transition-opacity hover:opacity-80"
-            >
-              {combo.split("+").map(renderKey)}
-            </button>
+            <div className="flex h-7.5 w-40 items-center rounded-md border border-base-border bg-neutral-900 px-3">
+              <button type="button" onClick={startRecording} className="">
+                {combo.split("").map(renderKey)}
+              </button>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-1">
-        <div className="text-[10px] text-neutral-600">
+      <div className="flex items-center justify-end px-1">
+        {/* 초기값을 표시 ui. 디자이너 요청으로 주석 처리 */}
+        {/* <div className="text-[10px] text-neutral-600">
           {combo !== defaultShortcut && <span>기본값: {defaultShortcut}</span>}
-        </div>
+        </div> */}
         {error && <span className="text-[10px] text-red-500">{error}</span>}
       </div>
     </div>

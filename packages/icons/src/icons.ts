@@ -28,12 +28,14 @@ import IconLayoutCard16 from "./react/IconLayoutCard16";
 import IconLayoutList16 from "./react/IconLayoutList16";
 import IconLink12 from "./react/IconLink12";
 import IconLogout16 from "./react/IconLogout16";
+import IconLogoutMini12 from "./react/IconLogoutMini12";
 import IconMove16 from "./react/IconMove16";
 import IconNoteEmpty20 from "./react/IconNoteEmpty20";
 import IconNoteFull20 from "./react/IconNoteFull20";
 import IconPlus16 from "./react/IconPlus16";
 import IconPlus20 from "./react/IconPlus20";
 import IconRefresh16 from "./react/IconRefresh16";
+import IconRefreshMini12 from "./react/IconRefreshMini12";
 import IconSample20 from "./react/IconSample20";
 import IconSearch16 from "./react/IconSearch16";
 import IconSearch20 from "./react/IconSearch20";
@@ -76,12 +78,14 @@ export {
   IconLayoutList16,
   IconLink12,
   IconLogout16,
+  IconLogoutMini12,
   IconMove16,
   IconNoteEmpty20,
   IconNoteFull20,
   IconPlus16,
   IconPlus20,
   IconRefresh16,
+  IconRefreshMini12,
   IconSample20,
   IconSearch16,
   IconSearch20,
@@ -125,12 +129,14 @@ export const ICON_PALETTE = {
   layout_list_16: IconLayoutList16,
   link_12: IconLink12,
   logout_16: IconLogout16,
+  logout_mini_12: IconLogoutMini12,
   move_16: IconMove16,
   note_empty_20: IconNoteEmpty20,
   note_full_20: IconNoteFull20,
   plus_16: IconPlus16,
   plus_20: IconPlus20,
   refresh_16: IconRefresh16,
+  refresh_mini_12: IconRefreshMini12,
   sample_20: IconSample20,
   search_16: IconSearch16,
   search_20: IconSearch20,

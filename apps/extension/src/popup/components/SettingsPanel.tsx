@@ -1,12 +1,6 @@
-import {
-  IconArrowLeft16,
-  IconBookmark16,
-  IconCapture16,
-  IconDocument16,
-  IconLayoutCard16,
-  IconLogout16,
-} from "@pickle/icons";
-import { Button, ScrollArea } from "@pickle/ui";
+import { Icon } from "@pickle/icons";
+import { ActionButton, ScrollArea } from "@pickle/ui";
+import { cn } from "@pickle/ui/lib/utils";
 import { getShortcuts, resetShortcuts } from "@shared/storage";
 import {
   getOSDefaultShortcuts,
@@ -14,6 +8,7 @@ import {
   type ShortcutSettings,
 } from "@shared/types";
 import { useEffect, useState } from "react";
+import { useSession } from "@/shared/hooks/useSession";
 import { ShortcutRecorder } from "./ShortcutRecorder";
 
 interface SettingsPanelProps {
@@ -21,8 +16,19 @@ interface SettingsPanelProps {
   onLogout: () => void;
 }
 
+const fakeGetOSDefaultShortcuts = (): ShortcutSettings => {
+  return {
+    text: `Cmd+N`,
+    bookmark: `Cmd+B`,
+    capture: `Cmd+E`,
+    image: `Cmd+I`,
+  };
+};
 export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
-  const [shortcuts, setShortcuts] = useState<ShortcutSettings | null>(null);
+  const { user } = useSession();
+  const [shortcuts, setShortcuts] = useState<ShortcutSettings | null>(
+    fakeGetOSDefaultShortcuts(),
+  );
   const defaults = getOSDefaultShortcuts();
 
   useEffect(() => {
@@ -45,128 +51,280 @@ export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
   };
 
   return (
-    <div className="grid h-full w-full grid-rows-[auto_1fr_auto] bg-neutral-900 text-white">
-      {/* Header */}
-      <div className="flex items-center gap-2 border-neutral-800 border-b p-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="rounded-lg p-1 transition-colors hover:bg-neutral-800"
-          aria-label="Back"
-        >
-          <IconArrowLeft16 className="text-neutral-400" />
-        </button>
-        <h2 className="font-bold text-lg">설정</h2>
-      </div>
-
-      {/* Content */}
-      <ScrollArea className="overflow-auto">
-        <div className="p-4">
-          <section className="mb-4">
-            <h3 className="mb-3 font-semibold text-neutral-400 text-xs uppercase tracking-wider">
-              시스템 환경
-            </h3>
-            <div className="rounded-xl border border-neutral-800 bg-neutral-800/40 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="rounded bg-neutral-700 px-1.5 py-0.5 font-medium text-[10px] text-neutral-300">
-                    OS
-                  </div>
-                  <span className="text-neutral-200 text-sm">
-                    {isMac ? "macOS (Apple)" : "Windows / Linux"}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={openChromeShortcuts}
-                  className="text-[10px] text-indigo-400 hover:underline"
-                >
-                  브라우저 단축키 설정
-                </button>
+    <div className="h-full w-full bg-neutral-900 text-white">
+      {/* header */}
+      <ScrollArea className="h-full overflow-auto">
+        <header className="sticky top-0 flex h-[45px] items-center gap-2 border-base-border border-b bg-neutral-950/1 px-5 backdrop-blur-[20px]">
+          <ActionButton icon="arrow_left_16" onClick={onBack} /> <h1>설정</h1>
+        </header>
+        <div className="space-y-6 px-5 py-[24px_30px]">
+          {/* 시스템 환경 */}
+          <section>
+            <SectionHeader title="시스템 환경" />
+            <SectionCard className="flex items-center justify-between">
+              {/* OS */}
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-4.5 items-center rounded-sm bg-neutral-700 px-1.5 font-medium text-[11px] text-neutral-400">
+                  OS
+                </span>
+                <span className="text-[13px] text-base-foreground">
+                  {isMac ? "macOS (Apple)" : "Windows / Linux"}
+                </span>
               </div>
-            </div>
-          </section>
-
-          <section className="mb-4">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-neutral-400 text-xs uppercase tracking-wider">
-                커스텀 단축키
-              </h3>
               <button
                 type="button"
-                onClick={handleReset}
-                className="text-[10px] text-neutral-500 transition-colors hover:text-indigo-400"
+                onClick={openChromeShortcuts}
+                className="text-[12px] text-green-300 transition-colors hover:text-green-200"
               >
-                초기화
+                브라우저 단축키 설정
               </button>
-            </div>
+            </SectionCard>
+          </section>
 
-            <div className="flex flex-col gap-2">
-              {shortcuts ? (
+          {/* 단축키 설정 */}
+          <section>
+            <SectionHeader
+              title="단축키 설정"
+              addOn={
+                <button
+                  type="button"
+                  className="group/reset inline-flex items-center gap-1 text-[12px] text-base-muted-foreground transition-colors hover:text-base-foreground"
+                  onClick={handleReset}
+                >
+                  <Icon
+                    name="refresh_mini_12"
+                    className="transition-colors group-hover/reset:text-neutral-300"
+                  />{" "}
+                  초기화
+                </button>
+              }
+            />
+            <SectionCard className="">
+              {shortcuts && (
                 <>
-                  <ShortcutRecorder
-                    label="텍스트 저장"
-                    action="text"
-                    icon={<IconDocument16 />}
-                    initialValue={shortcuts.text}
-                    defaultShortcut={defaults.text}
-                    onUpdate={handleUpdate}
-                  />
                   <ShortcutRecorder
                     label="북마크"
                     action="bookmark"
-                    icon={<IconBookmark16 />}
                     initialValue={shortcuts.bookmark}
                     defaultShortcut={defaults.bookmark}
                     onUpdate={handleUpdate}
                   />
+                  <div className="mt-3 mb-3 h-px bg-base-border-light" />
                   <ShortcutRecorder
-                    label="화면 캡처"
-                    action="capture"
-                    icon={<IconCapture16 />}
-                    initialValue={shortcuts.capture}
-                    defaultShortcut={defaults.capture}
-                    onUpdate={handleUpdate}
-                  />
-                  <ShortcutRecorder
-                    label="이미지 저장"
+                    label="이미지"
                     action="image"
-                    icon={<IconLayoutCard16 />}
                     initialValue={shortcuts.image}
                     defaultShortcut={defaults.image}
                     onUpdate={handleUpdate}
                   />
+                  <div className="mt-3 mb-3 h-px bg-base-border-light" />
+                  <ShortcutRecorder
+                    label="화면 캡쳐"
+                    action="capture"
+                    initialValue={shortcuts.capture}
+                    defaultShortcut={defaults.capture}
+                    onUpdate={handleUpdate}
+                  />
+                  <div className="mt-3 mb-3 h-px bg-base-border-light" />
+                  <ShortcutRecorder
+                    label="텍스트"
+                    action="text"
+                    initialValue={shortcuts.text}
+                    defaultShortcut={defaults.text}
+                    onUpdate={handleUpdate}
+                  />
                 </>
-              ) : (
-                <div className="py-2 text-center text-neutral-500 text-xs italic">
-                  로딩 중...
-                </div>
               )}
-            </div>
+            </SectionCard>
           </section>
 
-          <section className="mb-4">
-            <h3 className="mb-3 font-semibold text-neutral-400 text-xs uppercase tracking-wider">
-              계정
-            </h3>
-            <Button
-              variant="secondary_line"
-              className="w-full justify-start gap-2 text-red-400 hover:bg-red-400/10 hover:text-red-400"
-              onClick={onLogout}
-            >
-              <IconLogout16 />
-              로그아웃
-            </Button>
+          {/* 계정 */}
+          <section>
+            <SectionHeader
+              title="계정"
+              addOn={
+                <button
+                  type="button"
+                  className="group/reset inline-flex items-center gap-1 text-[12px] text-base-muted-foreground transition-colors hover:text-base-foreground"
+                  onClick={onLogout}
+                >
+                  <Icon
+                    name="logout_mini_12"
+                    className="transition-colors group-hover/reset:text-neutral-300"
+                  />{" "}
+                  로그아웃
+                </button>
+              }
+            />
+
+            <SectionCard>
+              <div className="flex items-center gap-3">
+                <img src="/google.svg" alt="" />
+                <span className="text-[13px] text-base-muted-foreground">
+                  {user?.email}
+                </span>
+              </div>
+            </SectionCard>
           </section>
         </div>
       </ScrollArea>
-      {/* Footer */}
-      <div className="border-neutral-800 border-t p-4">
-        <p className="text-center text-[10px] text-neutral-600">
-          Pickle Extension v1.0.0
-          <br />© 2026 Pickle Note. All rights reserved.
-        </p>
-      </div>
     </div>
+    // <div className="grid h-full w-full grid-rows-[auto_1fr_auto] bg-neutral-900 text-white">
+    //   {/* Header */}
+    //   <div className="flex items-center gap-2 border-neutral-800 border-b p-4">
+    //     <button
+    //       type="button"
+    //       onClick={onBack}
+    //       className="rounded-lg p-1 transition-colors hover:bg-neutral-800"
+    //       aria-label="Back"
+    //     >
+    //       <IconArrowLeft16 className="text-neutral-400" />
+    //     </button>
+    //     <h2 className="font-bold text-lg">설정</h2>
+    //   </div>
+
+    //   {/* Content */}
+    //   <ScrollArea className="overflow-auto">
+    //     <div className="p-4">
+    //       <section className="mb-4">
+    //         <h3 className="mb-3 font-semibold text-neutral-400 text-xs uppercase tracking-wider">
+    //           시스템 환경
+    //         </h3>
+    //         <div className="rounded-xl border border-neutral-800 bg-neutral-800/40 p-4">
+    //           <div className="flex items-center justify-between">
+    //             <div className="flex items-center gap-2">
+    //               <div className="rounded bg-neutral-700 px-1.5 py-0.5 font-medium text-[10px] text-neutral-300">
+    //                 OS
+    //               </div>
+    //               <span className="text-neutral-200 text-sm">
+    //                 {isMac ? "macOS (Apple)" : "Windows / Linux"}
+    //               </span>
+    //             </div>
+    //             <button
+    //               type="button"
+    //               onClick={openChromeShortcuts}
+    //               className="text-[10px] text-indigo-400 hover:underline"
+    //             >
+    //               브라우저 단축키 설정
+    //             </button>
+    //           </div>
+    //         </div>
+    //       </section>
+
+    //       <section className="mb-4">
+    //         <div className="mb-4 flex items-center justify-between">
+    //           <h3 className="font-semibold text-neutral-400 text-xs uppercase tracking-wider">
+    //             커스텀 단축키
+    //           </h3>
+    //           <button
+    //             type="button"
+    //             onClick={handleReset}
+    //             className="text-[10px] text-neutral-500 transition-colors hover:text-indigo-400"
+    //           >
+    //             초기화
+    //           </button>
+    //         </div>
+
+    //         <div className="flex flex-col gap-2">
+    //           {shortcuts ? (
+    //             <>
+    //               <ShortcutRecorder
+    //                 label="텍스트 저장"
+    //                 action="text"
+    //                 icon={<IconDocument16 />}
+    //                 initialValue={shortcuts.text}
+    //                 defaultShortcut={defaults.text}
+    //                 onUpdate={handleUpdate}
+    //               />
+    //               <ShortcutRecorder
+    //                 label="북마크"
+    //                 action="bookmark"
+    //                 icon={<IconBookmark16 />}
+    //                 initialValue={shortcuts.bookmark}
+    //                 defaultShortcut={defaults.bookmark}
+    //                 onUpdate={handleUpdate}
+    //               />
+    //               <ShortcutRecorder
+    //                 label="화면 캡처"
+    //                 action="capture"
+    //                 icon={<IconCapture16 />}
+    //                 initialValue={shortcuts.capture}
+    //                 defaultShortcut={defaults.capture}
+    //                 onUpdate={handleUpdate}
+    //               />
+    //               <ShortcutRecorder
+    //                 label="이미지 저장"
+    //                 action="image"
+    //                 icon={<IconLayoutCard16 />}
+    //                 initialValue={shortcuts.image}
+    //                 defaultShortcut={defaults.image}
+    //                 onUpdate={handleUpdate}
+    //               />
+    //             </>
+    //           ) : (
+    //             <div className="py-2 text-center text-neutral-500 text-xs italic">
+    //               로딩 중...
+    //             </div>
+    //           )}
+    //         </div>
+    //       </section>
+
+    //       <section className="mb-4">
+    //         <h3 className="mb-3 font-semibold text-neutral-400 text-xs uppercase tracking-wider">
+    //           계정
+    //         </h3>
+    //         <Button
+    //           variant="secondary_line"
+    //           className="w-full justify-start gap-2 text-red-400 hover:bg-red-400/10 hover:text-red-400"
+    //           onClick={onLogout}
+    //         >
+    //           <IconLogout16 />
+    //           로그아웃
+    //         </Button>
+    //       </section>
+    //     </div>
+    //   </ScrollArea>
+    //   {/* Footer */}
+    //   <div className="border-neutral-800 border-t p-4">
+    //     <p className="text-center text-[10px] text-neutral-600">
+    //       Pickle Extension v1.0.0
+    //       <br />© 2026 Pickle Note. All rights reserved.
+    //     </p>
+    //   </div>
+    // </div>
   );
 }
+
+const SectionHeader = ({
+  title,
+  addOn,
+}: {
+  title: string;
+  addOn?: React.ReactNode;
+}) => {
+  return (
+    <header className="flex items-center justify-between pb-3">
+      <h2 className="text-[12px] text-neutral-500">{title}</h2>
+      {addOn}
+    </header>
+  );
+};
+
+const SectionCard = ({
+  className,
+  children,
+}: {
+  className?: HTMLDivElement["className"];
+  children?: React.ReactNode;
+}) => {
+  return (
+    <div
+      className={cn(
+        "rounded-[10px] border border-base-border bg-neutral-850 p-3",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
