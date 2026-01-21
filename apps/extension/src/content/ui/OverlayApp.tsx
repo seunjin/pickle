@@ -7,6 +7,7 @@ import { Confirm, Spinner, useDialog } from "@pickle/ui";
 import { saveNote } from "@shared/api/note";
 import { OverlayToast } from "@shared/components/OverlayToast";
 import { extensionStorage } from "@shared/lib/extension-api";
+import { logger } from "@shared/lib/logger";
 import { getNoteKey } from "@shared/storage";
 import { useToastStore } from "@shared/stores/useToastStore";
 import type { NoteData, ViewType } from "@shared/types";
@@ -59,7 +60,7 @@ export default function OverlayApp({
       areaName: string,
     ) => {
       if (areaName === "local" && changes[STORAGE_KEY]) {
-        console.log("Storage changed:", changes[STORAGE_KEY]);
+        logger.debug("Storage changed", { changes: changes[STORAGE_KEY] });
         const newValue = changes[STORAGE_KEY].newValue as NoteData;
         if (newValue) {
           setNote(newValue);
@@ -78,7 +79,7 @@ export default function OverlayApp({
     // 초기 로드
     extensionStorage.get(STORAGE_KEY, (result) => {
       if (result[STORAGE_KEY]) {
-        console.log("Loaded note:", result[STORAGE_KEY]);
+        logger.debug("Loaded note", { note: result[STORAGE_KEY] });
         const data = result[STORAGE_KEY] as NoteData;
         setNote(data);
         if (data.mode) setView(data.mode);
@@ -95,7 +96,7 @@ export default function OverlayApp({
       areaName: string,
     ) => {
       if (areaName === "local" && changes.supabaseSession?.newValue) {
-        console.log("Session recovered! Clearing error...");
+        logger.debug("Session recovered! Clearing error");
         dialog.closeAll(); // Close any login-related dialogs
         showToast({
           title: "로그인이 완료되었습니다.",
@@ -119,7 +120,7 @@ export default function OverlayApp({
   const handleSave = async (finalData?: Partial<NoteData>) => {
     // Merge current state with finalData from editor (to avoid async state lag)
     const currentNote = { ...note, ...finalData };
-    console.log("Saving note (Overlay):", currentNote);
+    logger.debug("Saving note (Overlay)");
     setIsSaving(true);
 
     try {
@@ -198,7 +199,7 @@ export default function OverlayApp({
 
       onClose();
     } catch (e: unknown) {
-      console.error("Save failed:", e);
+      logger.error("Save failed", { error: e });
       const msg = e instanceof Error ? e.message : "Unknown error occurred";
 
       const isAuthError =
@@ -267,7 +268,7 @@ export default function OverlayApp({
   };
 
   const handleRetake = async () => {
-    console.log("Retake capture requested");
+    logger.debug("Retake capture requested");
     // 1. 현재 오버레이 닫기 (새로운 캡쳐 영역 선택을 위해)
     onClose();
 

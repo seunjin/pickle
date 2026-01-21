@@ -12,6 +12,7 @@ import {
   type SupabaseClient,
 } from "@supabase/supabase-js";
 import { chromeStorageAdapter } from "./chromeStorageAdapter";
+import { logger } from "./logger";
 
 const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -61,7 +62,7 @@ export async function getSession(): Promise<Session | null> {
     }
     return null;
   } catch (error) {
-    console.error("[Supabase] getSession error:", error);
+    logger.error("[Supabase] getSession error", { error });
     return null;
   }
 }
@@ -91,7 +92,7 @@ export async function refreshSession(): Promise<Session | null> {
   try {
     const currentSession = await getSession();
     if (!currentSession?.refresh_token) {
-      console.warn("[Supabase] No refresh token available");
+      logger.warn("[Supabase] No refresh token available");
       return null;
     }
 
@@ -101,7 +102,7 @@ export async function refreshSession(): Promise<Session | null> {
     });
 
     if (error) {
-      console.error("[Supabase] Refresh failed:", error);
+      logger.error("[Supabase] Refresh failed", { error });
       await clearSession();
       return null;
     }
@@ -113,7 +114,7 @@ export async function refreshSession(): Promise<Session | null> {
 
     return null;
   } catch (error) {
-    console.error("[Supabase] refreshSession error:", error);
+    logger.error("[Supabase] refreshSession error", { error });
     return null;
   }
 }
@@ -135,13 +136,13 @@ export async function getValidSession(): Promise<Session | null> {
 
   // 이미 만료됨
   if (expiresAtMs <= now) {
-    console.log("[Supabase] Session expired, attempting refresh...");
+    logger.debug("[Supabase] Session expired, attempting refresh");
     return refreshSession();
   }
 
   // 만료 임박 (5분 이내)
   if (expiresAtMs - now < TOKEN_REFRESH_MARGIN_MS) {
-    console.log("[Supabase] Session expiring soon, refreshing...");
+    logger.debug("[Supabase] Session expiring soon, refreshing");
     return refreshSession();
   }
 

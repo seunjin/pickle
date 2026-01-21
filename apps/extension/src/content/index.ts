@@ -1,4 +1,6 @@
-console.log("Pickle Content Script Loaded");
+import { logger } from "@shared/lib/logger";
+
+logger.info("Pickle Content Script Loaded");
 
 // [REMOVED] 레거시 웹 브리지 세션 동기화 코드
 // 새 인증 플로우에서는 chrome.identity.launchWebAuthFlow를 사용하므로
@@ -6,17 +8,14 @@ console.log("Pickle Content Script Loaded");
 
 // 캡쳐 및 메타데이터 요청 수신
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  console.log("Content Script Received Message:", request);
-
   if (request.action === "START_CAPTURE") {
     startCapture();
   } else if (request.action === "GET_METADATA") {
     try {
       const metadata = extractMetadata();
-      console.log("Metadata extracted:", metadata);
       sendResponse(metadata);
     } catch (e) {
-      console.error("Metadata extraction failed:", e);
+      logger.error("Metadata extraction failed", { error: e });
       sendResponse(null);
     }
   } else if (request.action === "GET_SELECTION") {
@@ -194,7 +193,7 @@ function startCapture() {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
       cleanup();
-      console.log("Capture cancelled by ESC key.");
+      logger.debug("Capture cancelled by ESC key");
     }
   };
 
@@ -209,7 +208,7 @@ function startCapture() {
 
     // 너무 작은 영역(실수 클릭) 무시
     if (rect.width < 10 || rect.height < 10) {
-      console.log("Capture area too small, ignoring.");
+      logger.debug("Capture area too small, ignoring");
       return;
     }
 

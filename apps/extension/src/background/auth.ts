@@ -5,6 +5,7 @@
  * 익스텐션 내부에서 Google OAuth 로그인을 처리합니다.
  */
 
+import { logger } from "@shared/lib/logger";
 import {
   clearSession,
   getSession,
@@ -40,7 +41,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
     });
 
     if (error || !data.url) {
-      console.error("[Auth] Failed to generate OAuth URL:", error);
+      logger.error("[Auth] Failed to generate OAuth URL", { error });
       return null;
     }
 
@@ -80,7 +81,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
         const { data: userData, error: userError } =
           await client.auth.getUser(accessToken);
         if (userError || !userData.user) {
-          console.error("[Auth] Failed to get user:", userError);
+          logger.error("[Auth] Failed to get user", { error: userError });
           return null;
         }
 
@@ -97,7 +98,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
         return session;
       }
 
-      console.error("[Auth] No code or tokens in callback URL");
+      logger.error("[Auth] No code or tokens in callback URL");
       return null;
     }
 
@@ -106,7 +107,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
       await client.auth.exchangeCodeForSession(code);
 
     if (sessionError || !sessionData.session) {
-      console.error("[Auth] Failed to exchange code:", sessionError);
+      logger.error("[Auth] Failed to exchange code", { error: sessionError });
       return null;
     }
 
@@ -115,7 +116,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
 
     return sessionData.session;
   } catch (error) {
-    console.error("[Auth] OAuth flow error:", error);
+    logger.error("[Auth] OAuth flow error", { error });
     return null;
   }
 }
@@ -125,7 +126,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
  */
 export async function logout(): Promise<void> {
   await clearSession();
-  console.log("[Auth] Logged out");
+  logger.debug("[Auth] Logged out");
 }
 
 /**

@@ -1,5 +1,6 @@
 import type { Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { logger } from "../lib/logger";
 
 interface UseSessionReturn {
   session: Session | null;
@@ -18,7 +19,7 @@ export function useSession(): UseSessionReturn {
   useEffect(() => {
     // 개발 모드 (chrome API 없음) 체크
     if (typeof chrome === "undefined" || !chrome.storage) {
-      console.warn("[useSession] chrome.storage not available (dev mode)");
+      logger.warn("[useSession] chrome.storage not available (dev mode)");
       return;
     }
 
@@ -45,7 +46,7 @@ export function useSession(): UseSessionReturn {
 
   const signOut = () => {
     if (typeof chrome === "undefined" || !chrome.storage) {
-      console.warn("[useSession] chrome.storage not available (dev mode)");
+      logger.warn("[useSession] chrome.storage not available (dev mode)");
       return;
     }
     chrome.storage.local.remove("supabaseSession");

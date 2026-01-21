@@ -1,4 +1,5 @@
 import { sendMessageToContentScript } from "@background/messaging";
+import { logger } from "@shared/lib/logger";
 import { setNote } from "@shared/storage";
 import type { PageMetadata } from "@shared/types";
 
@@ -38,7 +39,7 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
       title: metadata.title, // [추가] 추출된 제목을 에디터의 초기 제목으로 설정
     });
   } catch (error) {
-    console.warn("메타데이터 추출 실패 (Retry Failed):", error);
+    logger.warn("메타데이터 추출 실패 (Retry Failed)", { error });
 
     // 실패 시 기본 데이터로 저장 (Fallback)
     await setNote(tab.id, {

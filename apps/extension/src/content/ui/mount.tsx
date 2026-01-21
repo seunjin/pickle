@@ -1,5 +1,6 @@
 import { OVERLAY_DIMENSIONS } from "@shared/layout";
 import { extensionRuntime } from "@shared/lib/extension-api";
+import { logger } from "@shared/lib/logger";
 
 const MOUNT_ID = "pickle-overlay-root";
 
@@ -71,7 +72,7 @@ extensionRuntime.onMessage.addListener(
       if (request.tabId) {
         mountOverlay(request.tabId);
       } else {
-        console.error("Tab ID missing in OPEN_OVERLAY request");
+        logger.error("Tab ID missing in OPEN_OVERLAY request");
       }
       sendResponse({ status: "opened" });
       return true;

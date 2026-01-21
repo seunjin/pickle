@@ -1,4 +1,5 @@
 import { sendMessageToContentScript } from "@background/messaging";
+import { logger } from "@shared/lib/logger";
 import { setNote } from "@shared/storage";
 
 export async function startCaptureFlow(tab: chrome.tabs.Tab) {
@@ -15,7 +16,7 @@ export async function startCaptureFlow(tab: chrome.tabs.Tab) {
   // 2. Content Script에 캡쳐 시작 요청
   sendMessageToContentScript(tab.id, { action: "START_CAPTURE" }).catch(
     (error) => {
-      console.warn("캡쳐 스크립트 연결 실패:", error);
+      logger.warn("캡쳐 스크립트 연결 실패", { error });
     },
   );
 }

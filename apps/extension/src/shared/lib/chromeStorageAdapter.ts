@@ -7,6 +7,7 @@
  */
 
 import type { SupportedStorage } from "@supabase/supabase-js";
+import { logger } from "./logger";
 
 export const chromeStorageAdapter: SupportedStorage = {
   /**
@@ -18,7 +19,7 @@ export const chromeStorageAdapter: SupportedStorage = {
       const value = result[key];
       return typeof value === "string" ? value : null;
     } catch (error) {
-      console.error("[ChromeStorageAdapter] getItem error:", error);
+      logger.error("[ChromeStorageAdapter] getItem error", { error });
       return null;
     }
   },
@@ -30,7 +31,7 @@ export const chromeStorageAdapter: SupportedStorage = {
     try {
       await chrome.storage.local.set({ [key]: value });
     } catch (error) {
-      console.error("[ChromeStorageAdapter] setItem error:", error);
+      logger.error("[ChromeStorageAdapter] setItem error", { error });
     }
   },
 
@@ -41,7 +42,7 @@ export const chromeStorageAdapter: SupportedStorage = {
     try {
       await chrome.storage.local.remove(key);
     } catch (error) {
-      console.error("[ChromeStorageAdapter] removeItem error:", error);
+      logger.error("[ChromeStorageAdapter] removeItem error", { error });
     }
   },
 };

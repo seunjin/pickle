@@ -2,6 +2,8 @@
  * Chrome Extension API를 브라우저 환경에서도 에러 없이 사용할 수 있도록 추상화한 유틸리티입니다.
  */
 
+import { logger } from "./logger";
+
 /**
  * 현재 익스텐션 컨텍스트가 유효한지 확인합니다.
  * 익스텐션이 재로드되면 기존 스크립트의 context는 invalidated 상태가 됩니다.
@@ -33,7 +35,7 @@ export const extensionStorage = {
           callback as (items: Record<string, any>) => void,
         );
       } catch (_e) {
-        console.warn(
+        logger.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
       }
@@ -64,7 +66,7 @@ export const extensionStorage = {
       try {
         chrome.storage.local.set(items, callback || (() => {}));
       } catch (_e) {
-        console.warn(
+        logger.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
       }
@@ -85,7 +87,7 @@ export const extensionStorage = {
       try {
         chrome.storage.local.remove(key, callback || (() => {}));
       } catch (_e) {
-        console.warn(
+        logger.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
       }
@@ -108,7 +110,7 @@ export const extensionStorage = {
         try {
           chrome.storage.onChanged.addListener(callback);
         } catch (_e) {
-          console.warn("[Pickle] Extension context invalidated.");
+          logger.warn("[Pickle] Extension context invalidated.");
         }
       } else {
         const handler = (
@@ -131,7 +133,7 @@ export const extensionStorage = {
         try {
           chrome.storage.onChanged.removeListener(callback);
         } catch (_e) {
-          console.warn("[Pickle] Extension context invalidated.");
+          logger.warn("[Pickle] Extension context invalidated.");
         }
       } else {
         // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
@@ -198,7 +200,7 @@ export const extensionRuntime = {
     if (getIsExtensionValid()) {
       window.close();
     } else {
-      console.log("[Mock] Extension popup would close here.");
+      logger.debug("[Mock] Extension popup would close here.");
     }
   },
   getURL: (path: string) => {
@@ -226,7 +228,7 @@ export const extensionRuntime = {
         try {
           chrome.runtime.onMessage.addListener(callback);
         } catch (_e) {
-          console.warn("[Pickle] Extension context invalidated.");
+          logger.warn("[Pickle] Extension context invalidated.");
         }
       } else {
         const handler = (
@@ -272,7 +274,7 @@ export const extensionRuntime = {
         try {
           chrome.runtime.onMessage.removeListener(callback);
         } catch (_e) {
-          console.warn("[Pickle] Extension context invalidated.");
+          logger.warn("[Pickle] Extension context invalidated.");
         }
       } else {
         // biome-ignore lint/suspicious/noExplicitAny: internal mock implementation
@@ -288,7 +290,7 @@ export const extensionRuntime = {
       try {
         chrome.runtime.sendMessage(message, callback || (() => {}));
       } catch (_e) {
-        console.warn(
+        logger.warn(
           "[Pickle] Extension context invalidated. Please refresh the page.",
         );
       }

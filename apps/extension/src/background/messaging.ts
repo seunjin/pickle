@@ -6,6 +6,7 @@
  * 이때 메시지를 보내면 "Receiving end does not exist" 에러가 발생합니다.
  * 이 함수는 에러 발생 시 동적으로 스크립트를 주입(Injection)하고 재시도하는 로직을 포함합니다.
  */
+import { logger } from "@shared/lib/logger";
 export async function sendMessageToContentScript(
   tabId: number,
   message: unknown,
@@ -21,9 +22,9 @@ export async function sendMessageToContentScript(
         // 탭 정보를 가져와 주입 가능한 페이지인지 확인합니다. (보안 정책 대응)
         const tab = await chrome.tabs.get(tabId);
         if (!tab.url || isRestrictedUrl(tab.url)) {
-          console.warn(
-            `Skipping script injection: Restricted URL detected (${tab.url || "unknown"})`,
-          );
+          logger.warn("Skipping script injection: Restricted URL detected", {
+            url: tab.url,
+          });
           throw new Error("CANNOT_INJECT_RESTRICTED_URL");
         }
 
@@ -42,7 +43,9 @@ export async function sendMessageToContentScript(
           return await chrome.tabs.sendMessage(tabId, message);
         }
       } catch (injectionError) {
-        console.error("Script injection or retry failed:", injectionError);
+        logger.error("Script injection or retry failed", {
+          error: injectionError,
+        });
         throw injectionError;
       }
     }

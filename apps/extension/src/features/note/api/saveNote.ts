@@ -4,6 +4,7 @@ import type {
   StoredNoteData,
 } from "@pickle/contracts/src/note";
 import { DEFAULT_STORAGE_LIMIT_BYTES } from "@pickle/contracts/src/storage";
+import { logger } from "@shared/lib/logger";
 import {
   clearSession,
   getValidSession,
@@ -71,19 +72,19 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       .single();
 
     if (wsError) {
-      console.error("Workspace Fetch Error:", wsError);
+      logger.error("Workspace Fetch Error", { error: wsError });
 
       // 🚨 토큰 만료 시 자동 갱신 시도 (L2 전략)
       if (
         wsError.code === "PGRST301" ||
         wsError.message.includes("JWT expired")
       ) {
-        console.log("[SaveNote] Token expired, attempting refresh...");
+        logger.debug("[SaveNote] Token expired, attempting refresh");
         const newSession = await refreshSession();
 
         if (newSession) {
           // 새 토큰으로 재시도
-          console.log("[SaveNote] Token refreshed, retrying save...");
+          logger.debug("[SaveNote] Token refreshed, retrying save");
           return saveNoteToSupabase(note);
         }
 
@@ -102,7 +103,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
     }
 
     if (!workspaceMember) {
-      console.error("No Workspace Found for User:", userId);
+      logger.error("No Workspace Found for User", { userId });
       return {
         success: false,
         error:
@@ -119,7 +120,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
     );
 
     if (usageError) {
-      console.error("Storage usage check failed:", usageError);
+      logger.error("Storage usage check failed", { error: usageError });
     } else {
       const usageInfo = Array.isArray(usage) ? usage[0] : usage;
       const { total_used_bytes, limit_bytes } = usageInfo || {
@@ -188,10 +189,9 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
           bitmap.close();
         }
       } catch (e) {
-        console.warn(
-          "[SaveNote] Failed to fetch bookmark image dimensions:",
-          e,
-        );
+        logger.warn("[SaveNote] Failed to fetch bookmark image dimensions", {
+          error: e,
+        });
       }
     }
 
@@ -277,7 +277,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       .single();
 
     if (error) {
-      console.error("Supabase Write Error:", error);
+      logger.error("Supabase Write Error", { error });
       return { success: false, error: error.message };
     }
 
@@ -287,7 +287,7 @@ export async function saveNoteToSupabase(note: CreateNoteInput) {
       debug: { filePath, workspaceId: workspaceMember.workspace_id },
     };
   } catch (error) {
-    console.error("Background Save Error:", error);
+    logger.error("Background Save Error", { error });
     return { success: false, error: (error as Error).message };
   }
 }

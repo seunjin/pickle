@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../index.css"; // Global Tailwind styles are Safe here!
 import { DialogProvider } from "@pickle/ui";
+import { logger } from "@shared/lib/logger";
 import OverlayApp from "../content/ui/OverlayApp";
 
 const root = document.getElementById("root");
@@ -15,7 +16,7 @@ const params = new URLSearchParams(window.location.search);
 const tabId = Number(params.get("tabId"));
 
 if (!tabId) {
-  console.error("Tab ID missing in Overlay Iframe URL");
+  logger.error("Tab ID missing in Overlay Iframe URL");
 }
 
 createRoot(root).render(

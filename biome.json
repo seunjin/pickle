@@ -64,7 +64,7 @@
   },
   "overrides": [
     {
-      "includes": ["apps/extension/**", "packages/icons/**", "packages/ui/**"],
+      "includes": ["packages/icons/**", "packages/ui/**", "**/vite.config.ts"],
       "linter": {
         "rules": {
           "suspicious": {

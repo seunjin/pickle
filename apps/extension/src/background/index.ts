@@ -1,6 +1,7 @@
 import { startBookmarkFlow } from "@features/bookmark/background";
 import { startCaptureFlow } from "@features/capture/background";
 import { saveNoteToSupabase } from "@features/note/api/saveNote";
+import { logger } from "@shared/lib/logger";
 import { clearNote, setNote, updateNote } from "@shared/storage";
 import type { CaptureData, PageMetadata, ViewType } from "@shared/types";
 import {
@@ -13,7 +14,7 @@ import {
 import { setupContextMenus } from "./contextMenus";
 import { sendMessageToContentScript } from "./messaging";
 
-console.log("Pickle Background Service Worker Running");
+logger.info("Pickle Background Service Worker Running");
 
 /**
  * 1. Setup Context Menus
@@ -78,14 +79,16 @@ chrome.contextMenus.onClicked.addListener(
       sendMessageToContentScript(tab.id, { action: "GET_METADATA" })
         .then((metadata: PageMetadata) => {
           if (metadata && tab.id) {
-            console.log("Metadata fetched in background:", metadata);
+            logger.debug("Metadata fetched in background", { metadata });
             updateNote(tab.id, {
               pageMeta: metadata,
               // title은 에디터에서 관리하도록 제거
             });
           }
         })
-        .catch((err) => console.warn("Background metadata fetch failed:", err));
+        .catch((err) =>
+          logger.warn("Background metadata fetch failed", { error: err }),
+        );
     }
   },
 );
@@ -107,7 +110,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
     }
 
     if (targetTab?.id) {
-      console.log("Starting capture flow (shortcut) for tab:", targetTab.id);
+      logger.debug("Starting capture flow (shortcut)", { tabId: targetTab.id });
       await startCaptureFlow(targetTab);
     }
   }
@@ -155,7 +158,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendMessageToContentScript(tabId, { action: "GET_METADATA" })
             .then((metadata) => {
               if (metadata) {
-                console.log("Metadata fetched after capture:", metadata);
+                logger.debug("Metadata fetched after capture", { metadata });
                 updateNote(tabId, {
                   pageMeta: metadata as PageMetadata,
                   // title은 에디터에서 관리하도록 제거
@@ -163,7 +166,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               }
             })
             .catch((err) =>
-              console.warn("Capture metadata fetch failed:", err),
+              logger.warn("Capture metadata fetch failed", { error: err }),
             );
         },
       );
@@ -197,7 +200,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: !!session, session });
       })
       .catch((error) => {
-        console.error("Login failed:", error);
+        logger.error("Login failed", { error });
         sendResponse({ success: false, error: error.message });
       });
     return true; // 비동기 응답 대기
@@ -301,11 +304,11 @@ chrome.runtime.onMessageExternal.addListener(
   (message, _sender, sendResponse) => {
     // 웹에서 로그인 성공 후 세션 정보를 보내주는 경우
     if (message.type === "SYNC_SESSION" && message.session) {
-      console.log("Session received from Web:", message.session);
+      logger.debug("Session received from Web");
 
       // 받은 세션을 익스텐션의 로컬 스토리지에 저장합니다.
       chrome.storage.local.set({ supabaseSession: message.session }, () => {
-        console.log("Session saved to local storage");
+        logger.debug("Session saved to local storage");
         sendResponse({ success: true });
       });
       return true; // 비동기 응답 대기
