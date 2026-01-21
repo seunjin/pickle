@@ -45,7 +45,7 @@ export const SidebarItemBase = ({
 
           <span
             className={cn(
-              "truncate text-[15px] text-base-muted-foreground leading-[15px] transition-colors group-hover:text-base-foreground",
+              "truncate text-[15px] text-base-muted-foreground leading-[1.1] transition-colors group-hover:text-base-foreground",
               active && "text-base-primary group-hover:text-base-primary",
               !active && forceFocus && "text-base-foreground",
               active &&
