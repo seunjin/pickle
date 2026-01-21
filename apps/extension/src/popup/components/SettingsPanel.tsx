@@ -45,7 +45,7 @@ export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
   };
 
   return (
-    <div className="flex h-full w-full flex-col bg-neutral-900 text-white">
+    <div className="grid h-full w-full grid-rows-[auto_1fr_auto] bg-neutral-900 text-white">
       {/* Header */}
       <div className="flex items-center gap-2 border-neutral-800 border-b p-4">
         <button
@@ -60,7 +60,7 @@ export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
       </div>
 
       {/* Content */}
-      <ScrollArea className="max-h-[400px] flex-1">
+      <ScrollArea className="overflow-auto">
         <div className="p-4">
           <section className="mb-4">
             <h3 className="mb-3 font-semibold text-neutral-400 text-xs uppercase tracking-wider">
@@ -101,7 +101,7 @@ export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="flex flex-col gap-2">
               {shortcuts ? (
                 <>
                   <ShortcutRecorder
@@ -159,15 +159,14 @@ export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
             </Button>
           </section>
         </div>
-
-        {/* Footer */}
-        <div className="border-neutral-800 border-t p-4">
-          <p className="text-center text-[10px] text-neutral-600">
-            Pickle Extension v1.0.0
-            <br />© 2026 Pickle Note. All rights reserved.
-          </p>
-        </div>
       </ScrollArea>
+      {/* Footer */}
+      <div className="border-neutral-800 border-t p-4">
+        <p className="text-center text-[10px] text-neutral-600">
+          Pickle Extension v1.0.0
+          <br />© 2026 Pickle Note. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 }
