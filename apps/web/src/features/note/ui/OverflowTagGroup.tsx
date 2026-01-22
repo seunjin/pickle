@@ -2,10 +2,10 @@
 
 import type { Tag } from "@pickle/contracts/src/tag";
 import {
+  OriginTooltip,
+  OriginTooltipContent,
+  OriginTooltipTrigger,
   TAG_VARIANTS,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
 } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useLayoutEffect, useRef, useState } from "react";
@@ -139,13 +139,13 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
           })}
         </div>
         {overflowCount > 0 && (
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <OriginTooltip>
+            <OriginTooltipTrigger asChild>
               <span className="shrink-0 cursor-pointer font-medium text-[12px] text-neutral-600 hover:text-base-muted-foreground">
                 +{overflowCount}
               </span>
-            </TooltipTrigger>
-            <TooltipContent
+            </OriginTooltipTrigger>
+            <OriginTooltipContent
               side="bottom"
               align="start"
               sideOffset={5}
@@ -170,8 +170,8 @@ export function OverflowTagGroup({ tags }: OverflowTagGroupProps) {
                   </div>
                 );
               })}
-            </TooltipContent>
-          </Tooltip>
+            </OriginTooltipContent>
+          </OriginTooltip>
         )}
       </div>
     </div>

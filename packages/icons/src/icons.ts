@@ -32,6 +32,7 @@ import IconLogoutMini12 from "./react/IconLogoutMini12";
 import IconMove16 from "./react/IconMove16";
 import IconNoteEmpty20 from "./react/IconNoteEmpty20";
 import IconNoteFull20 from "./react/IconNoteFull20";
+import IconNotice16 from "./react/IconNotice16";
 import IconPlus16 from "./react/IconPlus16";
 import IconPlus20 from "./react/IconPlus20";
 import IconRefresh16 from "./react/IconRefresh16";
@@ -82,6 +83,7 @@ export {
   IconMove16,
   IconNoteEmpty20,
   IconNoteFull20,
+  IconNotice16,
   IconPlus16,
   IconPlus20,
   IconRefresh16,
@@ -133,6 +135,7 @@ export const ICON_PALETTE = {
   move_16: IconMove16,
   note_empty_20: IconNoteEmpty20,
   note_full_20: IconNoteFull20,
+  notice_16: IconNotice16,
   plus_16: IconPlus16,
   plus_20: IconPlus20,
   refresh_16: IconRefresh16,

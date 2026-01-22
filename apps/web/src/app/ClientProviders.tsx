@@ -1,7 +1,7 @@
 "use client";
 
 import type { AppUser, Workspace } from "@pickle/contracts";
-import { DialogProvider, Toaster, TooltipProvider } from "@pickle/ui";
+import { DialogProvider, OriginTooltipProvider, Toaster } from "@pickle/ui";
 /**
  * 클라이언트 사이드 Provider들을 통합 관리합니다.
  * 계층 구조: Query -> Session -> Dialog
@@ -33,10 +33,10 @@ export function ClientProviders({
         initialWorkspace={initialWorkspace}
       >
         <DialogProvider>
-          <TooltipProvider>
+          <OriginTooltipProvider>
             {children}
             <Toaster />
-          </TooltipProvider>
+          </OriginTooltipProvider>
         </DialogProvider>
       </SessionProvider>
     </QueryProvider>

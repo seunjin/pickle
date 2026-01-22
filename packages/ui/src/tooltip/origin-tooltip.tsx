@@ -1,8 +1,8 @@
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type * as React from "react";
-import { cn } from "./lib/utils";
+import { cn } from "../lib/utils";
 
-function TooltipProvider({
+function OriginTooltipProvider({
   delayDuration = 0,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
@@ -15,23 +15,23 @@ function TooltipProvider({
   );
 }
 
-function Tooltip({
+function OriginTooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return (
-    <TooltipProvider>
+    <OriginTooltipProvider>
       <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
+    </OriginTooltipProvider>
   );
 }
 
-function TooltipTrigger({
+function OriginTooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
-function TooltipContent({
+function OriginTooltipContent({
   className,
   sideOffset = 0,
   children,
@@ -53,11 +53,20 @@ function TooltipContent({
       >
         {children}
         {useArrow && (
-          <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground" />
+          <TooltipPrimitive.Arrow
+            className={cn(
+              "z-50 size-2.5 translate-y-[calc(-50%_-_0px)] rotate-45 bg-neutral-700 fill-neutral-700 shadow-b-standard",
+            )}
+          />
         )}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
+export {
+  OriginTooltip,
+  OriginTooltipTrigger,
+  OriginTooltipContent,
+  OriginTooltipProvider,
+};

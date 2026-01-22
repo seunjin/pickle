@@ -10,8 +10,13 @@ export type { SidebarItemBaseProps };
 export const SidebarNavItem = ({
   badge,
   icon,
+  rightSection,
   ...props
-}: Omit<SidebarItemBaseProps, "icon"> & { badge?: number; icon: IconName }) => {
+}: Omit<SidebarItemBaseProps, "icon" | "rightSection"> & {
+  badge?: number;
+  icon: IconName;
+  rightSection?: React.ReactNode;
+}) => {
   const badgeElement =
     badge !== undefined && badge > 0 ? (
       <span
@@ -43,7 +48,7 @@ export const SidebarNavItem = ({
           )}
         />
       }
-      rightSection={badgeElement}
+      rightSection={rightSection ?? badgeElement}
     />
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@pickle/icons";
-import { ScrollArea } from "@pickle/ui";
+import { ScrollArea, Tooltip } from "@pickle/ui";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -51,6 +51,14 @@ export const Sidebar = () => {
   });
 
   const inboxTotalCount = inboxData?.totalCount || 0;
+
+  // 휴지통 노트 목록 조회 (알림용, workspace 로드 후에만 실행)
+  const { data: trashData } = useQuery({
+    ...noteQueries.trash({ workspaceId }),
+    enabled: !!workspaceId,
+  });
+
+  const trashTotalCount = trashData?.totalCount || 0;
 
   const handleCreateFolder = (name: string) => {
     setIsCreatingFolder(false);
@@ -232,6 +240,21 @@ export const Sidebar = () => {
               icon="trash_16"
               label="휴지통"
               active={pathname === "/trash"}
+              rightSection={
+                trashTotalCount > 0 && (
+                  <Tooltip
+                    trigger={
+                      <Icon
+                        name="notice_16"
+                        className="cursor-pointer text-neutral-600 transition-colors hover:text-neutral-500"
+                      />
+                    }
+                  >
+                    휴지통에 항목이 있습니다. 스토리지 용량 확보를 위해서 <br />
+                    휴지통을 비워주세요.
+                  </Tooltip>
+                )
+              }
             />
           </div>
         </div>

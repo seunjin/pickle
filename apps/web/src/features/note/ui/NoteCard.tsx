@@ -43,7 +43,7 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
             {note.title}
           </div>
 
-          <p className="truncate text-[13px] text-neutral-650 leading-none">
+          <p className="truncate text-[13px] text-neutral-650 leading-[1.1]">
             {note.meta?.url}
           </p>
         </div>
