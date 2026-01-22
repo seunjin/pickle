@@ -22,6 +22,9 @@ export default async function SigninPage(props: {
   if (user) {
     if (appUser && appUser.status === "active") {
       redirect(next || "/dashboard");
+    } else {
+      // 가입 절차가 남은 경우
+      redirect("/signup");
     }
   }
 

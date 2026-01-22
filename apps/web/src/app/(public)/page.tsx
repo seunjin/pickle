@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
 
 export const metadata: Metadata = {
@@ -10,11 +9,9 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const { user, appUser } = await getServerAuth();
-
-  // 로그인 상태이며 활성화된 유저라면 대시보드로
-  if (user && appUser?.status === "active") {
-    redirect("/dashboard");
-  }
+  const isActive = user && appUser?.status === "active";
+  const isPending = user && (!appUser || appUser.status === "pending");
+  const isLoggedAny = !!user;
 
   return (
     <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] py-10">
@@ -40,22 +37,24 @@ export default async function Home() {
 
         <div className="flex flex-col gap-4">
           <Link
-            href="/signin"
+            href={isActive ? "/dashboard" : isPending ? "/signup" : "/signin"}
             className="flex h-[48px] min-w-[200px] items-center justify-center rounded-[8px] bg-base-primary font-bold text-[16px] text-black transition-opacity hover:opacity-90"
           >
             시작하기
           </Link>
-          <div className="flex items-center justify-center gap-[5px]">
-            <span className="text-[14px] text-gray-500 leading-none">
-              계정이 없으신가요?
-            </span>
-            <Link
-              href="/signup"
-              className="text-center font-medium text-[14px] text-base-muted-foreground transition-colors hover:text-base-primary"
-            >
-              회원가입
-            </Link>
-          </div>
+          {!isLoggedAny && (
+            <div className="flex items-center justify-center gap-[5px]">
+              <span className="text-[14px] text-gray-500 leading-none">
+                계정이 없으신가요?
+              </span>
+              <Link
+                href="/signup"
+                className="text-center font-medium text-[14px] text-base-muted-foreground transition-colors hover:text-base-primary"
+              >
+                회원가입
+              </Link>
+            </div>
+          )}
         </div>
       </div>
       <footer className="text-center text-gray-500 text-sm">

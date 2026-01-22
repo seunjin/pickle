@@ -3,6 +3,7 @@ export * from "./checkbox";
 export * from "./constants/tag";
 export * from "./dialog";
 export * from "./dropdown-menu";
+export * from "./error/ErrorView";
 export * from "./input";
 export * from "./popover";
 export * from "./resizable";
