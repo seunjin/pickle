@@ -25,7 +25,7 @@ export const SidebarItemBase = ({
   return (
     <div
       className={cn(
-        "group flex items-center rounded-lg transition-[background-color] hover:bg-base-foreground-background",
+        "group flex items-center rounded-md transition-[background-color] hover:bg-base-foreground-background",
         forceFocus && "bg-base-foreground-background",
         active &&
           "bg-base-primary-active-background hover:bg-base-primary-active-background",

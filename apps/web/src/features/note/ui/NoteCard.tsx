@@ -25,7 +25,7 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
       {/* thumbnail */}
       {note.type === "text" ? (
         // 텍스트 노트의 경우
-        <div className="overflow-hidden px-5 pt-4 pb-5">
+        <div className="overflow-hidden px-4 pt-3 pb-4">
           <p className="line-clamp-6 font-medium text-[13px] text-neutral-300 leading-normal">
             {note.data.text}
           </p>
@@ -35,15 +35,23 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
       )}
 
       {/* content */}
-      <div className="grid min-w-0 grid-rows-[auto_1fr] px-5 pt-4 pb-5">
-        <div className="min-w-0 pb-[22px]">
+      <div className="grid min-w-0 grid-rows-[auto_1fr] px-4 pt-3 pb-4">
+        <div className="min-w-0 pb-[14px]">
           <NoteCardHeader note={note} type={note.type} />
 
-          <div className="ellipsis mb-2 line-clamp-1 font-semibold text-[15px] text-neutral-100 leading-[1.3]">
+          <div
+            className={cn(
+              "ellipsis mb-1 line-clamp-1 font-semibold text-[15px] text-neutral-100 leading-[1.3]",
+            )}
+          >
             {note.title}
           </div>
 
-          <p className="truncate text-[13px] text-neutral-650 leading-[1.1]">
+          <p
+            className={cn(
+              "truncate text-[13px] text-neutral-650 leading-[1.1]",
+            )}
+          >
             {note.meta?.url}
           </p>
         </div>
