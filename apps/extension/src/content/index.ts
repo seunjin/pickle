@@ -109,10 +109,6 @@ async function initShortcutListener() {
 
 initShortcutListener();
 
-// [REMOVED] 레거시 웹 브리지 세션 동기화 코드
-// 새 인증 플로우에서는 chrome.identity.launchWebAuthFlow를 사용하므로
-// postMessage 기반 세션 동기화가 더 이상 필요하지 않습니다.
-
 // 캡쳐 및 메타데이터 요청 수신
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "START_CAPTURE") {
@@ -166,8 +162,7 @@ function extractMetadata() {
       }
     }
 
-    // 2. Fallback to default /favicon.ico (Check if it exists can't be done easily synchronously, so we allow it or try google)
-    // 3. Ultimate Fallback: Google S2 Service
+    // 2. Fallback to default /favicon.ico
     return `https://www.google.com/s2/favicons?domain=${window.location.hostname}&sz=64`;
   };
 
@@ -230,8 +225,10 @@ function startCapture() {
   overlay.style.justifyContent = "center";
   overlay.style.alignItems = "center";
   overlay.id = "pickle-capture-overlay";
+  overlay.tabIndex = -1; // 키보드 이벤트를 확실히 받기 위해 포커스 가능하게 설정
 
   document.body.appendChild(overlay);
+  overlay.focus(); // 생성 즉시 포커스
 
   // Selection Box 생성
   const selectionBox = document.createElement("div");
@@ -282,26 +279,31 @@ function startCapture() {
     e.stopPropagation();
   };
 
+  // ESC 키 핸들러
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      cleanup();
+      logger.debug("Capture cancelled by ESC key");
+    }
+  };
+
   // 정리 함수 (공통 로직)
   const cleanup = () => {
-    document.body.removeChild(overlay);
-    document.body.removeChild(selectionBox);
-    document.body.removeChild(customCursor);
+    if (document.body.contains(overlay)) document.body.removeChild(overlay);
+    if (document.body.contains(selectionBox))
+      document.body.removeChild(selectionBox);
+    if (document.body.contains(customCursor))
+      document.body.removeChild(customCursor);
     document.body.style.cursor = "default";
 
     overlay.removeEventListener("mousedown", onMouseDown);
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
-    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keydown", onKeyDown, true);
+    document.removeEventListener("keydown", onKeyDown, true);
     document.removeEventListener("mousemove", updateCursor);
-  };
-
-  // ESC 키 핸들러
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      cleanup();
-      logger.debug("Capture cancelled by ESC key");
-    }
   };
 
   const onMouseUp = () => {
@@ -320,7 +322,6 @@ function startCapture() {
     }
 
     // 화면이 업데이트(Overlay 제거)된 후 메시지 전송
-    // requestAnimationFrame을 두 번 호출하여 확실하게 페인트 이후에 실행되도록 함
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         chrome.runtime.sendMessage({
@@ -342,5 +343,6 @@ function startCapture() {
   overlay.addEventListener("mousedown", onMouseDown);
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("mouseup", onMouseUp);
-  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keydown", onKeyDown, true);
+  document.addEventListener("keydown", onKeyDown, true);
 }

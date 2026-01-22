@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@pickle/ui/base.css";
+@import "@pickle/ui/toast.css";
 
 /* apps/extension/src 기준 3단계 상위가 루트(pickle-note) */
 @source "../../../packages/ui/src/**/*.{ts,tsx}";

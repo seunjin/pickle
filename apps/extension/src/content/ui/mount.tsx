@@ -58,6 +58,16 @@ export function mountOverlay(tabId: number) {
     }
   };
   window.addEventListener("message", handleMessage);
+
+  // ESC key on Host Page to close overlay
+  const handleEsc = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      iframe.remove();
+      window.removeEventListener("message", handleMessage);
+      window.removeEventListener("keydown", handleEsc);
+    }
+  };
+  window.addEventListener("keydown", handleEsc);
 }
 
 // Global Message Listener for Opening Overlay
