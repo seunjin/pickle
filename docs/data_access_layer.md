@@ -39,36 +39,37 @@ const createNote = async (note) => {
 
 ### 2.2 Chrome Extension (`apps/extension`)
 
-익스텐션 또한 **독립적인 클라이언트**로서 Supabase와 직접 통신합니다.
+익스텐션은 웹보다 파편화된 환경(Multiple Frames, Service Worker Life-cycle)을 다루기 위해 **백그라운드 조정자(Background Orchestrator)** 모델을 사용합니다.
 
-*   **Background Script**: `packages/extension/src/background/index.ts`에서 Supabase Client를 초기화하고 DB에 직접 접근합니다.
-*   **Service Worker**: Manifest V3 환경에서도 `supabase-js`는 정상 작동합니다. (단, `localStorage` 대신 `chrome.storage` 사용 등의 어댑터 설정 필요 가능성 있음)
-*   **Environment**: API URL과 Anon Key는 빌드 타임에 주입되거나 설정 파일로 관리합니다.
-
----
-
-## 3. 보안 모델 (Security Model)
-
-클라이언트가 DB에 직접 접근하므로, **보안은 애플리케이션 코드가 아닌 데이터베이스 계층(RLS)에서 담당**합니다.
-
-1.  **Authentication (인증)**:
-    *   Web: Supabase Auth Cookie 세션
-    *   Extension: Web에서 동기화된 `access_token`을 사용하여 인증된 요청 수행
-2.  **Authorization (인가)**:
-    *   **RLS (Row Level Security)** 정책을 통해 "내 데이터만 볼 수 있음", "내 데이터만 쓸 수 있음"을 엄격히 강제합니다.
-    *   예: `auth.uid() = user_id`
+*   **Background Orchestration**: 단순히 DB에 요청을 보내는 것을 넘어, `startCaptureFlow`, `startBookmarkFlow` 등 복잡한 비즈니스 로직의 시퀀스를 관리합니다. 
+*   **State Caching (`tabHoverCache`)**: `iframe` 간의 물리적 격리를 극복하기 위해, 사용자의 마우스 호버 상태 등 휘발성 데이터를 백그라운드 메모리에 캐싱하여 실시간으로 프레임 간 컨텍스트를 동기화합니다.
+*   **Communication Safety**: 익스텐션의 세션 유효성 검증과 데이터 직렬화(Serialization) 안정성을 확보하기 위해 `safeSendMessage` 유틸리티를 통한 방어적 통신을 수행합니다.
+*   **Direct DB Access**: 보안이 보장된 백그라운드 환경에서 `supabase-js`를 초기화하고, RLS 권한 하에 직접 DB 쓰기 작업을 수행하여 웹 애플리케이션과의 데이터 정합성을 유지합니다.
 
 ---
 
-## 4. 데이터 흐름 요약
+## 3. 보안 및 권한 모델 (Security & Authorization)
 
-| 구분 | 기존 방식 (Legacy) | **변경 후 (New Standard)** |
+클라이언트가 DB에 직접 접근하므로, 보안의 핵심은 **데이터베이스 계층(RLS)**에 위치합니다.
+
+1.  **인증 (Authentication)**:
+    - **Web**: Supabase Auth 쿠키 기반 세션 유지.
+    - **Extension**: PKCE 플로우로 획득한 토큰을 `chrome.storage.local`에 보관하고, 요청 헤더에 자동으로 주입하여 인증된 세션을 형성합니다.
+2.  **인가 (Authorization - RLS)**:
+    - 모든 테이블에 `auth.uid() = user_id` 정책을 적용하여 "내 데이터만 제어 가능" 원칙을 물리적으로 강제합니다.
+    - 민감한 워크스페이스 관리 로직은 RPC(Remote Procedure Call)를 통해 서버 사이드에서 검증 후 처리합니다.
+
+---
+
+## 4. 데이터 흐름 요약 (Data Flow Matrix)
+
+| 구분 | 흐름 (Flow) | 보안 통제 (Security) |
 | :--- | :--- | :--- |
-| **Web Read/Write** | Client -> API Route -> DB | **Client -> DB (Direct)** |
-| **Extension Write** | Extension -> Web API -> DB | **Extension -> DB (Direct)** |
-| **Security** | API Route에서 검증 | **DB RLS에서 검증** |
+| **Web App** | Client -> Supabase Client -> DB | Browser Session + RLS |
+| **Extension** | Content Script -> Background -> DB | Ext. Storage + RLS + Safe Messaging |
+| **Assets/Binary** | Background -> Storage -> Meta DB | Workspace Limit RPC + RLS |
 
-> **주의**: 복잡한 서버 사이드 로직(예: 결제 처리, 민감정보 가공)이 필요한 경우에만 제한적으로 `features/*/api` 내부의 Server Actions나 Supabase Edge Functions를 사용합니다.
+> **Tech Lead's Note**: 복잡한 서버 사이드 비즈니스 로직(결제 처리, 대량 데이터 가공)이 필요한 경우에만 Edge Functions를 사용하며, 그 외 모든 일반 데이터 처리는 **직접 연결**을 원칙으로 하여 아키텍처 복잡도를 최소화합니다.
 
 ---
 

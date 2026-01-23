@@ -26,17 +26,19 @@ Shadow DOM만으로는 완벽한 격리(특히 REM 단위 및 부모 Transform �
 apps/extension/src/
 ├── overlay/              # 격리된 Iframe 환경
 │   ├── index.html        # Iframe Host HTML (투명 배경)
-│   └── index.tsx         # React Entry Point (기존 OverlayApp 로드)
+│   └── index.tsx         # React Entry Point (OverlayApp 로드)
 ├── content/
-│   └── ui/
-│       └── mount.tsx     # Iframe 주입 로직 (Content Script)
+│   ├── index.ts          # 메시지 수신 및 단축키 감지
+│   └── lib/
+│       └── mount-overlay.ts  # Iframe 주입 로직 (Top Frame 체크 포함)
 └── shared/
     └── layout.ts         # 공통 사이즈 상수 (width, height)
 ```
 
 ### 🧩 데이터 흐름
 1.  **Background**: 단축키/메뉴 클릭 시 `OPEN_OVERLAY` 메시지 전송.
-2.  **Content Script (`mount.tsx`)**:
+2.  **Content Script (`mount-overlay.ts`)**:
+    *   **중요**: 주입을 시도하는 프레임이 최상위(`window === window.top`)인지 확인합니다.
     *   `src/overlay/index.html`을 가리키는 `<iframe>` 생성.
     *   `document.documentElement`에 append.
     *   Iframe 크기와 위치를 지정.
@@ -48,7 +50,12 @@ apps/extension/src/
 
 ## 3. 구현 핵심 포인트
 
-### A. Manifest 설정 (`manifest.json`)
+### A. 멀티 프레임 대응 (Top Frame Policy)
+사용자가 `iframe` 내의 요소를 작업(예: 이미지 저장)하더라도, 오버레이 UI는 반드시 **최상위 부모 창(Top Frame)**에 떠야 합니다.
+- **이유**: `iframe`은 크기가 가변적이며 매우 작을 수 있어, UI가 잘리거나 조작이 불가능해질 수 있습니다.
+- **구현**: 모든 프레임에 주입된 컨텐트 스크립트가 메시지를 받으면, 자신이 Top Frame인 경우에만 `mountOverlay`를 수행하고 나머지는 무시합니다.
+
+### B. Manifest 설정 (`manifest.json`)
 Iframe으로 로드하려면 해당 HTML이 `web_accessible_resources`에 등록되어 있어야 합니다.
 
 ```json
@@ -60,7 +67,7 @@ Iframe으로 로드하려면 해당 HTML이 `web_accessible_resources`에 등록
 ]
 ```
 
-### B. Vite 빌드 설정 (`vite.config.ts`)
+### C. Vite 빌드 설정 (`vite.config.ts`)
 HTML 파일을 빌드 엔트리로 추가해야 합니다.
 
 ```ts
@@ -68,12 +75,17 @@ build: {
   rollupOptions: {
     input: {
       overlay: path.resolve(__dirname, "src/overlay/index.html"),
+      content: path.resolve(__dirname, "src/content/index.ts"),
     },
+    output: {
+      entryFileNames: "assets/[name].js",
+      chunkFileNames: "assets/[name].js",
+    }
   },
 }
 ```
 
-### C. 클릭 통과 처리 (Click-through)
+### D. 클릭 통과 처리 (Click-through)
 Iframe이 화면의 일부만 덮도록 하거나, 투명 영역 클릭을 처리해야 합니다.
 현재 구현은 **위젯 크기만큼만 Iframe을 리사이징**하여 나머지 영역의 상호작용을 보장합니다.
 
@@ -85,15 +97,16 @@ export const OVERLAY_DIMENSIONS = {
   margin: 16,
 };
 
-// mount.tsx
-iframe.style.width = `${OVERLAY_DIMENSIONS.width + buffer}px`; // 위젯 크기만큼만 할당
+// mount-overlay.ts
+iframe.style.width = `${OVERLAY_DIMENSIONS.width}px`; 
 ```
 
 ---
 
 ## 4. 최종 체크리스트 (Checklist)
 
-- [ ] **Iframe 사용**: UI가 복잡하거나 스타일 격리가 중요하다면 Shadow DOM 대신 Iframe을 사용했는가?
-- [ ] **Manifest 등록**: HTML 파일이 web accessible 리소스에 있는가?
-- [ ] **빌드 엔트리**: `vite.config.ts`에 HTML 파일이 input으로 잡혀있는가?
-- [ ] **사이즈 관리**: Iframe 크기가 콘텐츠를 가리지 않도록 적절히 제어되는가?
+- [x] **Iframe 사용**: UI 격리를 위해 Iframe 아키텍처를 채택했는가?
+- [x] **Top Frame 전용 마운트**: UI가 `iframe` 내부에 갇히지 않도록 최상위 창 로직을 갖추었는가?
+- [x] **Stable Filenames**: 빌드 시 동적 임포트 에러 방지를 위해 고정 파일명을 사용하는가?
+- [x] **Manifest 등록**: HTML 파일이 web accessible 리소스에 있는가?
+- [x] **빌드 엔트리**: `vite.config.ts`에 HTML과 Content Script가 input으로 잡혀있는가?

@@ -1,16 +1,24 @@
-# Extension Authentication Flow (OAuth 기반)
+# Extension 인증 시스템 및 세션 생명주기 (Auth Architecture)
 
-이 문서는 Chrome Extension의 인증 플로우를 설명합니다. `chrome.identity.launchWebAuthFlow` API를 사용하여 익스텐션 내부에서 Google OAuth 로그인을 처리합니다.
+본 문서는 Pickle 크롬 익스텐션의 인증 메커니즘, OAuth 플로우, 그리고 웹 브라우저 환경에서의 세션 동기화 전략을 상세히 기술합니다.
 
-## 1. 개요 (Overview)
+---
 
-### 설계 원칙
-- **익스텐션 주체 인증**: 웹 브리지 없이 익스텐션에서 직접 로그인
-- **PKCE 지원**: MV3 Service Worker 환경에서 안전한 OAuth 플로우
-- **웹 세션 동기화**: 익스텐션 로그인 상태를 웹 애플리케이션으로 자동 전파
-- **Type-Safety 강화**: Any 타입을 제거하고 구체적인 인터페이스 정의 (CONVENTIONS 준수)
+## 1. 인증 설계 원칙 (Design Principles)
 
-### 아키텍처
+Pickle 익스텐션의 인증 시스템은 다음과 같은 수석 엔지니어링 원칙 하에 설계되었습니다:
+
+1.  **독립적 주체 인증 (Native Auth)**: 별도의 웹 브리지 없이 `chrome.identity.launchWebAuthFlow`를 통해 익스텐션 자체적으로 OAuth 플로우를 완결합니다.
+2.  **보안 강화된 PKCE**: MV3 Service Worker의 `localStorage` 제약을 극복하기 위해 `chrome.storage.local`을 백엔드로 하는 커스텀 스토리지 어댑터를 구현하여 PKCE(Proof Key for Code Exchange)를 지원합니다.
+3.  **지연 없는 세션 전파 (Web-Ext Sync)**: 익스텐션에서 획득한 세션을 웹 애플리케이션(`apps/web`)으로 즉각 전파하여 사용자에게 통합된 경험을 제공합니다.
+4.  **강력한 타입 안전성**: `SupabaseClient<Database>`와 구체적인 세션 인터페이스를 사용하여 런타임 캐스팅 에러를 방지합니다.
+
+---
+
+## 2. OAuth & 세션 갱신 아키텍처
+
+### 인증 시퀀스
+익스텐션 백그라운드는 수명이 짧은 Access Token의 한계를 극복하기 위해 **Silent Refresh** 패턴을 채택합니다.
 
 ```mermaid
 sequenceDiagram
@@ -19,203 +27,61 @@ sequenceDiagram
     participant Chrome as chrome.identity API
     participant Supabase as Supabase OAuth
 
-    User->>Ext: 로그인 버튼 클릭
-    Ext->>Supabase: OAuth URL 생성 (PKCE)
-    Ext->>Chrome: launchWebAuthFlow(authUrl)
-    Chrome->>User: Google 로그인 팝업
-    User->>Chrome: 로그인 완료
-    Chrome-->>Ext: Redirect URL with code
-    Ext->>Supabase: exchangeCodeForSession(code)
-    Supabase-->>Ext: Session (access_token + refresh_token)
-    Ext->>Ext: chrome.storage.local에 세션 저장
-    Ext-->>User: 로그인 완료!
+    User->>Ext: 로그인 시도 (LOGIN 메시지)
+    Ext->>Supabase: OAuth URL 생성 & PKCE 챌린지 준비
+    Ext->>Chrome: launchWebAuthFlow 실행
+    Chrome->>User: 로그인 팝업 노출
+    User->>Chrome: 인증 완료
+    Chrome-->>Ext: Redirect URL (with code)
+    Ext->>Supabase: 코드-세션 교환 (exchangeCodeForSession)
+    Supabase-->>Ext: Session (JWT + Refresh Token)
+    Ext->>Ext: chrome.storage.local에 영구 저장
+    Ext-->>User: 로그인 완료 피드백
 ```
 
-## 2. 세션 유지 정책 (Session Lifetime)
+### 세션 검증 알고리즘
+데이터 요청 시마다 `getValidSession()`을 호출하여 토큰의 유효성을 선제적으로 검사합니다.
+- **만료 5분 전 감지**: 토큰 만료가 5분 이내로 다가오면 백그라운드에서 자동으로 `refreshSession()`을 수행하여 애플리케이션 중단을 방지합니다.
+- **PGRST301 대응**: 예상치 못한 JWT 만료 에러 발생 시, 즉각적인 재시도(Retry) 로직을 통해 저장 실패를 최소화합니다.
 
-| 토큰 | 유효 기간 | 설정 위치 |
+---
+
+## 3. 확장 프로그램 메시징 API (Auth & Core)
+
+Background Service Worker는 모든 데이터 및 인증 요청의 중앙 게이트웨이 역할을 수행합니다.
+
+| Action (Message) | 설명 | 응답 페이로드 |
 |:---|:---|:---|
-| **Access Token** | 1시간 (3600초) | `config.toml` → `jwt_expiry` |
-| **Refresh Token** | Supabase 프로젝트 설정 (기본 7일~30일) | Dashboard → Auth Settings |
+| `LOGIN` | 구글 OAuth 흐름 시작 | `{ success, session }` |
+| `LOGOUT` | 로컬 세션 클리어 및 로그아웃 | `{ success }` |
+| `GET_SESSION` | 유효한 현재 세션 반환 (필요시 갱신) | `{ success, session }` |
+| `IS_LOGGED_IN` | 인증 상태 불리언 체크 | `{ success, loggedIn }` |
+| `SAVE_NOTE` | 백그라운드 DB 직접 쓰기 (RLS 적용) | `{ success, error? }` |
+| `RUN_*_FLOW` | 단축키 트리거 기반 저장 프로세스 실행 | `{ success, tabId }` |
 
-### 자동 갱신 로직
+---
 
-```typescript
-// shared/lib/supabase.ts - getValidSession()
-export async function getValidSession(): Promise<Session | null> {
-  const session = await getSession();
-  if (!session) return null;
+## 4. 웹-익스텐션 세션 동기화 (Sync Strategy)
 
-  const expiresAt = session.expires_at ?? 0;
-  const isExpiringSoon = expiresAt * 1000 - Date.now() < 5 * 60 * 1000; // 5분 전
+사용자가 익스텐션에서 로그인했을 때 웹 대시보드도 자동으로 로그인되도록 하는 브릿지 엔드포인트를 사용합니다.
 
-  if (isExpiringSoon) {
-    return refreshSession(); // 자동 갱신
-  }
-  return session;
-}
-```
+- **Sync 엔드포인트**: `https://picklenote.io/api/internal/auth/extension-sync`
+- **동작 원리**: 
+  1. 익스텐션이 성공적인 세션 획득 후 위 URL로 토큰을 전달합니다.
+  2. 서버 사이드에서 `Set-Cookie`를 통해 웹 도메인의 인증 쿠키를 설정합니다.
+  3. 보안을 위해 **일회용 암호화 토큰 방식**으로 고도화가 예정되어 있으며, 현재는 HTTPS 암호화 채널을 통한 파라미터 전달 방식을 사용 중입니다.
 
-### 사용자 경험
+---
 
-| 시나리오 | 동작 |
-|:---|:---|
-| Access Token 유효 | ✅ 그대로 사용 |
-| Access Token 만료 임박 (5분 이내) | ✅ 자동 갱신 (사용자 무감지) |
-| Refresh Token 만료 | ❌ 재로그인 필요 ("로그인 필요" 다이얼로그) |
+## 5. 보안 수칙 (Security Guidelines)
 
-## 3. 핵심 파일 구조
+- **Sensitive Data Storage**: 사용자 세션은 반드시 `sync`가 아닌 `local` 스토리지(`chrome.storage.local`)에 저장하여 외부 동기화 위협을 차단합니다.
+- **Serialization Safety**: `safeSendMessage`를 통해 전달되는 모든 인증 정보는 불변성(Immutability)을 보장하기 위해 직렬화 검증을 거칩니다.
+- **RLS Enforced**: 모든 DB 직접 호출은 Supabase RLS에 의존하며, Anon Key가 탈취되더라도 타인의 데이터에 접근할 수 없도록 스키마 수준에서 방어합니다.
 
-```
-apps/extension/src/
-├── background/
-│   ├── auth.ts              # OAuth 로그인 모듈 (launchOAuthFlow)
-│   └── index.ts             # LOGIN, LOGOUT 메시지 핸들러
-├── shared/lib/
-│   ├── chromeStorageAdapter.ts  # PKCE용 Custom Storage
-│   └── supabase.ts              # Supabase 클라이언트 래퍼
-└── content/ui/
-    └── OverlayApp.tsx       # 로그인 UI 연결
-```
+---
 
-## 4. Extension ID 고정
+## 6. 관련 기술 가이드
 
-`manifest.json`의 `key` 필드로 Extension ID를 고정합니다. 이를 통해:
-- 모든 개발자/환경에서 동일한 ID 사용
-- Supabase redirect URL과 일치 보장
-- 팀원 간 테스트 일관성
-
-```json
-{
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1Isp...",
-}
-```
-
-**현재 고정된 ID**: `pgbkfbhojodldapigoomjkglijnbjlkf`
-
-## 5. Supabase 설정
-
-### 로컬 개발 (config.toml)
-
-```toml
-[auth.external.google]
-enabled = true
-client_id = "env(GOOGLE_CLIENT_ID)"
-secret = "env(GOOGLE_CLIENT_SECRET)"
-redirect_uri = "http://127.0.0.1:54321/auth/v1/callback"
-
-# Extension redirect URL 필수 등록
-additional_redirect_urls = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "https://pgbkfbhojodldapigoomjkglijnbjlkf.chromiumapp.org/"
-]
-```
-
-### 프로덕션 (Supabase Dashboard)
-
-1. **Authentication → URL Configuration**
-2. **Redirect URLs**에 추가:
-   - `https://pgbkfbhojodldapigoomjkglijnbjlkf.chromiumapp.org/`
-
-## 6. 메시지 API
-
-Background Service Worker와 통신하는 메시지 API:
-
-| Action | 설명 | Response |
-|:---|:---|:---|
-| `LOGIN` | OAuth 로그인 실행 | `{ success, session }` |
-| `LOGOUT` | 세션 삭제 | `{ success }` |
-| `GET_SESSION` | 현재 세션 조회 | `{ success, session }` |
-| `GET_USER` | 현재 사용자 정보 | `{ success, user }` |
-| `IS_LOGGED_IN` | 로그인 상태 확인 | `{ success, loggedIn }` |
-
-### 사용 예시
-
-```typescript
-// 로그인 요청
-chrome.runtime.sendMessage({ action: "LOGIN" }, (response) => {
-  if (response?.success) {
-    console.log("로그인 성공:", response.session.user.email);
-  }
-});
-
-// 로그인 상태 확인
-chrome.runtime.sendMessage({ action: "IS_LOGGED_IN" }, (response) => {
-  console.log("로그인 여부:", response.loggedIn);
-});
-```
-
-## 7. PKCE Custom Storage
-
-MV3 Service Worker에는 `localStorage`가 없으므로, `chrome.storage.local` 기반 Custom Storage Adapter를 사용합니다.
-
-```typescript
-// shared/lib/chromeStorageAdapter.ts
-export const chromeStorageAdapter: SupportedStorage = {
-  getItem: async (key) => {
-    const result = await chrome.storage.local.get(key);
-    return typeof result[key] === "string" ? result[key] : null;
-  },
-  setItem: async (key, value) => {
-    await chrome.storage.local.set({ [key]: value });
-  },
-  removeItem: async (key) => {
-    await chrome.storage.local.remove(key);
-  },
-};
-```
-
-## 8. 에러 처리
-
-### 인증 에러 감지 (OverlayApp.tsx)
-
-```typescript
-const isAuthError =
-  errorMessage.includes("Unauthorized") ||
-  errorMessage.includes("만료") ||
-  errorMessage.includes("No Workspace");
-
-if (isAuthError) {
-  // 로그인 다이얼로그 표시
-  dialog.open(() => <Confirm ... />);
-}
-```
-
-### 토큰 만료 시 자동 갱신 (saveNote.ts)
-
-```typescript
-if (wsError.code === "PGRST301" || wsError.message.includes("JWT expired")) {
-  const newSession = await refreshSession();
-  if (newSession) {
-    return saveNoteToSupabase(note); // 재시도
-  }
-  await clearSession();
-  return { success: false, error: "세션이 만료되었습니다..." };
-}
-```
-
-## 9. 웹-익스텐션 세션 동기화 (Web-Ext Sync)
-
-익스텐션에서 로그인한 정보를 웹 사이트([picklenote.io](https://picklenote.io))와 공유하기 위해 `/api/internal/auth/extension-sync` 엔드포인트를 사용합니다.
-
-### 동기화 흐름
-1. 익스텐션에서 OAuth 로그인 완료 후 세션 획득
-2. 익스텐션이 웹의 싱크 API URL을 새 탭으로 오픈
-   - URL: `/api/internal/auth/extension-sync?access_token=...&refresh_token=...`
-3. 서버는 전달받은 토큰을 웹 서비스의 인증 쿠키로 설정
-4. 설정 완료 후 메인 대시보드로 리다이렉트
-
-> [!WARNING]
-> 현재는 URL 파라미터로 토큰을 전달하는 방식입니다. 보안 강화를 위해 프로덕션 환경에서는 1회용 인증 코드(One-time Code) 방식으로 고도화가 필요합니다.
-
-## 10. 기술적 개선 사항 (Improvements)
-
-- **Any 타입 제거**: `getNotes`, `getTrashNotes`, `updateUser` 등 주요 API 및 쿼리 함수의 타입을 `SupabaseClient<Database>`와 구체적인 Data 인터페이스로 명시화하여 런타임 에러 방지.
-- **RPC 타입 확장**: `Database` 타입에 누락된 RPC 함수(`delete_user_account` 등)를 안전하게 처리하기 위한 타입 캐스팅 전략 적용.
-- **접근성(a11y) 강화**: 상세 페이지의 썸네일 클릭 영역 등에 키보드 네비게이션 지원(`tabIndex`, `onKeyDown`) 추가.
-
-## 11. 관련 문서
-
-- [Extension Architecture](./extension_architecture.md)
-- [Data Access Layer](./data_access_layer.md)
+- [Extension Architecture](./extension_architecture.md) - 전체적인 구조 및 iFrame 대응 전략
+- [Data Access Layer](./data_access_layer.md) - 백그라운드 데이터 처리 정책
