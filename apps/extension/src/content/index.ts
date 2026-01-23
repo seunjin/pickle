@@ -1,16 +1,115 @@
 import { logger } from "@shared/lib/logger";
 import { formatShortcut } from "@shared/lib/shortcuts";
 import { getShortcuts } from "@shared/storage";
-import type { ShortcutAction } from "@shared/types";
+import { DEFAULT_SHORTCUTS, type ShortcutAction } from "@shared/types";
+import { mountOverlay } from "./lib/mount-overlay";
 
 logger.info("Pickle Content Script Loaded");
 
+// 캡쳐 시작 및 메타데이터 요청 수신
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+  const isTopFrame = window === window.top;
+
+  if (request.action === "START_CAPTURE") {
+    if (isTopFrame) {
+      startCapture();
+    }
+    return false;
+  }
+
+  if (request.action === "GET_METADATA") {
+    try {
+      const metadata = extractMetadata();
+      sendResponse(metadata);
+    } catch (e) {
+      logger.error("Metadata extraction failed", { error: e });
+      sendResponse(null);
+    }
+    return true;
+  }
+
+  if (request.action === "GET_SELECTION") {
+    sendResponse({ text: window.getSelection()?.toString() || "" });
+    return true;
+  }
+
+  if (request.action === "OPEN_OVERLAY") {
+    try {
+      logger.info("[Content] OPEN_OVERLAY received", {
+        tabId: request.tabId,
+        isTopFrame,
+        url: window.location.href,
+      });
+
+      if (isTopFrame) {
+        if (request.tabId) {
+          mountOverlay(request.tabId);
+          sendResponse({ status: "opened", success: true });
+        } else {
+          sendResponse({ status: "error", error: "No tabId provided" });
+        }
+      } else {
+        // 최상위 프레임이 아니면 응답만 보내고 무시
+        sendResponse({ status: "ignored", reason: "Not top frame" });
+      }
+    } catch (e) {
+      logger.error("[Content] Failed to mount overlay via message", {
+        error: e,
+      });
+      sendResponse({ status: "error", error: (e as Error).message });
+    }
+    return true;
+  }
+
+  return false;
+});
+
+/**
+ * 🚀 안전한 메시지 전송 유틸리티
+ * - 익스텐션 컨텍스트 무효화 확인
+ * - 데이터 직렬화 보장 (Deep Clone)
+ * - lastError 통합 로깅
+ */
+function safeSendMessage(message: any, callback?: (response: any) => void) {
+  if (typeof chrome === "undefined" || !chrome.runtime?.id) {
+    logger.warn("Extension context invalidated or chrome not available.");
+    return;
+  }
+
+  try {
+    const serializable = JSON.parse(JSON.stringify(message));
+    chrome.runtime.sendMessage(serializable, (response: any) => {
+      if (chrome.runtime.lastError) {
+        const error = chrome.runtime.lastError.message;
+        if (error?.includes("context invalidated")) {
+          logger.warn(
+            "Extension context invalidated. Please refresh the page.",
+          );
+        } else {
+          logger.warn("Message response error", { error });
+        }
+      }
+      callback?.(response);
+    });
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    logger.error("sendMessage failure", { error: errorMsg });
+  }
+}
+
 // 단축키 감시 및 실행
-async function initShortcutListener() {
-  let shortcuts = await getShortcuts();
+function initShortcutListener() {
+  let shortcuts = DEFAULT_SHORTCUTS;
   let lastHoveredImage: { src: string; alt: string } | null = null;
 
-  // 실시간 단축키 업데이트 감지
+  getShortcuts()
+    .then((saved) => {
+      shortcuts = saved;
+    })
+    .catch((err) => {
+      logger.warn("Failed to load shortcuts, using defaults", { error: err });
+    });
+
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === "sync" && changes.user_shortcuts) {
       shortcuts = changes.user_shortcuts.newValue as typeof shortcuts;
@@ -18,16 +117,26 @@ async function initShortcutListener() {
     }
   });
 
-  // 이미지 호버 추적
   window.addEventListener(
     "mouseover",
     (e) => {
-      const target = e.target as HTMLElement;
-      if (target instanceof HTMLImageElement) {
-        lastHoveredImage = {
-          src: target.src,
-          alt: target.alt || target.title || "",
-        };
+      try {
+        const target = e.target as HTMLElement;
+        if (target instanceof HTMLImageElement) {
+          if (lastHoveredImage?.src === target.src) return;
+
+          const imageData = {
+            src: target.src,
+            alt: target.alt || target.title || "",
+          };
+          lastHoveredImage = imageData;
+          safeSendMessage({ action: "UPDATE_HOVERED_IMAGE", imageData });
+        } else if (lastHoveredImage !== null) {
+          lastHoveredImage = null;
+          safeSendMessage({ action: "UPDATE_HOVERED_IMAGE", imageData: null });
+        }
+      } catch (_err) {
+        // mouseover 실패 격리
       }
     },
     { passive: true },
@@ -36,7 +145,6 @@ async function initShortcutListener() {
   window.addEventListener(
     "keydown",
     (e) => {
-      // 입력 필드(input, textarea)나 contenteditable 요소에서는 단축키 무시
       const target = e.target as HTMLElement;
       if (
         target.tagName === "INPUT" ||
@@ -47,12 +155,9 @@ async function initShortcutListener() {
       }
 
       const currentCombo = formatShortcut(e);
-      logger.info("Key pressed", { combo: currentCombo });
 
-      // 매칭되는 단축키 찾기
       const action = Object.entries(shortcuts).find(([_, combo]) => {
         if (typeof combo !== "string") return false;
-        // Mac/Windows 간의 Ctrl/Cmd 호환성 처리 (저장된 값이 Ctrl이어도 Mac에서는 Cmd로 매칭 허용)
         const normalizedCombo = combo.replace("Ctrl+", "Cmd+");
         const normalizedCurrent = currentCombo.replace("Ctrl+", "Cmd+");
         return normalizedCombo === normalizedCurrent || combo === currentCombo;
@@ -62,69 +167,51 @@ async function initShortcutListener() {
         e.preventDefault();
         e.stopPropagation();
 
-        logger.debug("Shortcut matched", { action, combo: currentCombo });
+        logger.info("Shortcut matched", { action, combo: currentCombo });
 
-        const message: {
-          action: string;
-          fromShortcut: boolean;
-          imageData?: { src: string; alt: string };
-        } = {
+        let metadata = null;
+        try {
+          metadata = extractMetadata();
+        } catch (err) {
+          logger.error("Metadata extraction failed during shortcut", {
+            error: err,
+          });
+        }
+
+        const message: any = {
           action: `RUN_${action.toUpperCase()}_FLOW`,
           fromShortcut: true,
+          metadata,
         };
 
-        // 이미지 저장 단축키인 경우 호버된 이미지 정보 포함
-        if (action === "image" && lastHoveredImage) {
+        if (action === "image") {
           message.imageData = lastHoveredImage;
         }
 
-        // 백그라운드에 액션 요청
-        try {
-          chrome.runtime.sendMessage(message, (response) => {
-            if (chrome.runtime.lastError) {
-              logger.warn(
-                "Extension connection lost. Please refresh the page.",
-                {
-                  error: chrome.runtime.lastError.message,
-                },
-              );
-            } else {
-              logger.info("Action requested successfully", {
-                action,
-                response,
+        safeSendMessage(message, (response) => {
+          if (response?.success && response.tabId) {
+            if (window === window.top && action !== "capture") {
+              logger.info("Mounting overlay from direct response (Top Frame)", {
+                tabId: response.tabId,
               });
+              mountOverlay(response.tabId);
             }
-          });
-        } catch (err) {
-          logger.error("Failed to send message to extension", { error: err });
-          logger.info(
-            "TIP: If you just updated the extension, please refresh this tab.",
-          );
-        }
+          } else if (response?.error) {
+            logger.error("Action flow failed", { error: response.error });
+          }
+        });
       }
     },
-    true, // capture phase에서 먼저 낚아챔
+    true,
   );
 }
 
-initShortcutListener();
-
-// 캡쳐 및 메타데이터 요청 수신
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  if (request.action === "START_CAPTURE") {
-    startCapture();
-  } else if (request.action === "GET_METADATA") {
-    try {
-      const metadata = extractMetadata();
-      sendResponse(metadata);
-    } catch (e) {
-      logger.error("Metadata extraction failed", { error: e });
-      sendResponse(null);
-    }
-  } else if (request.action === "GET_SELECTION") {
-    sendResponse({ text: window.getSelection()?.toString() || "" });
-  }
-});
+try {
+  initShortcutListener();
+  logger.info("Content script initialized successfully");
+} catch (err) {
+  logger.error("Failed to initialize shortcut listener", { error: err });
+}
 
 function extractMetadata() {
   const resolveUrl = (url: string | null | undefined) => {
@@ -150,34 +237,47 @@ function extractMetadata() {
   const getFavicon = () => {
     // 1. Try different link selectors
     const selectors = [
-      "link[rel='icon']",
-      "link[rel='shortcut icon']",
-      "link[rel='apple-touch-icon']",
+      "link[rel~='icon']", // ~=를 사용하여 'shortcut icon' 등도 포함
+      "link[rel~='shortcut']",
+      "link[rel~='apple-touch-icon']",
     ];
 
     for (const selector of selectors) {
       const link = document.querySelector(selector) as HTMLLinkElement;
       if (link?.href) {
-        return link.href; // href is absolute
+        try {
+          return new URL(link.href, document.baseURI).href;
+        } catch {
+          return link.href;
+        }
       }
     }
 
-    // 2. Fallback to default /favicon.ico
-    return `https://www.google.com/s2/favicons?domain=${window.location.hostname}&sz=64`;
+    // 2. Fallback to /favicon.ico on the current origin
+    return `${window.location.origin}/favicon.ico`;
   };
 
-  return {
-    title: getMeta("og:title") || getMeta("twitter:title") || document.title,
-    description:
-      getMeta("og:description") ||
-      getMeta("twitter:description") ||
-      getMeta("description") ||
-      "",
-    image: resolveUrl(getMeta("og:image") || getMeta("twitter:image")),
-    site_name: getMeta("og:site_name") || window.location.hostname,
-    favicon: getFavicon(),
-    url: window.location.href,
-  };
+  try {
+    return {
+      title: getMeta("og:title") || getMeta("twitter:title") || document.title,
+      description:
+        getMeta("og:description") ||
+        getMeta("twitter:description") ||
+        getMeta("description") ||
+        "",
+      image: resolveUrl(getMeta("og:image") || getMeta("twitter:image")),
+      site_name: getMeta("og:site_name") || window.location.hostname,
+      favicon: getFavicon(),
+      url: window.location.href,
+    };
+  } catch (err) {
+    logger.error("extractMetadata failed", { error: err });
+    return {
+      title: document.title,
+      url: window.location.href,
+      favicon: getFavicon(),
+    };
+  }
 }
 
 function startCapture() {
@@ -228,7 +328,7 @@ function startCapture() {
   overlay.tabIndex = -1; // 키보드 이벤트를 확실히 받기 위해 포커스 가능하게 설정
 
   document.body.appendChild(overlay);
-  overlay.focus(); // 생성 즉시 포커스
+  overlay.focus({ preventScroll: true }); // 생성 즉시 포커스, 스크롤 점프 방지
 
   // Selection Box 생성
   const selectionBox = document.createElement("div");
@@ -324,7 +424,7 @@ function startCapture() {
     // 화면이 업데이트(Overlay 제거)된 후 메시지 전송
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        chrome.runtime.sendMessage({
+        safeSendMessage({
           action: "CAPTURE_AREA",
           area: {
             x: rect.x * window.devicePixelRatio,

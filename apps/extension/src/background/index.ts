@@ -17,6 +17,11 @@ import { sendMessageToContentScript } from "./messaging";
 logger.info("Pickle Background Service Worker Running");
 
 /**
+ * 0. Global Cache for Cross-Frame Coordination
+ */
+const tabHoverCache: Record<number, { src: string; alt: string } | null> = {};
+
+/**
  * 1. Setup Context Menus
  */
 chrome.runtime.onInstalled.addListener(() => {
@@ -28,52 +33,62 @@ chrome.runtime.onInstalled.addListener(() => {
  */
 chrome.contextMenus.onClicked.addListener(
   async (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
-    if (info.menuItemId === "open-app") {
-      const appUrl =
-        import.meta.env.NEXT_PUBLIC_APP_URL || "https://picklenote.vercel.app";
-      chrome.tabs.create({ url: appUrl });
-      return;
-    }
+    try {
+      if (info.menuItemId === "open-app") {
+        const appUrl =
+          import.meta.env.NEXT_PUBLIC_APP_URL ||
+          "https://picklenote.vercel.app";
+        chrome.tabs.create({ url: appUrl });
+        return;
+      }
 
-    if (info.menuItemId === "capture" && tab) {
-      await startCaptureFlow(tab);
-      return;
-    }
+      if (info.menuItemId === "capture" && tab) {
+        await startCaptureFlow(tab);
+        return;
+      }
 
-    if (info.menuItemId === "bookmark" && tab) {
-      await startBookmarkFlow(tab);
-      return;
-    }
+      if (info.menuItemId === "bookmark" && tab) {
+        // [수정] 2번째 인자 생략 호출 (Metadata 없음)
+        await startBookmarkFlow(tab);
+        return;
+      }
 
-    let mode: ViewType = "menu";
-    if (info.menuItemId === "save-text") mode = "text";
-    else if (info.menuItemId === "save-image") mode = "image";
+      let mode: ViewType = "menu";
+      if (info.menuItemId === "save-text") mode = "text";
+      else if (info.menuItemId === "save-image") mode = "image";
 
-    if (tab?.windowId && tab.id) {
-      await setNote(tab.id, {
-        text: info.selectionText,
-        url: info.pageUrl,
-        srcUrl: info.srcUrl,
-        timestamp: Date.now(),
-        mode: mode,
-      });
+      if (tab?.windowId && tab.id) {
+        await setNote(tab.id, {
+          text: info.selectionText,
+          url: info.pageUrl,
+          srcUrl: info.srcUrl,
+          timestamp: Date.now(),
+          mode: mode,
+        });
 
-      await sendMessageToContentScript(tab.id, {
-        action: "OPEN_OVERLAY",
-        mode: mode,
-        tabId: tab.id,
-      });
-
-      sendMessageToContentScript(tab.id, { action: "GET_METADATA" })
-        .then((metadata: PageMetadata) => {
-          if (metadata && tab.id) {
-            logger.debug("Metadata fetched in background", { metadata });
-            updateNote(tab.id, { pageMeta: metadata });
-          }
-        })
-        .catch((err) =>
-          logger.warn("Background metadata fetch failed", { error: err }),
+        await sendMessageToContentScript(
+          tab.id,
+          {
+            action: "OPEN_OVERLAY",
+            mode: mode,
+            tabId: tab.id,
+          },
+          { frameId: 0 },
         );
+
+        sendMessageToContentScript(tab.id, { action: "GET_METADATA" })
+          .then((metadata: PageMetadata) => {
+            if (metadata && tab.id) {
+              logger.debug("Metadata fetched in background", { metadata });
+              updateNote(tab.id, { pageMeta: metadata });
+            }
+          })
+          .catch((err) =>
+            logger.warn("Background metadata fetch failed", { error: err }),
+          );
+      }
+    } catch (err) {
+      logger.error("Context menu handling failed", { error: err });
     }
   },
 );
@@ -82,23 +97,36 @@ chrome.contextMenus.onClicked.addListener(
  * 4. Message Handler
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  logger.debug("Background received message", {
+    action: request.action,
+    from: sender.tab ? "content" : "popup",
+  });
+
   if (request.action === "CAPTURE_AREA") {
     const windowId = sender.tab?.windowId;
     const tabId = sender.tab?.id;
 
     if (windowId && tabId) {
       updateNote(tabId, { isLoading: true, mode: "capture" }).then(() => {
-        sendMessageToContentScript(tabId, {
-          action: "OPEN_OVERLAY",
-          mode: "capture",
-          tabId: tabId,
-        });
+        sendMessageToContentScript(
+          tabId,
+          {
+            action: "OPEN_OVERLAY",
+            mode: "capture",
+            tabId: tabId,
+          },
+          { frameId: 0 },
+        );
       });
 
       chrome.tabs.captureVisibleTab(
         windowId,
         { format: "png" },
         async (dataUrl) => {
+          if (!dataUrl) {
+            logger.error("Failed to capture visible tab");
+            return;
+          }
           const captureData: CaptureData = {
             image: dataUrl,
             area: request.area,
@@ -109,17 +137,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             captureData: captureData,
           });
 
-          sendMessageToContentScript(tabId, { action: "GET_METADATA" })
-            .then((metadata) => {
-              if (metadata) {
-                updateNote(tabId, {
-                  pageMeta: metadata as PageMetadata,
-                });
-              }
-            })
-            .catch((err) =>
-              logger.warn("Capture metadata fetch failed", { error: err }),
-            );
+          // 캡처된 페이지의 메타데이터가 메시지에 있다면 우선 사용
+          if (request.metadata) {
+            updateNote(tabId, { pageMeta: request.metadata });
+          } else {
+            sendMessageToContentScript(tabId, { action: "GET_METADATA" })
+              .then((metadata) => {
+                if (metadata) {
+                  updateNote(tabId, {
+                    pageMeta: metadata as PageMetadata,
+                  });
+                }
+              })
+              .catch((err) =>
+                logger.warn("Capture metadata fetch failed", { error: err }),
+              );
+          }
         },
       );
     }
@@ -137,9 +170,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true; // 비동기 응답 대기
   } else if (request.action === "SAVE_TO_STORAGE") {
-    setNote(request.tabId, request.data).then(() =>
-      sendResponse({ success: true }),
-    );
+    setNote(request.tabId, request.data)
+      .then(() => sendResponse({ success: true }))
+      .catch((err) => {
+        logger.error("SAVE_TO_STORAGE failed", { error: err });
+        sendResponse({ success: false, error: err.message });
+      });
     return true;
   } else if (request.action === "RE_CAPTURE") {
     if (sender.tab) {
@@ -181,13 +217,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "OPEN_OVERLAY") {
     const tabId = request.tabId;
     if (tabId) {
-      sendMessageToContentScript(tabId, {
-        action: "OPEN_OVERLAY",
-        mode: request.mode,
-        tabId: tabId,
-      }).then((response) => sendResponse(response));
+      sendMessageToContentScript(
+        tabId,
+        {
+          action: "OPEN_OVERLAY",
+          mode: request.mode,
+          tabId: tabId,
+        },
+        { frameId: 0 },
+      )
+        .then((response) => sendResponse(response))
+        .catch((err) => {
+          logger.error("OPEN_OVERLAY via background proxy failed", {
+            error: err,
+          });
+          sendResponse({ success: false, error: err.message });
+        });
       return true;
     }
+    sendResponse({ success: false, error: "Missing tabId" });
+    return false;
   } else if (request.action === "GET_SELECTION") {
     const tabId = request.tabId;
     if (tabId) {
@@ -204,7 +253,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ success: false, error: "Tab not found" });
           return;
         }
-        startBookmarkFlow(tab).then(() => sendResponse({ success: true }));
+        startBookmarkFlow(tab, request.metadata)
+          .then(() => sendResponse({ success: true, tabId }))
+          .catch((err) => {
+            logger.error("RUN_BOOKMARK_FLOW failed", { error: err });
+            sendResponse({ success: false, error: err.message });
+          });
       });
       return true;
     }
@@ -218,7 +272,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({ success: false, error: "Tab not found" });
           return;
         }
-        startCaptureFlow(tab).then(() => sendResponse({ success: true }));
+        startCaptureFlow(tab)
+          .then(() => sendResponse({ success: true, tabId }))
+          .catch((err) => {
+            logger.error("RUN_CAPTURE_FLOW failed", { error: err });
+            sendResponse({ success: false, error: err.message });
+          });
       });
       return true;
     }
@@ -227,8 +286,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "RUN_TEXT_FLOW") {
     const tabId = sender.tab?.id;
     if (tabId) {
-      sendMessageToContentScript(tabId, { action: "GET_SELECTION" }).then(
-        (response) => {
+      sendMessageToContentScript(tabId, { action: "GET_SELECTION" })
+        .then((response) => {
           const text = response?.text || "";
           if (text) {
             setNote(tabId, {
@@ -237,19 +296,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               timestamp: Date.now(),
               mode: "text",
             }).then(() => {
-              sendMessageToContentScript(tabId, {
-                action: "OPEN_OVERLAY",
-                mode: "text",
-                tabId: tabId,
-              });
+              sendMessageToContentScript(
+                tabId,
+                {
+                  action: "OPEN_OVERLAY",
+                  mode: "text",
+                  tabId: tabId,
+                },
+                { frameId: 0 },
+              );
+              if (request.metadata) {
+                updateNote(tabId, { pageMeta: request.metadata });
+              }
+              sendResponse({ success: true, tabId });
             });
+          } else {
+            sendResponse({ success: false, error: "No text selected" });
           }
-        },
-      );
+        })
+        .catch((err) => {
+          sendResponse({ success: false, error: err.message });
+        });
+      return true; // 비동기 응답
+    }
+    return false;
+  } else if (request.action === "UPDATE_HOVERED_IMAGE") {
+    const tabId = sender.tab?.id;
+    if (tabId) {
+      tabHoverCache[tabId] = request.imageData;
+      sendResponse({ success: true });
     }
   } else if (request.action === "RUN_IMAGE_FLOW") {
     const tabId = sender.tab?.id;
-    const imageData = request.imageData;
+    // 메시지에 데이터가 없으면 캐시에서 가져옵니다.
+    const imageData =
+      request.imageData || (tabId ? tabHoverCache[tabId] : null);
 
     if (tabId && imageData) {
       setNote(tabId, {
@@ -258,13 +339,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         url: sender.tab?.url,
         timestamp: Date.now(),
         mode: "image",
-      }).then(() => {
-        sendMessageToContentScript(tabId, {
-          action: "OPEN_OVERLAY",
-          mode: "image",
-          tabId: tabId,
+        pageMeta: request.metadata, // 이미지 저장 시에도 메타데이터 포함
+      })
+        .then(() => {
+          // 🚀 Background에서 직접 injection 시도
+          sendMessageToContentScript(
+            tabId,
+            {
+              action: "OPEN_OVERLAY",
+              mode: "image",
+              tabId: tabId,
+            },
+            { frameId: 0 },
+          ).catch((err) =>
+            logger.warn("Initial push mount failed, relying on pull", {
+              error: err,
+            }),
+          );
+
+          sendResponse({ success: true, tabId });
+        })
+        .catch((err) => {
+          logger.error("RUN_IMAGE_FLOW failed", { error: err });
+          sendResponse({ success: false, error: err.message });
         });
-      });
+      return true;
+    }
+    sendResponse({ success: false, error: "No image hovered or identified" });
+    return true;
+  } else if (request.action === "CLEAR_NOTE") {
+    const tabId = request.tabId || sender.tab?.id;
+    if (tabId) {
+      clearNote(tabId).then(() => sendResponse({ success: true }));
+      return true;
     }
   }
 });
@@ -288,4 +395,5 @@ chrome.runtime.onMessageExternal.addListener(
  */
 chrome.tabs.onRemoved.addListener((tabId) => {
   clearNote(tabId);
+  delete tabHoverCache[tabId];
 });

@@ -1,4 +1,4 @@
-import { mountOverlay } from "../../content/ui/mount";
+import { mountOverlay } from "../../content/lib/mount-overlay";
 
 /**
  * 개발 환경에서 오버레이 마운트를 테스트하기 위한 런처 버튼입니다.

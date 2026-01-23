@@ -13,7 +13,7 @@ import { getNoteKey } from "@shared/storage";
 import { useToastStore } from "@shared/stores/useToastStore";
 import type { NoteData, ViewType } from "@shared/types";
 import { AnimatePresence } from "motion/react";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useState } from "react";
 
 /**
  * OverlayApp Component
@@ -34,6 +34,12 @@ export default function OverlayApp({
   const STORAGE_KEY = getNoteKey(tabId);
   const [isSaving, setIsSaving] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+
+  const handleClose = useCallback(() => {
+    // 🧹 클린업: 탭에 저장된 임시 데이터를 백그라운드 스토리지에서 제거
+    chrome.runtime.sendMessage({ action: "CLEAR_NOTE", tabId });
+    onClose();
+  }, [tabId, onClose]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -100,12 +106,12 @@ export default function OverlayApp({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (isSaving) return;
-        onClose();
+        handleClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, isSaving]);
+  }, [handleClose, isSaving]);
 
   const handleUpdateNote = (data: Partial<NoteData>) => {
     setNote((prev) => ({ ...prev, ...data }));
@@ -219,7 +225,7 @@ export default function OverlayApp({
         type: "PICKLE_NOTE_SAVED",
       });
 
-      onClose();
+      handleClose();
     } catch (e: unknown) {
       logger.error("Save failed", { error: e });
       const msg = e instanceof Error ? e.message : "Unknown error occurred";
@@ -229,7 +235,7 @@ export default function OverlayApp({
   };
 
   const handleRetake = async () => {
-    onClose();
+    handleClose();
     chrome.runtime.sendMessage({ action: "RE_CAPTURE" });
   };
 
@@ -239,7 +245,7 @@ export default function OverlayApp({
         <TextEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onClose={onClose}
+          onClose={handleClose}
           onSave={handleSave}
           isSaving={isSaving}
         />
@@ -248,7 +254,7 @@ export default function OverlayApp({
         <CaptureEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onClose={onClose}
+          onClose={handleClose}
           onRetake={handleRetake}
           onSave={handleSave}
           isSaving={isSaving}
@@ -258,7 +264,7 @@ export default function OverlayApp({
         <ImageEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onClose={onClose}
+          onClose={handleClose}
           onSave={handleSave}
           isSaving={isSaving}
         />
@@ -267,7 +273,7 @@ export default function OverlayApp({
         <BookmarkEditor
           note={note}
           onUpdate={handleUpdateNote}
-          onClose={onClose}
+          onClose={handleClose}
           onSave={handleSave}
           isSaving={isSaving}
         />

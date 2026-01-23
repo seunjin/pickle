@@ -3,7 +3,10 @@ import { logger } from "@shared/lib/logger";
 import { setNote } from "@shared/storage";
 import type { PageMetadata } from "@shared/types";
 
-export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
+export async function startBookmarkFlow(
+  tab: chrome.tabs.Tab,
+  initialMetadata?: PageMetadata,
+) {
   if (!tab.windowId || !tab.id) return;
 
   // 1. 초기 상태 저장 (로딩 시작)
@@ -15,18 +18,28 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
     isLoading: true,
   });
 
-  // 2. Open Overlay
-  await sendMessageToContentScript(tab.id, {
-    action: "OPEN_OVERLAY",
-    mode: "bookmark",
-    tabId: tab.id,
-  });
+  // 2. Open Overlay (Top Frame 타겟팅)
+  await sendMessageToContentScript(
+    tab.id,
+    {
+      action: "OPEN_OVERLAY",
+      mode: "bookmark",
+      tabId: tab.id,
+    },
+    { frameId: 0 },
+  );
 
   try {
-    // Content Script에 메타데이터 요청
-    const metadata = (await sendMessageToContentScript(tab.id, {
-      action: "GET_METADATA",
-    })) as PageMetadata;
+    let metadata = initialMetadata;
+
+    // 초기 메타데이터가 없으면 Content Script에 요청
+    if (!metadata) {
+      metadata = (await sendMessageToContentScript(tab.id, {
+        action: "GET_METADATA",
+      })) as PageMetadata;
+    }
+
+    if (!metadata) throw new Error("Metadata not found");
 
     // 결과 저장 및 로딩 해제
     await setNote(tab.id, {
@@ -36,10 +49,11 @@ export async function startBookmarkFlow(tab: chrome.tabs.Tab) {
       mode: "bookmark",
       isLoading: false,
       pageMeta: metadata,
-      title: metadata.title, // [추가] 추출된 제목을 에디터의 초기 제목으로 설정
+      title: metadata.title,
     });
   } catch (error) {
     logger.warn("메타데이터 추출 실패 (Retry Failed)", { error });
+    // ... Fallback logic remains ...
 
     // 실패 시 기본 데이터로 저장 (Fallback)
     await setNote(tab.id, {

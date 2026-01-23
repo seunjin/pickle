@@ -10,10 +10,13 @@ import { logger } from "@shared/lib/logger";
 export async function sendMessageToContentScript(
   tabId: number,
   message: unknown,
+  options?: { frameId?: number },
 ) {
   try {
     // 1차 시도: 그냥 메시지를 보내봅니다.
-    return await chrome.tabs.sendMessage(tabId, message);
+    return await chrome.tabs.sendMessage(tabId, message, {
+      frameId: options?.frameId,
+    });
   } catch (error: unknown) {
     // Content Script가 로드되지 않아서 실패한 경우를 감지합니다.
     const err = error as Error;

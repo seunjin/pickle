@@ -15,13 +15,15 @@
     "activeTab",
     "storage",
     "scripting",
-    "identity"
+    "identity",
+    "tabs"
   ],
-  "host_permissions": ["https://*.supabase.co/*"],
+  "host_permissions": ["https://*.supabase.co/*", "<all_urls>"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content/index.ts", "src/content/ui/mount.tsx"]
+      "js": ["src/content/index.ts"],
+      "all_frames": true
     }
   ],
   "web_accessible_resources": [

@@ -60,6 +60,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         overlay: path.resolve(__dirname, "src/overlay/index.html"),
+        content: path.resolve(__dirname, "src/content/index.ts"),
+      },
+      output: {
+        entryFileNames: "assets/[name].js",
+        chunkFileNames: "assets/[name].js",
+        assetFileNames: "assets/[name].[ext]",
       },
     },
     // Use Lightning CSS for production build as well
