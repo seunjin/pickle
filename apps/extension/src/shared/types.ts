@@ -36,8 +36,8 @@ export interface NoteData {
   memo?: string;
 }
 
-// [NEW] Shortcut types
-export type ShortcutAction = "text" | "image" | "capture" | "bookmark";
+// [NEW] Shortcut types (이미지 단축키는 패널 전용으로 제외)
+export type ShortcutAction = "text" | "capture" | "bookmark";
 
 export interface ShortcutSettings {
   [key: string]: string; // action -> key combination (e.g., "capture" -> "Ctrl+Shift+E")
@@ -53,7 +53,6 @@ export const getOSDefaultShortcuts = (): ShortcutSettings => {
     text: `${prefix}+N`,
     bookmark: `${prefix}+B`,
     capture: `${prefix}+E`,
-    image: `${prefix}+I`,
   };
 };
 

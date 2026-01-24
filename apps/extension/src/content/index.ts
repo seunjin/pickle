@@ -4,7 +4,7 @@ import { getShortcuts } from "@shared/storage";
 import { DEFAULT_SHORTCUTS, type ShortcutAction } from "@shared/types";
 import { mountOverlay } from "./lib/mount-overlay";
 
-logger.info("Pickle Content Script Loaded");
+logger.debug("Pickle Content Script Loaded");
 
 // 캡쳐 시작 및 메타데이터 요청 수신
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
@@ -70,7 +70,14 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
  * - 데이터 직렬화 보장 (Deep Clone)
  * - lastError 통합 로깅
  */
-function safeSendMessage(message: any, callback?: (response: any) => void) {
+function safeSendMessage(
+  message: Record<string, unknown>,
+  callback?: (response: {
+    success?: boolean;
+    tabId?: number;
+    error?: unknown;
+  }) => void,
+) {
   if (typeof chrome === "undefined" || !chrome.runtime?.id) {
     logger.warn("Extension context invalidated or chrome not available.");
     return;
@@ -78,29 +85,36 @@ function safeSendMessage(message: any, callback?: (response: any) => void) {
 
   try {
     const serializable = JSON.parse(JSON.stringify(message));
-    chrome.runtime.sendMessage(serializable, (response: any) => {
-      if (chrome.runtime.lastError) {
-        const error = chrome.runtime.lastError.message;
-        if (error?.includes("context invalidated")) {
-          logger.warn(
-            "Extension context invalidated. Please refresh the page.",
-          );
-        } else {
-          logger.warn("Message response error", { error });
+    chrome.runtime.sendMessage(
+      serializable,
+      (response: { success?: boolean; tabId?: number; error?: unknown }) => {
+        if (chrome.runtime.lastError) {
+          const error = chrome.runtime.lastError.message;
+          if (error?.includes("context invalidated")) {
+            logger.warn(
+              "Extension context invalidated. Please refresh the page.",
+            );
+          } else {
+            logger.warn("Message response error", { error });
+          }
         }
-      }
-      callback?.(response);
-    });
+        callback?.(response);
+      },
+    );
   } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    logger.error("sendMessage failure", { error: errorMsg });
+    const errorStr = err instanceof Error ? err.message : JSON.stringify(err);
+    logger.error(`sendMessage failure: ${errorStr}`);
   }
 }
 
-// 단축키 감시 및 실행
+// 단축키 감시 및 실행 (이미지 단축키 제외 - 패널에서만 지원)
 function initShortcutListener() {
+  const isTopFrame = window === window.top;
+  logger.debug(
+    `[Pickle] initShortcutListener started (isTopFrame: ${isTopFrame})`,
+  );
+
   let shortcuts = DEFAULT_SHORTCUTS;
-  let lastHoveredImage: { src: string; alt: string } | null = null;
 
   getShortcuts()
     .then((saved) => {
@@ -118,31 +132,6 @@ function initShortcutListener() {
   });
 
   window.addEventListener(
-    "mouseover",
-    (e) => {
-      try {
-        const target = e.target as HTMLElement;
-        if (target instanceof HTMLImageElement) {
-          if (lastHoveredImage?.src === target.src) return;
-
-          const imageData = {
-            src: target.src,
-            alt: target.alt || target.title || "",
-          };
-          lastHoveredImage = imageData;
-          safeSendMessage({ action: "UPDATE_HOVERED_IMAGE", imageData });
-        } else if (lastHoveredImage !== null) {
-          lastHoveredImage = null;
-          safeSendMessage({ action: "UPDATE_HOVERED_IMAGE", imageData: null });
-        }
-      } catch (_err) {
-        // mouseover 실패 격리
-      }
-    },
-    { passive: true },
-  );
-
-  window.addEventListener(
     "keydown",
     (e) => {
       const target = e.target as HTMLElement;
@@ -155,7 +144,6 @@ function initShortcutListener() {
       }
 
       const currentCombo = formatShortcut(e);
-
       const action = Object.entries(shortcuts).find(([_, combo]) => {
         if (typeof combo !== "string") return false;
         const normalizedCombo = combo.replace("Ctrl+", "Cmd+");
@@ -167,48 +155,43 @@ function initShortcutListener() {
         e.preventDefault();
         e.stopPropagation();
 
-        logger.info("Shortcut matched", { action, combo: currentCombo });
+        logger.info(`[Pickle] Shortcut matched: ${action}`, {
+          combo: currentCombo,
+        });
 
         let metadata = null;
         try {
           metadata = extractMetadata();
-        } catch (err) {
-          logger.error("Metadata extraction failed during shortcut", {
-            error: err,
-          });
-        }
+        } catch (_err) {}
 
-        const message: any = {
+        const message: Record<string, unknown> = {
           action: `RUN_${action.toUpperCase()}_FLOW`,
           fromShortcut: true,
           metadata,
         };
 
-        if (action === "image") {
-          message.imageData = lastHoveredImage;
-        }
-
         safeSendMessage(message, (response) => {
           if (response?.success && response.tabId) {
-            if (window === window.top && action !== "capture") {
-              logger.info("Mounting overlay from direct response (Top Frame)", {
-                tabId: response.tabId,
-              });
+            if (isTopFrame && action !== "capture") {
               mountOverlay(response.tabId);
             }
           } else if (response?.error) {
-            logger.error("Action flow failed", { error: response.error });
+            const errorStr =
+              typeof response.error === "object"
+                ? JSON.stringify(response.error)
+                : String(response.error);
+            logger.error(`Action flow failed: ${errorStr}`);
           }
         });
       }
     },
-    true,
+    true, // Capture Phase
   );
 }
 
 try {
   initShortcutListener();
-  logger.info("Content script initialized successfully");
+  logger.debug("Content script initialized successfully");
 } catch (err) {
   logger.error("Failed to initialize shortcut listener", { error: err });
 }

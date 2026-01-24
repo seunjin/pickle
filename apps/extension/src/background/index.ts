@@ -17,9 +17,8 @@ import { sendMessageToContentScript } from "./messaging";
 logger.info("Pickle Background Service Worker Running");
 
 /**
- * 0. Global Cache for Cross-Frame Coordination
+ * 0. Setup
  */
-const tabHoverCache: Record<number, { src: string; alt: string } | null> = {};
 
 /**
  * 1. Setup Context Menus
@@ -320,53 +319,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true; // 비동기 응답
     }
     return false;
-  } else if (request.action === "UPDATE_HOVERED_IMAGE") {
-    const tabId = sender.tab?.id;
-    if (tabId) {
-      tabHoverCache[tabId] = request.imageData;
-      sendResponse({ success: true });
-    }
-  } else if (request.action === "RUN_IMAGE_FLOW") {
-    const tabId = sender.tab?.id;
-    // 메시지에 데이터가 없으면 캐시에서 가져옵니다.
-    const imageData =
-      request.imageData || (tabId ? tabHoverCache[tabId] : null);
-
-    if (tabId && imageData) {
-      setNote(tabId, {
-        srcUrl: imageData.src,
-        altText: imageData.alt,
-        url: sender.tab?.url,
-        timestamp: Date.now(),
-        mode: "image",
-        pageMeta: request.metadata, // 이미지 저장 시에도 메타데이터 포함
-      })
-        .then(() => {
-          // 🚀 Background에서 직접 injection 시도
-          sendMessageToContentScript(
-            tabId,
-            {
-              action: "OPEN_OVERLAY",
-              mode: "image",
-              tabId: tabId,
-            },
-            { frameId: 0 },
-          ).catch((err) =>
-            logger.warn("Initial push mount failed, relying on pull", {
-              error: err,
-            }),
-          );
-
-          sendResponse({ success: true, tabId });
-        })
-        .catch((err) => {
-          logger.error("RUN_IMAGE_FLOW failed", { error: err });
-          sendResponse({ success: false, error: err.message });
-        });
-      return true;
-    }
-    sendResponse({ success: false, error: "No image hovered or identified" });
-    return true;
   } else if (request.action === "CLEAR_NOTE") {
     const tabId = request.tabId || sender.tab?.id;
     if (tabId) {
@@ -395,5 +347,4 @@ chrome.runtime.onMessageExternal.addListener(
  */
 chrome.tabs.onRemoved.addListener((tabId) => {
   clearNote(tabId);
-  delete tabHoverCache[tabId];
 });

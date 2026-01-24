@@ -21,7 +21,6 @@ const fakeGetOSDefaultShortcuts = (): ShortcutSettings => {
     text: `Cmd+N`,
     bookmark: `Cmd+B`,
     capture: `Cmd+E`,
-    image: `Cmd+I`,
   };
 };
 export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
@@ -107,14 +106,6 @@ export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
                     action="bookmark"
                     initialValue={shortcuts.bookmark}
                     defaultShortcut={defaults.bookmark}
-                    onUpdate={handleUpdate}
-                  />
-                  <div className="mt-3 mb-3 h-px bg-base-border-light" />
-                  <ShortcutRecorder
-                    label="이미지"
-                    action="image"
-                    initialValue={shortcuts.image}
-                    defaultShortcut={defaults.image}
                     onUpdate={handleUpdate}
                   />
                   <div className="mt-3 mb-3 h-px bg-base-border-light" />
