@@ -48,15 +48,13 @@ export const isMac =
   /Macintosh|MacIntel|MacPPC|Mac68K/i.test(navigator.userAgent);
 
 export const getOSDefaultShortcuts = (): ShortcutSettings => {
-  // Cmd+Shift+1(탭 이동), Alt+숫자(메뉴) 등 모든 충돌 가능성을 배제하기 위해
-  // 익스텐션에서 가장 안전하게 쓸 수 있는 Alt+Shift + 숫자 조합을 사용합니다.
-  // Mac: Option+Shift+1, Windows: Alt+Shift+1
+  // 브라우저 기본 단축키와의 충돌을 최소화하기 위해 prefix를 OS별로 다르게 설정합니다.
   const prefix = isMac ? "Cmd+Shift" : "Alt+Shift";
 
   return {
-    bookmark: `${prefix}+B`,
-    capture: `${prefix}+E`,
-    text: `${prefix}+D`,
+    bookmark: `${prefix}+B`, // Bookmark (B)
+    capture: `${prefix}+E`, // Capture (E)
+    text: `${prefix}+D`, // Document/Selection (D)
   };
 };
 
