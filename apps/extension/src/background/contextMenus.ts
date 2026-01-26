@@ -28,7 +28,7 @@ export function setupContextMenus() {
     chrome.contextMenus.create({
       parentId: MENU_ROOT_ID,
       id: "save-image",
-      title: "🖼️ 이미지 저장하기",
+      title: "이미지 저장하기",
       contexts: ["image"], // 이미지를 클릭했을 때만 표시됨
     });
 
@@ -36,7 +36,7 @@ export function setupContextMenus() {
     chrome.contextMenus.create({
       parentId: MENU_ROOT_ID,
       id: "capture",
-      title: "📷 캡쳐하기 ⇧⌘E",
+      title: "캡쳐하기",
       contexts: ["all"],
     });
 
@@ -44,7 +44,7 @@ export function setupContextMenus() {
     chrome.contextMenus.create({
       parentId: MENU_ROOT_ID,
       id: "bookmark",
-      title: "🔖 북마크",
+      title: "북마크",
       contexts: ["all"],
     });
 
@@ -60,7 +60,7 @@ export function setupContextMenus() {
     chrome.contextMenus.create({
       parentId: MENU_ROOT_ID,
       id: "open-app",
-      title: "🚀 Pickle 열기",
+      title: "Pickle 열기",
       contexts: ["all"],
     });
   });
