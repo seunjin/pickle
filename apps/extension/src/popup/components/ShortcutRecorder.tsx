@@ -22,6 +22,12 @@ export function ShortcutRecorder({
   const [isRecording, setIsRecording] = useState(false);
   const [combo, setCombo] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
+
+  // 부모 상태가 바뀌면(로그인/초기화 등) 내부 상태도 동기화
+  useEffect(() => {
+    setCombo(initialValue);
+  }, [initialValue]);
+
   const inputRef = useRef<HTMLButtonElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

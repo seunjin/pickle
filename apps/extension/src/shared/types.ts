@@ -45,17 +45,18 @@ export interface ShortcutSettings {
 
 export const isMac =
   typeof navigator !== "undefined" &&
-  /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+  /Macintosh|MacIntel|MacPPC|Mac68K/i.test(navigator.userAgent);
 
 export const getOSDefaultShortcuts = (): ShortcutSettings => {
-  // 브라우저 기본 단축키(Cmd+N, Cmd+B 등)와의 충돌을 피하기 위해
-  // Alt+Shift(Mac에서는 Option+Shift) 조합을 기본으로 사용하는 것이 가장 안전합니다.
+  // Cmd+Shift+1(탭 이동), Alt+숫자(메뉴) 등 모든 충돌 가능성을 배제하기 위해
+  // 익스텐션에서 가장 안전하게 쓸 수 있는 Alt+Shift + 숫자 조합을 사용합니다.
+  // Mac: Option+Shift+1, Windows: Alt+Shift+1
   const prefix = isMac ? "Cmd+Shift" : "Alt+Shift";
 
   return {
-    text: `${prefix}+S`, // Selection (S)
-    bookmark: `${prefix}+B`, // Bookmark (B)
-    capture: `${prefix}+E`, // Capture (E)
+    bookmark: `${prefix}+B`,
+    capture: `${prefix}+E`,
+    text: `${prefix}+D`,
   };
 };
 
