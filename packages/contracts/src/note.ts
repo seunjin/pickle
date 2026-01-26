@@ -227,7 +227,7 @@ export const noteWithAssetSchema = strictNoteSchema.and(
 // Explicitly define NoteWithAsset as Discriminated Union
 export type NoteWithAsset = z.infer<typeof noteWithAssetSchema>;
 
-// DB 일관성 체크
+// DB 일관성 체크 (fts_tokens 등 DB 생성 전용 필드는 무시)
 export const _checkNoteSchema = (
   x: z.infer<typeof strictNoteSchema>,
-): NoteRow => x;
+): Omit<NoteRow, "fts_tokens"> => x;
