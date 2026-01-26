@@ -85,6 +85,23 @@ export function BookmarkEditor({
                         src={note.pageMeta?.favicon}
                         alt={`${note.pageMeta?.site_name} favicon`}
                         className="h-full w-full object-contain"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          // 무한 루프 방지: 이미 구글 파비콘으로 시도했다면 숨김 처리
+                          if (target.dataset.fallback === "true") {
+                            target.style.display = "none";
+                            return;
+                          }
+
+                          try {
+                            const domain = new URL(note.pageMeta?.url || "")
+                              .hostname;
+                            target.dataset.fallback = "true";
+                            target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+                          } catch (_err) {
+                            target.style.display = "none";
+                          }
+                        }}
                       />
                     </span>
                   )}

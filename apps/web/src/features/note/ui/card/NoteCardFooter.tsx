@@ -24,6 +24,20 @@ export function NoteCardFooter({ url, meta, onDelete }: NoteCardFooterProps) {
               src={meta.favicon}
               alt=""
               className="h-full w-full object-contain"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.dataset.fallback === "true") {
+                  target.style.display = "none";
+                  return;
+                }
+                try {
+                  const domain = new URL(url).hostname;
+                  target.dataset.fallback = "true";
+                  target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+                } catch (_err) {
+                  target.style.display = "none";
+                }
+              }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-[8px] text-neutral-500">
