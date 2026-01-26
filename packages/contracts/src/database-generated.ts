@@ -166,6 +166,7 @@ export type Database = {
           data: Json;
           deleted_at: string | null;
           folder_id: string | null;
+          fts_tokens: unknown;
           id: string;
           memo: string | null;
           meta: Json | null;
@@ -184,6 +185,7 @@ export type Database = {
           data?: Json;
           deleted_at?: string | null;
           folder_id?: string | null;
+          fts_tokens?: unknown;
           id?: string;
           memo?: string | null;
           meta?: Json | null;
@@ -202,6 +204,7 @@ export type Database = {
           data?: Json;
           deleted_at?: string | null;
           folder_id?: string | null;
+          fts_tokens?: unknown;
           id?: string;
           memo?: string | null;
           meta?: Json | null;
@@ -226,6 +229,13 @@ export type Database = {
             columns: ["folder_id"];
             isOneToOne: false;
             referencedRelation: "folders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
             referencedColumns: ["id"];
           },
           {
@@ -281,6 +291,7 @@ export type Database = {
           full_name: string | null;
           id: string;
           is_marketing_agreed: boolean;
+          is_over_14: boolean;
           is_privacy_agreed: boolean;
           is_terms_agreed: boolean;
           status: Database["public"]["Enums"]["user_status"];
@@ -293,6 +304,7 @@ export type Database = {
           full_name?: string | null;
           id: string;
           is_marketing_agreed?: boolean;
+          is_over_14?: boolean;
           is_privacy_agreed?: boolean;
           is_terms_agreed?: boolean;
           status?: Database["public"]["Enums"]["user_status"];
@@ -305,6 +317,7 @@ export type Database = {
           full_name?: string | null;
           id?: string;
           is_marketing_agreed?: boolean;
+          is_over_14?: boolean;
           is_privacy_agreed?: boolean;
           is_terms_agreed?: boolean;
           status?: Database["public"]["Enums"]["user_status"];
@@ -376,7 +389,13 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      complete_signup: { Args: { marketing_agreed?: boolean }; Returns: Json };
+      complete_signup:
+        | { Args: { marketing_agreed?: boolean }; Returns: Json }
+        | {
+            Args: { is_over_14?: boolean; marketing_agreed?: boolean };
+            Returns: Json;
+          };
+      delete_user_account: { Args: never; Returns: undefined };
       get_workspace_storage_info: {
         Args: { p_workspace_id: string };
         Returns: {

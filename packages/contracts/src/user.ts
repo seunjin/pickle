@@ -34,6 +34,7 @@ export const appUserSchema = z.object({
   is_terms_agreed: z.boolean(),
   is_privacy_agreed: z.boolean(),
   is_marketing_agreed: z.boolean(),
+  is_over_14: z.boolean(),
   created_at: z.string(),
 });
 

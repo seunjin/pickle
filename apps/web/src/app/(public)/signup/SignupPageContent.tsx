@@ -24,6 +24,7 @@ export default function SignupPageContent() {
   const dialog = useDialog();
 
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isOver14, setIsOver14] = useState(false);
   const [agreements, setAgreements] = useState({
     terms: false,
     privacy: false,
@@ -88,7 +89,7 @@ export default function SignupPageContent() {
         </div>
         <div className="flex flex-col items-center gap-7.5">
           {/* 회원가입 Card */}
-          <PickleCausticGlass className="h-100 w-full">
+          <PickleCausticGlass className="w-full">
             <div className="pb-11">
               <h1 className="pb-1 font-bold text-[22px] leading-[1.3]">
                 Sign UP
@@ -98,6 +99,39 @@ export default function SignupPageContent() {
                 약관에 동의해주세요.
               </p>
             </div>
+
+            {/* 이용 자격 확인 - 14세 이상 확인 */}
+            <div className="flex flex-col gap-3 pb-7.5">
+              {/* 전체약관 동의 */}
+              <div className="border-base-border-light border-b pb-2">
+                <label
+                  htmlFor="is-over-14-check"
+                  className="group inline-flex w-full cursor-pointer items-center gap-3"
+                >
+                  <Checkbox
+                    id="is-over-14-check"
+                    name="is-over-14-check"
+                    checked={isOver14}
+                    onChange={(e) => setIsOver14(e.target.checked)}
+                  />{" "}
+                  <span className="text-[14px] text-base-foreground">
+                    이용 자격 확인
+                  </span>
+                </label>
+              </div>
+
+              {/*  */}
+              <div className="flex items-center gap-3">
+                <div className="size-4" />
+                <span className="inline-flex items-center gap-1 text-[14px]">
+                  <strong className="font-normal text-base-primary">
+                    [필수]
+                  </strong>{" "}
+                  본인은 만 14세 이상입니다.
+                </span>
+              </div>
+            </div>
+
             <div className="flex flex-col gap-3 pb-11">
               {/* 전체약관 동의 */}
               <div className="border-base-border-light border-b pb-2">
@@ -206,7 +240,10 @@ export default function SignupPageContent() {
                 next={next}
                 label="Google로 회원가입"
                 disabled={
-                  isCompleting || !agreements.terms || !agreements.privacy
+                  isCompleting ||
+                  !isOver14 ||
+                  !agreements.terms ||
+                  !agreements.privacy
                 }
                 onClick={
                   user && (!appUser || appUser.status === "pending")
@@ -215,6 +252,7 @@ export default function SignupPageContent() {
                           setIsCompleting(true);
                           await completeSignup({
                             marketing_agreed: agreements.marketing,
+                            is_over_14: isOver14,
                           });
 
                           // 성공 시 대시보드로 이동
@@ -235,6 +273,7 @@ export default function SignupPageContent() {
                     is_terms_agreed: agreements.terms,
                     is_privacy_agreed: agreements.privacy,
                     is_marketing_agreed: agreements.marketing,
+                    is_over_14: isOver14,
                   },
                 }}
               />
