@@ -105,7 +105,7 @@ export function ShortcutRecorder({
                 onClick={startRecording}
                 className="flex gap-1"
               >
-                {combo.split("+").map(renderKey)}
+                {renderKey(combo)}
               </button>
             </div>
           )}

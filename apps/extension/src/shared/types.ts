@@ -48,13 +48,14 @@ export const isMac =
   /Mac|iPhone|iPod|iPad/.test(navigator.platform);
 
 export const getOSDefaultShortcuts = (): ShortcutSettings => {
-  // 브라우저/OS 기본 단축키(Cmd+N 등)와의 충돌을 피하기 위해
-  // 익스텐션은 Alt+Shift 조합을 기본으로 사용하는 것이 Best Practice입니다.
-  const prefix = "Alt+Shift";
+  // 브라우저 기본 단축키(Cmd+N, Cmd+B 등)와의 충돌을 피하기 위해
+  // Alt+Shift(Mac에서는 Option+Shift) 조합을 기본으로 사용하는 것이 가장 안전합니다.
+  const prefix = isMac ? "Cmd+Shift" : "Alt+Shift";
+
   return {
-    text: `${prefix}+S`, // Save Selection
-    bookmark: `${prefix}+D`, // Done/Bookmark
-    capture: `${prefix}+E`, // Capture (기존 유지)
+    text: `${prefix}+S`, // Selection (S)
+    bookmark: `${prefix}+B`, // Bookmark (B)
+    capture: `${prefix}+E`, // Capture (E)
   };
 };
 
