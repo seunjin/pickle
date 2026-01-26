@@ -16,18 +16,9 @@ interface SettingsPanelProps {
   onLogout: () => void;
 }
 
-const fakeGetOSDefaultShortcuts = (): ShortcutSettings => {
-  return {
-    text: `Cmd+N`,
-    bookmark: `Cmd+B`,
-    capture: `Cmd+E`,
-  };
-};
 export function SettingsPanel({ onBack, onLogout }: SettingsPanelProps) {
   const { user } = useSession();
-  const [shortcuts, setShortcuts] = useState<ShortcutSettings | null>(
-    fakeGetOSDefaultShortcuts(),
-  );
+  const [shortcuts, setShortcuts] = useState<ShortcutSettings | null>(null);
   const defaults = getOSDefaultShortcuts();
 
   useEffect(() => {

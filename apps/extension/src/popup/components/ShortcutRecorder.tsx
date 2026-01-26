@@ -100,8 +100,12 @@ export function ShortcutRecorder({
             </div>
           ) : (
             <div className="flex h-7.5 w-40 items-center rounded-md border border-base-border bg-neutral-900 px-3">
-              <button type="button" onClick={startRecording} className="">
-                {combo.split("").map(renderKey)}
+              <button
+                type="button"
+                onClick={startRecording}
+                className="flex gap-1"
+              >
+                {combo.split("+").map(renderKey)}
               </button>
             </div>
           )}
