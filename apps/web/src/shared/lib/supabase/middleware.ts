@@ -45,8 +45,8 @@ export async function updateSession(request: NextRequest) {
 
   // 🚨 [Auth Guard] 미로그인 사용자 처리
   // 1. 제외 경로: 로그인, 가입, 인증 API, 정적 자산 등
-  const isExcludedPath = ["/signin", "/signup", "/api", "/auth"].some((p) =>
-    request.nextUrl.pathname.startsWith(p),
+  const isExcludedPath = ["/signin", "/signup", "/api", "/auth", "/terms"].some(
+    (p) => request.nextUrl.pathname.startsWith(p),
   );
 
   const isRoot = request.nextUrl.pathname === "/";
