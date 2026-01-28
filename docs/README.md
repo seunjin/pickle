@@ -18,6 +18,7 @@
 ## 2. 처음 읽는 순서 (Recommended Reading Order)
 
 ### ① 프로젝트 전반 이해
+0. [DEVELOPMENT.md](./DEVELOPMENT.md) (**로컬 개발 가이드**) - **가장 먼저 읽어보세요!**
 1. [monorepo-structure.md](./monorepo-structure.md)  
    → 전체 레포 구조, apps / packages 역할
 2. [WORKSPACE_TECH_SPEC.md](./WORKSPACE_TECH_SPEC.md)  
