@@ -19,6 +19,9 @@ http://scripts.sil.org/OFL
 
 /* 1. 전역 기본 스타일 강제 정의 */
 @layer base {
+  .terms-reset {
+    all: revert;
+  }
   body {
     color: var(--color-base-foreground);
     background-color: var(--color-base-background);

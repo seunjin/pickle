@@ -4,6 +4,7 @@ export * from "./common";
 export type { Database } from "./database";
 export * from "./database-generated";
 export * from "./folder";
+export * from "./legal";
 export * from "./note";
 export * from "./storage";
 export * from "./tag";

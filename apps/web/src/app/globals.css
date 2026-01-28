@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@pickle/ui/base.css";
+@plugin "@tailwindcss/typography";
 
 /* apps/web/src/app 기준 4단계 상위가 루트(pickle-note) */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
@@ -34,3 +35,60 @@
   background-size: cover;
   z-index: -2;
 }
+
+/* 공통: native marker 제거 */
+.legal-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 항목 레이아웃: 번호 영역 + 본문 영역 */
+.legal-list > li {
+  display: grid;
+  grid-template-columns: var(--marker-width, 3ch) 1fr;
+  column-gap: 1ch;
+  align-items: start;
+}
+
+.legal-ol-decimal {
+  counter-reset: item;
+}
+
+.legal-ol-decimal > li {
+  counter-increment: item;
+}
+
+.legal-ol-decimal > li::before {
+  content: counter(item) ".";
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.legal-ol-alpha {
+  counter-reset: item;
+}
+
+.legal-ol-alpha > li {
+  counter-increment: item;
+}
+
+.legal-ol-alpha > li::before {
+  content: counter(item, lower-alpha) ".";
+  text-align: right;
+}
+
+.legal-ul-disc > li::before {
+  content: "•";
+  text-align: right;
+}
+
+.legal-list.sm {
+  --marker-width: 2ch;
+} /* 1~9 */
+.legal-list.md {
+  --marker-width: 3ch;
+} /* 1~99 */
+.legal-list.lg {
+  --marker-width: 4ch;
+} /* 1~999 */

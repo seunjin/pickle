@@ -257,10 +257,29 @@ export default function SignupPageContent() {
 
                           // 성공 시 대시보드로 이동
                           router.push("/dashboard");
-                        } catch (error) {
+                        } catch (error: unknown) {
+                          const errorMessage =
+                            error instanceof Error
+                              ? error.message
+                              : String(error);
+
+                          // AUTH_USER_NOT_FOUND: DB 리셋 등으로 인해 세션은 있으나 auth.users에 실제 정보가 없는 경우
+                          if (errorMessage.includes("AUTH_USER_NOT_FOUND")) {
+                            logger.warn(
+                              "Session invalid (user not found in DB). Forcing sign out.",
+                            );
+                            const { createClient } = await import(
+                              "@/shared/lib/supabase/client"
+                            );
+                            const supabase = createClient();
+                            await supabase.auth.signOut();
+                            router.replace("/signin?reason=session_expired");
+                            return;
+                          }
+
                           // 실패 시 전용 에러 페이지로 이동
                           router.push(
-                            `/signup/error?error=${encodeURIComponent(String(error))}`,
+                            `/signup/error?error=${encodeURIComponent(errorMessage)}`,
                           );
                           logger.error("Signup completion failed", { error });
                           setIsCompleting(false);

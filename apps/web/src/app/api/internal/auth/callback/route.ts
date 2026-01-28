@@ -20,6 +20,9 @@ export async function GET(request: Request) {
   const isTermsViaUrl = searchParams.get("terms") === "true";
   const isPrivacyViaUrl = searchParams.get("privacy") === "true";
   const isMarketingViaUrl = searchParams.get("marketing") === "true";
+  const isOver14ViaUrl =
+    searchParams.get("over14") === "true" ||
+    searchParams.get("is_over_14") === "true";
 
   if (code) {
     const supabase = await createClient();
@@ -42,9 +45,6 @@ export async function GET(request: Request) {
 
         // 프로필이 없는 경우 메타데이터 또는 URL 파라미터를 확인하여 즉시 생성 시도
         if (!userProfile) {
-          logger.warn(
-            "User profile missing, checking values for automatic signup",
-          );
           const meta = currentUser.user_metadata;
           const isTermsAgreed =
             isTermsViaUrl || String(meta?.is_terms_agreed) === "true";
@@ -52,30 +52,57 @@ export async function GET(request: Request) {
             isPrivacyViaUrl || String(meta?.is_privacy_agreed) === "true";
           const isMarketingAgreed =
             isMarketingViaUrl || String(meta?.is_marketing_agreed) === "true";
+          const isOver14Agreed =
+            isOver14ViaUrl || String(meta?.is_over_14) === "true";
 
-          if (isTermsAgreed && isPrivacyAgreed) {
+          logger.warn(
+            "User profile missing, checking values for automatic signup",
+            {
+              userId: currentUser.id,
+              isTermsAgreed,
+              isPrivacyAgreed,
+              isOver14Agreed,
+              isMarketingAgreed,
+              meta,
+            },
+          );
+
+          if (isTermsAgreed && isPrivacyAgreed && isOver14Agreed) {
+            logger.info(
+              "Fulfilling automatic signup requirements. Calling rpc.complete_signup",
+            );
             const { error: completeError } = await supabase.rpc(
               "complete_signup",
               {
-                marketing_agreed: isMarketingAgreed,
+                p_marketing_agreed: isMarketingAgreed,
+                p_is_over_14: isOver14Agreed,
               },
             );
 
             if (!completeError) {
-              // 신규 가입 성공 시 대시보드로 리다이렉트
+              logger.info("Automatic signup successful via callback", {
+                userId: currentUser.id,
+              });
               return NextResponse.redirect(`${origin}/dashboard`);
             }
-            logger.error("Failed to complete signup via callback", {
+
+            logger.error("Failed to complete signup via callback rpc", {
+              userId: currentUser.id,
               error: completeError,
             });
             return NextResponse.redirect(
-              `${origin}/signup/error?error=signup_processing_failed`,
+              `${origin}/signup/error?error=signup_processing_failed&details=${encodeURIComponent(JSON.stringify(completeError))}`,
             );
           }
 
-          // [핵심] 가입 데이터가 없는데 프로필도 없다면, 세션을 유지하지 않고 로그아웃 처리
-          // 그래야 차후 /signup에서 깨끗한 상태로 가입 프로세스를 시작할 수 있음.
-          logger.warn("No profile and no agreement data. Signing out");
+          logger.warn(
+            "Missing agreement requirements for automatic signup. Signing out",
+            {
+              isTermsAgreed,
+              isPrivacyAgreed,
+              isOver14Agreed,
+            },
+          );
           await supabase.auth.signOut();
           return NextResponse.redirect(`${origin}/signin?reason=no_profile`);
         }

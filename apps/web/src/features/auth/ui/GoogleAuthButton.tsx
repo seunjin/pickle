@@ -70,6 +70,9 @@ export const GoogleAuthButton = ({
         if (options.data.is_marketing_agreed) {
           callbackUrl.searchParams.set("marketing", "true");
         }
+        if (options.data.is_over_14) {
+          callbackUrl.searchParams.set("over14", "true");
+        }
       }
 
       const { error } = await supabase.auth.signInWithOAuth({

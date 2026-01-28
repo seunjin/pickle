@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/features/auth/api/getUser";
 import { createClient } from "@/shared/lib/supabase/server";
@@ -40,11 +41,16 @@ export default async function AdminLayout({
           <h1 className="font-bold text-xl tracking-tight">Admin</h1>
         </div>
         <nav className="flex flex-col gap-2 text-slate-400 text-sm">
-          <div className="rounded-md bg-slate-800 px-3 py-2 text-white">
+          <Link href="/admin" className="px-3 py-2 hover:text-white">
             대시보드
-          </div>
+          </Link>
           <div className="px-3 py-2 hover:text-white">사용자 관리</div>
-          <div className="px-3 py-2 hover:text-white">약관 관리</div>
+          <Link
+            href="/admin/legal"
+            className="rounded-md bg-slate-800 px-3 py-2 text-white"
+          >
+            약관 관리
+          </Link>
           <div className="px-3 py-2 hover:text-white">시스템 설정</div>
         </nav>
       </aside>

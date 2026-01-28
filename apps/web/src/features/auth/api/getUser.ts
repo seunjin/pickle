@@ -20,6 +20,8 @@ export const getUser = async (
     return null;
   }
 
+  if (!data) return null;
+
   // Zod 스키마를 사용하여 런타임 검증을 수행합니다.
   // DB의 text 타입과 AppUser의 Enum 타입 간 불일치를 안전하게 변환합니다.
   const result = appUserSchema.safeParse(data);
