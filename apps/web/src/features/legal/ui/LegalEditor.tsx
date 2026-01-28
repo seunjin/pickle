@@ -2,16 +2,22 @@
 
 import { Button } from "@pickle/ui";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableRow } from "@tiptap/extension-table-row";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
   Heading1,
   Heading2,
+  Heading3,
   Italic,
   List,
   ListOrdered,
   Quote,
+  Table as TableIcon,
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -34,21 +40,24 @@ export function LegalEditor({
       Placeholder.configure({
         placeholder: "이곳에 약관 내용을 마크다운으로 작성하세요...",
       }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: "legal-table",
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     immediatelyRender: false,
     content: initialContent,
     onUpdate: ({ editor }) => {
-      // Tiptap의 HTML 출력이 아닌 마크다운 처리를 위해 getHTML을 사용하되
-      // 실제 저장 시에는 마크다운으로 변환하거나 HTML 그대로 저장할 수 있습니다.
-      // 여기서는 사용자의 요구사항에 맞게 마크다운으로 취급하기 위해
-      // 간단한 변환 또는 전용 확장을 고려할 수 있으나, 일단 HTML/Text로 처리합니다.
-      // (Tiptap starter-kit은 기본적인 마크다운 입력을 지원합니다)
       onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
-        class:
-          "prose prose-invert max-w-none focus:outline-none min-h-[500px] p-6 text-neutral-300",
+        class: "prose-legal focus:outline-none min-h-[500px] p-6",
       },
     },
   });
@@ -61,6 +70,20 @@ export function LegalEditor({
   }, [initialContent, editor]);
 
   if (!editor) return null;
+
+  const handleInsertTable = () => {
+    if (editor.can().insertTable()) {
+      editor
+        .chain()
+        .focus()
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run();
+    } else {
+      import("@/shared/lib/logger").then(({ logger }) => {
+        logger.warn("Table command not available");
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/50">
@@ -79,6 +102,13 @@ export function LegalEditor({
           }
           active={editor.isActive("heading", { level: 2 })}
           icon={<Heading2 className="h-4 w-4" />}
+        />
+        <ToolbarButton
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+          active={editor.isActive("heading", { level: 3 })}
+          icon={<Heading3 className="h-4 w-4" />}
         />
         <div className="mx-1 h-4 w-px bg-neutral-800" />
         <ToolbarButton
@@ -106,6 +136,11 @@ export function LegalEditor({
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           active={editor.isActive("blockquote")}
           icon={<Quote className="h-4 w-4" />}
+        />
+        <ToolbarButton
+          onClick={handleInsertTable}
+          active={editor.isActive("table")}
+          icon={<TableIcon className="h-4 w-4" />}
         />
 
         <div className="ml-auto flex items-center gap-2">

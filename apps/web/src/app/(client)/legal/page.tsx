@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function LegalPage() {
-  return <LegalContent />;
+  return <LegalContent pagePath="legal" />;
 }

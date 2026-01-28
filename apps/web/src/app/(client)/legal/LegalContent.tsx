@@ -8,11 +8,12 @@ import { ScrollArea } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { getActiveLegalDocument } from "@/features/legal/api/getActiveLegalDocument";
 
-export function LegalContent() {
+interface LegalContentProps {
+  pagePath: "legal" | "terms";
+}
+export function LegalContent({ pagePath }: LegalContentProps) {
   const searchParams = useSearchParams();
   const tabParam = (searchParams.get("tab") || "service") as LegalDocumentType;
   const router = useRouter();
@@ -53,7 +54,7 @@ export function LegalContent() {
             <button
               key={tab.value}
               type="button"
-              onClick={() => router.push(`/legal?tab=${tab.value}`)}
+              onClick={() => router.push(`/${pagePath}?tab=${tab.value}`)}
               className={cn(
                 "font-medium text-[20px] text-muted-foreground transition-colors",
                 tabParam === tab.value
@@ -75,11 +76,11 @@ export function LegalContent() {
               내용을 불러오는 중...
             </div>
           ) : document ? (
-            <div className="prose prose-invert max-w-none text-neutral-300">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {document.content}
-              </ReactMarkdown>
-            </div>
+            <div
+              className="prose-legal p-6"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: 관리자가 작성한 신뢰할 수 있는 HTML 약관 내용을 렌더링함
+              dangerouslySetInnerHTML={{ __html: document.content }}
+            />
           ) : (
             <div className="py-20 text-center text-neutral-500">
               등록된 약관 내용이 없습니다.

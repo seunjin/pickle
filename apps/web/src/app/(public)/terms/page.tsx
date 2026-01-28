@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function TermsIndexPage() {
   return (
     <div className="effect-bg h-dvh p-10">
-      <LegalContent />
+      <LegalContent pagePath="terms" />
     </div>
   );
 }
