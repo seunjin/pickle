@@ -77,7 +77,7 @@ export function LegalContent({ pagePath }: LegalContentProps) {
             </div>
           ) : document ? (
             <div
-              className="prose-legal p-6"
+              className="prose-legal"
               // biome-ignore lint/security/noDangerouslySetInnerHtml: 관리자가 작성한 신뢰할 수 있는 HTML 약관 내용을 렌더링함
               dangerouslySetInnerHTML={{ __html: document.content }}
             />
