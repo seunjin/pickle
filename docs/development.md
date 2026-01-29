@@ -66,7 +66,11 @@ pnpm --filter extension dev
 
 ### 5.2 크롬 웹스토어 배포(심사) 시 유의사항
 - 크롬 웹스토어는 심사 제출용 ZIP 파일에 `key` 필드가 포함되는 것을 권장하지 않거나 거절 사유로 삼기도 합니다.
-- **자동 해결**: `pnpm build:extension` 명령을 실행하면 `vite.config.ts`의 로직이 프로덕션 모드일 때만 `key` 필드를 자동으로 제거한 후 배포판을 생성합니다. 심사 제출 시에는 `dist` 폴더의 결과물을 그대로 사용하면 됩니다.
+- **배포용 빌드 방법**: 심사 제출용 파일을 만들 때는 아래와 같이 환경 변수를 추가하여 빌드합니다.
+  ```bash
+  VITE_WEBSTORE_BUILD=true pnpm build:extension
+  ```
+- 이 명령을 사용하면 `key` 필드가 제거된 배포판이 `dist` 폴더에 생성됩니다. 일반적인 개발용 빌드(`pnpm build:extension`) 시에는 아이디 유지를 위해 `key`가 포함됩니다.
 
 ---
 

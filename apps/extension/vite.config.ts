@@ -9,11 +9,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vitejs.dev/config/
 // Tailwind is handled via PostCSS (see postcss.config.mjs) - same as Web app
-export default defineConfig(({ mode }) => {
-  // 프로덕션 빌드(심사 제출용) 시에는 manifest에서 key 필드를 제거하여
-  // 크롬 웹스토어 심사 거절 사유를 방지합니다.
+export default defineConfig(() => {
+  // 크롬 웹스토어 심사 제출용 빌드 시에만 manifest에서 key 필드를 제거합니다.
+  // 일반적인 로컬 빌드(pnpm build:extension)에서는 아이디 고정을 위해 key를 유지합니다.
   const manifestData = { ...manifest };
-  if (mode === "production") {
+  const isWebstoreBuild = process.env.VITE_WEBSTORE_BUILD === "true";
+
+  if (isWebstoreBuild) {
     delete (manifestData as any).key;
   }
 
