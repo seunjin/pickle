@@ -117,6 +117,12 @@ export async function GET(request: Request) {
       // 세션 생성 성공 및 active 유저 시 목적지로 이동
       // 만약 next가 기본값('/')이면 대시보드로 이동
       const destination = next === "/" ? "/dashboard" : next;
+
+      // destination이 전체 URL 형태(http:// 등)이면 origin을 붙이지 않고 바로 이동
+      if (destination.startsWith("http")) {
+        return NextResponse.redirect(destination);
+      }
+
       return NextResponse.redirect(`${origin}${destination}`);
     } else {
       logger.error("Auth callback error", { error });
