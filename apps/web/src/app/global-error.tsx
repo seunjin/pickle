@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@pickle/ui";
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import { logger } from "@/shared/lib/logger";
 
@@ -13,6 +14,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     logger.error("Global critical error", { error, digest: error.digest });
+    Sentry.captureException(error);
   }, [error]);
 
   return (
