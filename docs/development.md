@@ -55,24 +55,18 @@ pnpm --filter extension dev
 
 ---
 
-## 5. 익스텐션 인증 설정 (중요 🔑)
+## 5. 익스텐션 인증 설정 (자동화 완료 🔑)
 
-`manifest.json`에서 `key` 필드를 제거했기 때문에, 로컬 환경마다 익스텐션 ID가 달라집니다. 로그인을 정상적으로 사용하려면 아래 설정을 완료해야 합니다.
+`manifest.json`에 공용 개발 키(`key`)를 추가하고, `vite.config.ts`에서 빌드 시 이를 처리하도록 자동화했습니다. 이제 모든 개발 환경에서 익스텐션 ID가 **`pgbkfbhojodldapigoomjkglijnbjlkf`**로 고정됩니다.
 
-### 5.1 익스텐션 ID 확인
-1. `chrome://extensions` 페이지에서 Pickle 익스텐션의 **ID**를 복사합니다. (예: `nkpml...`)
+### 5.1 고정된 설정 정보
+- **익스텐션 ID**: `pgbkfbhojodldapigoomjkglijnbjlkf`
+- **Redirect URL**: `https://pgbkfbhojodldapigoomjkglijnbjlkf.chromiumapp.org/`
+- **인증 설정**: 로컬 수퍼베이스(`supabase/config.toml`)에 위 주소가 이미 등록되어 있어 별도의 추가 설정 없이 로그인을 테스트할 수 있습니다.
 
-### 5.2 Supabase Redirect URL 등록
-1. [Supabase Dashboard](https://supabase.com/dashboard) > 프로젝트 선택
-2. **Authentication** > **URL Configuration** 이동
-3. **Redirect URLs** 섹션에 아래 형식의 URL을 추가합니다.
-   ```text
-   https://<익스텐션ID>.chromiumapp.org/
-   ```
-   *예: `https://nkpml...chromiumapp.org/`*
-
-### 5.3 OAuth 설정 확인
-- Google Cloud Console의 OAuth 동의 화면에 해당 익스텐션 URL이 허용되어 있는지 확인이 필요할 수 있습니다. (기본적으로 Supabase가 중계하므로 Supabase에만 등록하면 대부분 해결됩니다.)
+### 5.2 크롬 웹스토어 배포(심사) 시 유의사항
+- 크롬 웹스토어는 심사 제출용 ZIP 파일에 `key` 필드가 포함되는 것을 권장하지 않거나 거절 사유로 삼기도 합니다.
+- **자동 해결**: `pnpm build:extension` 명령을 실행하면 `vite.config.ts`의 로직이 프로덕션 모드일 때만 `key` 필드를 자동으로 제거한 후 배포판을 생성합니다. 심사 제출 시에는 `dist` 폴더의 결과물을 그대로 사용하면 됩니다.
 
 ---
 
