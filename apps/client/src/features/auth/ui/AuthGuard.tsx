@@ -15,7 +15,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       }
 
       if (!appUser || appUser.status !== "active") {
-        console.log("[AuthGuard] App user not active, redirecting to /signup?reason=no_profile");
+        console.log(
+          "[AuthGuard] App user not active, redirecting to /signup?reason=no_profile",
+        );
         // 프로필이 없는 유저가 signin 페이지로 계속 튕기는 루프를 방지하기 위해 signup 페이지로 유도합니다.
         navigate({
           to: "/signup",

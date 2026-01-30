@@ -1,11 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { AuthGuard } from '@/features/auth/ui/AuthGuard'
+import { createFileRoute } from "@tanstack/react-router";
 import { useUser } from "@/features/auth/model/useUser";
+import { AuthGuard } from "@/features/auth/ui/AuthGuard";
 import { createClient } from "@/shared/lib/supabase";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: DashboardPage,
-})
+});
 
 function DashboardPage() {
   const { user } = useUser();
@@ -21,10 +21,14 @@ function DashboardPage() {
         <div className="text-center">
           <h1 className="mb-4 font-bold text-4xl">Pickle Dashboard</h1>
           <p className="mb-8 text-neutral-500">
-            로그인된 사용자: <span className="font-semibold text-base-primary">{user?.email}</span>
+            로그인된 사용자:{" "}
+            <span className="font-semibold text-base-primary">
+              {user?.email}
+            </span>
           </p>
 
           <button
+            type="button"
             onClick={handleSignOut}
             className="rounded-lg bg-red-500 px-6 py-2 font-medium text-white transition-colors hover:bg-red-600"
           >

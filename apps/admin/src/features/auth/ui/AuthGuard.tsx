@@ -15,7 +15,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       }
 
       if (!appUser || appUser.status !== "active") {
-        console.log("[AuthGuard] App user not active, redirecting to /signin?reason=no_profile");
+        console.log(
+          "[AuthGuard] App user not active, redirecting to /signin?reason=no_profile",
+        );
         navigate({
           to: "/signin",
           search: { reason: "no_profile" },

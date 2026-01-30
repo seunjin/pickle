@@ -2,37 +2,37 @@ import { ActionButton, Button, Modal, ScrollArea, useDialog } from "@pickle/ui";
 
 export type TermsType = "terms" | "privacy" | "marketing";
 interface TermsArgreementModalProps {
-    type: TermsType;
-    onAgree: () => void;
+  type: TermsType;
+  onAgree: () => void;
 }
 export function TermsArgreementModal({
-    type,
-    onAgree,
+  type,
+  onAgree,
 }: TermsArgreementModalProps) {
-    const { close } = useDialog();
-    const config = {
-        terms: {
-            title: "서비스 이용약관 동의",
-        },
-        privacy: {
-            title: "개인정보 수집 및 이용 동의",
-        },
-        marketing: {
-            title: "마케팅 정보 수신 동의",
-        },
-    };
-    return (
-        <Modal contentClassName="w-[500px]">
-            <div className="grid max-h-[80dvh] w-full min-w-0 grid-rows-[auto_1fr]">
-                <header className="flex items-center justify-between px-6 pb-5">
-                    <span className="font-semibold text-[18px]">
-                        {config[type].title}
-                    </span>
-                    <ActionButton icon="delete_16" onClick={() => close()} />
-                </header>
-                <ScrollArea className="h-full overflow-auto px-6">
-                    <div className="whitespace-pre-wrap">
-                        {`제1조 (목적)
+  const { close } = useDialog();
+  const config = {
+    terms: {
+      title: "서비스 이용약관 동의",
+    },
+    privacy: {
+      title: "개인정보 수집 및 이용 동의",
+    },
+    marketing: {
+      title: "마케팅 정보 수신 동의",
+    },
+  };
+  return (
+    <Modal contentClassName="w-[500px]">
+      <div className="grid max-h-[80dvh] w-full min-w-0 grid-rows-[auto_1fr]">
+        <header className="flex items-center justify-between px-6 pb-5">
+          <span className="font-semibold text-[18px]">
+            {config[type].title}
+          </span>
+          <ActionButton icon="delete_16" onClick={() => close()} />
+        </header>
+        <ScrollArea className="h-full overflow-auto px-6">
+          <div className="whitespace-pre-wrap">
+            {`제1조 (목적)
 본 약관은 ㈜피클노트(이하 “회사”)가 제공하는 Pickle 서비스(이하 “서비스”)의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
 
 제2조 (정의)
@@ -103,17 +103,17 @@ export function TermsArgreementModal({
 협의가 이루어지지 않을 경우, 관할 법원은 회사 본점 소재지 관할 법원으로 합니다.
 부칙
 본 약관은 2026년 ○월 ○일부터 시행합니다.`}
-                    </div>
-                </ScrollArea>
-            </div>
-            <div className="flex w-full justify-end gap-2 px-6">
-                <Button variant="secondary" className="flex-1" onClick={() => close()}>
-                    동의하지 않음
-                </Button>
-                <Button className="flex-1" onClick={() => onAgree()}>
-                    동의함
-                </Button>
-            </div>
-        </Modal>
-    );
+          </div>
+        </ScrollArea>
+      </div>
+      <div className="flex w-full justify-end gap-2 px-6">
+        <Button variant="secondary" className="flex-1" onClick={() => close()}>
+          동의하지 않음
+        </Button>
+        <Button className="flex-1" onClick={() => onAgree()}>
+          동의함
+        </Button>
+      </div>
+    </Modal>
+  );
 }

@@ -11,7 +11,10 @@ export async function getUserWorkspaces(
     .from("workspace_members")
     .select("workspaces (*)")
     .eq("user_id", userId);
-  console.log("[getUserWorkspaces] DB response received:", { count: data?.length, hasError: !!error });
+  console.log("[getUserWorkspaces] DB response received:", {
+    count: data?.length,
+    hasError: !!error,
+  });
 
   if (error) {
     logger.error("Error fetching workspaces", { userId, error });

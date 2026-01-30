@@ -37,12 +37,20 @@ export const SessionProvider = ({
 
       // 이미 같은 유저를 처리 중이면 중복 실행 방지
       if (processingUserIdRef.current === currentUser.id && retryCount === 0) {
-        console.log("[SessionProvider] fetchUserData - already processing for:", currentUser.id);
+        console.log(
+          "[SessionProvider] fetchUserData - already processing for:",
+          currentUser.id,
+        );
         return;
       }
 
       processingUserIdRef.current = currentUser.id;
-      console.log("[SessionProvider] fetchUserData started for:", currentUser.id, "retry:", retryCount);
+      console.log(
+        "[SessionProvider] fetchUserData started for:",
+        currentUser.id,
+        "retry:",
+        retryCount,
+      );
 
       try {
         // 1. 프로필 정보 조회
@@ -54,26 +62,42 @@ export const SessionProvider = ({
           const isTermsAgreed = String(meta?.is_terms_agreed) === "true";
           const isPrivacyAgreed = String(meta?.is_privacy_agreed) === "true";
           const isOver14Agreed = String(meta?.is_over_14) === "true";
-          const isMarketingAgreed = String(meta?.is_marketing_agreed) === "true";
+          const isMarketingAgreed =
+            String(meta?.is_marketing_agreed) === "true";
 
           if (isTermsAgreed && isPrivacyAgreed && isOver14Agreed) {
-            console.log("[SessionProvider] Fulfilling automatic signup requirements. Calling complete_signup RPC...");
+            console.log(
+              "[SessionProvider] Fulfilling automatic signup requirements. Calling complete_signup RPC...",
+            );
             try {
               const rpcPromise = supabase.rpc("complete_signup", {
                 p_marketing_agreed: isMarketingAgreed,
                 p_is_over_14: isOver14Agreed,
               });
-              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("RPC Timeout")), 3000));
-              const { error: completeError } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+              const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("RPC Timeout")), 3000),
+              );
+              const { error: completeError } = (await Promise.race([
+                rpcPromise,
+                timeoutPromise,
+              ])) as { error: any };
 
               if (!completeError) {
-                console.log("[SessionProvider] Automatic signup successful. Re-fetching profile...");
+                console.log(
+                  "[SessionProvider] Automatic signup successful. Re-fetching profile...",
+                );
                 userProfile = await getUser(supabase, currentUser.id);
               } else {
-                console.error("[SessionProvider] Failed to complete signup via RPC:", completeError);
+                console.error(
+                  "[SessionProvider] Failed to complete signup via RPC:",
+                  completeError,
+                );
               }
             } catch (err) {
-              console.error("[SessionProvider] RPC call timed out or failed:", err);
+              console.error(
+                "[SessionProvider] RPC call timed out or failed:",
+                err,
+              );
             }
           }
         }
@@ -81,7 +105,10 @@ export const SessionProvider = ({
         if (mounted) {
           setAppUser(userProfile);
           if (userProfile) {
-            const workspaces = await getUserWorkspaces(supabase, currentUser.id);
+            const workspaces = await getUserWorkspaces(
+              supabase,
+              currentUser.id,
+            );
             if (workspaces.length > 0) setWorkspace(workspaces[0]);
           }
           setIsLoading(false);
@@ -89,7 +116,9 @@ export const SessionProvider = ({
       } catch (e) {
         console.error("[SessionProvider] fetchUserData error:", e);
         if (mounted && retryCount < 2) {
-          console.log(`[SessionProvider] Retrying fetchUserData... (${retryCount + 1}/2)`);
+          console.log(
+            `[SessionProvider] Retrying fetchUserData... (${retryCount + 1}/2)`,
+          );
           setTimeout(() => fetchUserData(currentUser, retryCount + 1), 1000);
         } else if (mounted) {
           setIsLoading(false);
@@ -109,7 +138,7 @@ export const SessionProvider = ({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
       const currentUser = session?.user ?? null;
       if (!currentUser) {
