@@ -1,31 +1,35 @@
 import { Spinner } from "@pickle/ui";
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useUser } from "../model/useUser";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, appUser, isLoading } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
-        // CSR 환경에서는 window.location.href 혹은 전역 라우터를 사용하여 이동
-        // 일단은 www. 도메인 주소로 보냅니다.
-        const signinUrl = `${import.meta.env.VITE_WWW_URL || "http://localhost:3000"}/signin`;
-        window.location.href = signinUrl;
+        navigate({ to: "/signin", replace: true });
         return;
       }
 
       if (!appUser || appUser.status !== "active") {
-        const signinUrl = `${import.meta.env.VITE_WWW_URL || "http://localhost:3000"}/signin?reason=no_profile`;
-        window.location.href = signinUrl;
+        console.log("[AuthGuard] App user not active, redirecting to /signup?reason=no_profile");
+        // 프로필이 없는 유저가 signin 페이지로 계속 튕기는 루프를 방지하기 위해 signup 페이지로 유도합니다.
+        navigate({
+          to: "/signup",
+          search: { reason: "no_profile" },
+          replace: true,
+        });
         return;
       }
     }
-  }, [user, appUser, isLoading]);
+  }, [user, appUser, isLoading, navigate]);
 
   if (isLoading || !user || appUser?.status !== "active") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-base-background">
+      <div className="effect-bg flex min-h-screen flex-col items-center justify-center bg-base-background">
         <Spinner className="size-8 text-base-primary" />
       </div>
     );

@@ -6,10 +6,12 @@ export async function getUserWorkspaces(
   supabase: SupabaseClient<Database>,
   userId: string,
 ): Promise<Workspace[]> {
+  console.log("[getUserWorkspaces] Fetching workspaces from DB...", userId);
   const { data, error } = await supabase
     .from("workspace_members")
     .select("workspaces (*)")
     .eq("user_id", userId);
+  console.log("[getUserWorkspaces] DB response received:", { count: data?.length, hasError: !!error });
 
   if (error) {
     logger.error("Error fetching workspaces", { userId, error });

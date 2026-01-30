@@ -11,12 +11,5 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookieOptions: {
-      domain: import.meta.env.VITE_COOKIE_DOMAIN,
-      path: "/",
-      sameSite: "lax",
-      secure: true,
-    },
-  });
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
 }
