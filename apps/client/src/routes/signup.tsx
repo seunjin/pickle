@@ -231,7 +231,7 @@ function SignupPage() {
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex w-[340px] items-center gap-3">
               <GoogleAuthButton
                 next={next}
                 label="Google로 회원가입"
