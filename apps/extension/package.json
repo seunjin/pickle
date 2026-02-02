@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:webstore": "VITE_WEBSTORE_BUILD=true tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

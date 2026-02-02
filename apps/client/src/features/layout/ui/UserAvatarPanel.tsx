@@ -115,7 +115,7 @@ export function UserAvatarPanel() {
           {(appUser.authority === "super_admin" ||
             appUser.authority === "admin") && (
             <DropdownMenuItem asChild>
-              <Link to={"/admin" as any}>
+              <Link to="/admin">
                 <button
                   type="button"
                   className="flex w-full items-center gap-2"
@@ -126,14 +126,14 @@ export function UserAvatarPanel() {
             </DropdownMenuItem>
           )}
           <DropdownMenuItem asChild>
-            <Link to={"/settings" as any}>
+            <Link to="/settings">
               <button type="button" className="flex w-full items-center gap-2">
                 <Icon name="setting_16" /> 계정 설정
               </button>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to={"/legal" as any}>
+            <Link to="/legal">
               <button type="button" className="flex w-full items-center gap-2">
                 <Icon name="document_16" /> 피클약관
               </button>

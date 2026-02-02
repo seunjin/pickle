@@ -293,6 +293,9 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^3.17.1
         version: 3.17.1
+      import-in-the-middle:
+        specifier: ^2.0.6
+        version: 2.0.6
       lucide-react:
         specifier: ^0.559.0
         version: 0.559.0(react@19.2.3)
@@ -314,6 +317,9 @@ importers:
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
+      require-in-the-middle:
+        specifier: ^8.0.1
+        version: 8.0.1
       zustand:
         specifier: ^5.0.5
         version: 5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
