@@ -1,5 +1,7 @@
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
+import { useDialog } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
+import { NoteDetailDrawer } from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
 import { OverflowTagGroup } from "./OverflowTagGroup";
 import { Thumbnail } from "./thumbnail/Thumbnail";
@@ -10,9 +12,10 @@ interface NoteCardProps {
 }
 
 export function NoteCard({ note, readOnly }: NoteCardProps) {
+  const dialog = useDialog();
+
   const handleCardClick = () => {
-    // TODO: NoteDetailDrawer 연동 (layout 이관 후)
-    console.log("Card clicked:", note.id);
+    dialog.open(() => <NoteDetailDrawer note={note} readOnly={readOnly} />);
   };
 
   return (

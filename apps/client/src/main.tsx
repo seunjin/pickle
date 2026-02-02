@@ -3,6 +3,8 @@ console.log("!!! PIKLE-CLIENT MAIN.TSX STARTING !!!");
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+
+import { DialogProvider, Toaster } from "@pickle/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { SessionProvider } from "./features/auth/model/SessionContext";
@@ -28,7 +30,10 @@ if (rootElement) {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
-          <RouterProvider router={router} />
+          <DialogProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+          </DialogProvider>
         </SessionProvider>
       </QueryClientProvider>
     </React.StrictMode>,

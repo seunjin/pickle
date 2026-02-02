@@ -28,6 +28,7 @@ const TOKEN_REFRESH_MARGIN_MS = 5 * 60 * 1000;
  * chrome.storage.local 기반 Custom Storage Adapter 사용
  */
 export function createExtensionSupabaseClient(): SupabaseClient<Database> {
+  logger.info("[Supabase] Initializing client", { url: SUPABASE_URL });
   return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       flowType: "pkce",

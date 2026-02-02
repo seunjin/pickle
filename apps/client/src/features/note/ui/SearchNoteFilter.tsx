@@ -123,7 +123,7 @@ export function SearchNoteFilter({
             align="start"
             side="bottom"
             className={cn(
-              "z-[100] h-auto max-h-[400px] w-[300px] p-0",
+              "z-100 h-auto max-h-[400px] w-[300px] p-0",
               "border border-base-border-light bg-neutral-850 shadow-standard",
             )}
           >
