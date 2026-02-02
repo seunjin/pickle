@@ -1,3 +1,12 @@
+/**
+ * Supabase에서 조회한 노트 데이터의 tag_list 필드를 정규화합니다.
+ *
+ * Supabase 조인 쿼리는 `tag_list: note_tags(tag: tags(*))` 형태로 반환되며,
+ * 이 함수는 중첩된 `{ tag: Tag }[]` 구조를 `Tag[]` 배열로 평탄화합니다.
+ *
+ * @param data - Supabase 쿼리 결과 (raw data)
+ * @returns 정규화된 노트 데이터 배열
+ */
 export function transformNoteTagList(
   data: unknown[] | null,
 ): Array<Record<string, unknown>> | null {
