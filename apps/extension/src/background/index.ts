@@ -75,7 +75,11 @@ chrome.contextMenus.onClicked.addListener(
           { frameId: 0 },
         );
 
-        sendMessageToContentScript(tab.id, { action: "GET_METADATA" })
+        sendMessageToContentScript(
+          tab.id,
+          { action: "GET_METADATA" },
+          { frameId: 0 },
+        )
           .then((metadata: PageMetadata) => {
             if (metadata && tab.id) {
               logger.debug("Metadata fetched in background", { metadata });
@@ -140,7 +144,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           if (request.metadata) {
             updateNote(tabId, { pageMeta: request.metadata });
           } else {
-            sendMessageToContentScript(tabId, { action: "GET_METADATA" })
+            sendMessageToContentScript(
+              tabId,
+              { action: "GET_METADATA" },
+              { frameId: 0 },
+            )
               .then((metadata) => {
                 if (metadata) {
                   updateNote(tabId, {
