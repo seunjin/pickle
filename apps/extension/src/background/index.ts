@@ -11,7 +11,7 @@ import {
   launchOAuthFlow,
   logout,
 } from "./auth";
-import { setupContextMenus } from "./contextMenus";
+import { setupContextMenus } from "./context-menus";
 import { sendMessageToContentScript } from "./messaging";
 
 logger.info("Pickle Background Service Worker Running");

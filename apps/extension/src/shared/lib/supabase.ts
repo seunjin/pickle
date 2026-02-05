@@ -11,7 +11,7 @@ import {
   type Session,
   type SupabaseClient,
 } from "@supabase/supabase-js";
-import { chromeStorageAdapter } from "./chromeStorageAdapter";
+import { chromeStorageAdapter } from "./chrome-storage-adapter";
 import { logger } from "./logger";
 
 const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
