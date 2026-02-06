@@ -12,12 +12,11 @@ export function useSyncNoteList() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // 'pickle_sync' 채널 생성 (모든 탭 간 공유)
+    // 1. BroadcastChannel 구독 (다른 동일 출처 탭 대응)
     const channel = new BroadcastChannel("pickle_sync");
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === "PICKLE_NOTE_SAVED") {
-        // 노트 관련 모든 쿼리 무효화
         queryClient.invalidateQueries({
           queryKey: noteKeys.all,
         });
@@ -26,9 +25,36 @@ export function useSyncNoteList() {
 
     channel.addEventListener("message", handleMessage);
 
+    // 2. 브라우저 창(window.postMessage) 신호 수신 (익스텐션 iframe 브릿지)
+    const handleWindowMessage = (event: MessageEvent) => {
+      const type = event.data?.type;
+      if (type === "PICKLE_NOTE_SAVED" || type === "PICKLE_SYNC_REQUEST") {
+        queryClient.invalidateQueries({
+          queryKey: noteKeys.all,
+        });
+        // 다른 동일 출처 탭에도 알림 공유 (Proxy)
+        if (type !== "PICKLE_NOTE_SAVED") {
+          channel.postMessage({ type: "PICKLE_NOTE_SAVED" });
+        }
+      }
+    };
+    window.addEventListener("message", handleWindowMessage);
+
+    // 3. 윈도우 포커스 시점에 리프레시 (탭 전환 및 지연 동기화 대응)
+    const handleFocus = () => {
+      queryClient.invalidateQueries({
+        queryKey: noteKeys.all,
+        refetchType: "active",
+      });
+    };
+
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       channel.removeEventListener("message", handleMessage);
       channel.close();
+      window.removeEventListener("message", handleWindowMessage);
+      window.removeEventListener("focus", handleFocus);
     };
   }, [queryClient]);
 }
