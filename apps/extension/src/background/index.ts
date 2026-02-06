@@ -334,13 +334,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true;
     }
   } else if (request.action === "SYNC_DATA") {
-    // 실행 중인 모든 탭을 조회하여 피클 웹 앱 탭에 동기화 신호를 전파합니다.
-    const WEB_APP_URL_REGEX =
-      /picklenote\.vercel\.app|localhost:3000|127\.0\.0\.1:3000/;
-
+    // 모든 탭에 동기화 신호를 전파합니다. (웹 앱이 아닌 탭은 메시지를 무시하므로 안전합니다.)
     chrome.tabs.query({}, (tabs) => {
       for (const tab of tabs) {
-        if (tab.id && tab.url && WEB_APP_URL_REGEX.test(tab.url)) {
+        if (tab.id) {
           chrome.tabs
             .sendMessage(tab.id, { action: "NOTIFY_SYNC" })
             .catch(() => {
