@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { noteQueries } from "../model/noteQueries";
+import { useSyncNoteList } from "../model/useSyncNoteList";
 import { NoteList } from "./NoteList";
 import { NoteListFilter } from "./NoteListFilter";
 import type { NodataType } from "./NoteNodata";
@@ -27,7 +28,8 @@ export function NoteListWithFilter({
   const [selectedType, setSelectedType] = useState<SelectOptionValue>("all");
   const [sort, setSort] = useState<"latest" | "oldest">("latest");
 
-  // TODO: useSyncNoteList 이관 (BroadcastChannel 통한 실시간 리스트 동기화)
+  // 실시간 리스트 동기화 (BroadcastChannel 및 Window Focus 대응)
+  useSyncNoteList();
 
   // 1. Fetch Infinite Data
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
