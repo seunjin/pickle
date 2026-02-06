@@ -28,11 +28,11 @@ export function useSyncNoteList() {
     const handleWindowMessage = (event: MessageEvent) => {
       const type = event.data?.type;
       if (type === "PICKLE_NOTE_SAVED" || type === "PICKLE_SYNC_REQUEST") {
-        queryClient.invalidateQueries({
+        queryClient.refetchQueries({
           queryKey: noteKeys.all,
+          type: "active",
         });
         // 다른 동일 출처 탭에도 알림 공유 (Proxy)
-        // 무한 루프 방지를 위해 BroadcastChannel을 통해서는 PICKLE_NOTE_SAVED만 전송
         if (type !== "PICKLE_NOTE_SAVED") {
           channel.postMessage({ type: "PICKLE_NOTE_SAVED" });
         }
@@ -42,9 +42,10 @@ export function useSyncNoteList() {
 
     // 3. 윈도우 포커스 시점에 리프레시 (탭 전환 대응)
     const handleFocus = () => {
-      queryClient.invalidateQueries({
+      // 탭 전환 시점에 데이터가 stale 상태라면 즉시 갱신
+      queryClient.refetchQueries({
         queryKey: noteKeys.all,
-        refetchType: "active",
+        type: "active",
       });
     };
 
