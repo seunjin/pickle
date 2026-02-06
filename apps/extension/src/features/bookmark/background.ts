@@ -32,11 +32,13 @@ export async function startBookmarkFlow(
   try {
     let metadata = initialMetadata;
 
-    // 초기 메타데이터가 없으면 Content Script에 요청
+    // 초기 메타데이터가 없으면 Content Script에 요청 (Top Frame 타겟팅)
     if (!metadata) {
-      metadata = (await sendMessageToContentScript(tab.id, {
-        action: "GET_METADATA",
-      })) as PageMetadata;
+      metadata = (await sendMessageToContentScript(
+        tab.id,
+        { action: "GET_METADATA" },
+        { frameId: 0 },
+      )) as PageMetadata;
     }
 
     if (!metadata) throw new Error("Metadata not found");

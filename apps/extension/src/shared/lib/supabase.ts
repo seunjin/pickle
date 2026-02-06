@@ -11,7 +11,7 @@ import {
   type Session,
   type SupabaseClient,
 } from "@supabase/supabase-js";
-import { chromeStorageAdapter } from "./chromeStorageAdapter";
+import { chromeStorageAdapter } from "./chrome-storage-adapter";
 import { logger } from "./logger";
 
 const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -28,6 +28,7 @@ const TOKEN_REFRESH_MARGIN_MS = 5 * 60 * 1000;
  * chrome.storage.local 기반 Custom Storage Adapter 사용
  */
 export function createExtensionSupabaseClient(): SupabaseClient<Database> {
+  logger.info("[Supabase] Initializing client", { url: SUPABASE_URL });
   return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       flowType: "pkce",

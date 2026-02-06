@@ -7,7 +7,14 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
+    "includes": [
+      "**",
+      "!node_modules",
+      "!.next",
+      "!dist",
+      "!build",
+      "!**/routeTree.gen.ts"
+    ]
   },
   "css": {
     "parser": {
@@ -64,7 +71,13 @@
   },
   "overrides": [
     {
-      "includes": ["packages/icons/**", "packages/ui/**", "**/vite.config.ts"],
+      "includes": [
+        "packages/icons/**",
+        "packages/ui/**",
+        "apps/client/**",
+        "apps/admin/**",
+        "**/vite.config.ts"
+      ],
       "linter": {
         "rules": {
           "suspicious": {

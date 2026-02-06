@@ -1,0 +1,43 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { noteKeys } from "./noteQueries";
+
+/**
+ * 프로젝트 전반의 데이터 변경 신호를 감지하여 노트 리스트를 최신화하는 훅입니다.
+ * - BroadcastChannel("pickle_sync")을 통해 다른 탭/익스텐션의 변경 사항을 수신합니다.
+ * - 윈도우 포커스 시점에도 데이터를 리프레시합니다.
+ */
+export function useSyncNoteList() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // 1. BroadcastChannel 구독
+    const channel = new BroadcastChannel("pickle_sync");
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "PICKLE_NOTE_SAVED") {
+        queryClient.invalidateQueries({
+          queryKey: noteKeys.all,
+        });
+      }
+    };
+
+    channel.addEventListener("message", handleMessage);
+
+    // 2. 윈도우 포커스 시점에 리프레시 (탭 전환 대응)
+    const handleFocus = () => {
+      queryClient.invalidateQueries({
+        queryKey: noteKeys.all,
+        refetchType: "active",
+      });
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [queryClient]);
+}
