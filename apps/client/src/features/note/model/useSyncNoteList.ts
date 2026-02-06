@@ -26,12 +26,16 @@ export function useSyncNoteList() {
 
     // 2. 브라우저 창(window.postMessage) 신호 수신 (익스텐션 iframe 브릿지)
     const handleWindowMessage = (event: MessageEvent) => {
-      if (event.data?.type === "PICKLE_NOTE_SAVED") {
+      const type = event.data?.type;
+      if (type === "PICKLE_NOTE_SAVED" || type === "PICKLE_SYNC_REQUEST") {
         queryClient.invalidateQueries({
           queryKey: noteKeys.all,
         });
         // 다른 동일 출처 탭에도 알림 공유 (Proxy)
-        channel.postMessage({ type: "PICKLE_NOTE_SAVED" });
+        // 무한 루프 방지를 위해 BroadcastChannel을 통해서는 PICKLE_NOTE_SAVED만 전송
+        if (type !== "PICKLE_NOTE_SAVED") {
+          channel.postMessage({ type: "PICKLE_NOTE_SAVED" });
+        }
       }
     };
     window.addEventListener("message", handleWindowMessage);

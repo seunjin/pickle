@@ -221,8 +221,8 @@ export default function OverlayApp({
       // 🔄 알림 기능 제거에 따라, 저장 완료 피드백을 보장하기 위해 다시 await를 사용합니다.
       await saveNote(input);
 
-      // 2. 부모 창(웹 앱)에 직접 신호 전달 (Origin 격리 대응 브릿지)
-      window.parent.postMessage({ type: "PICKLE_NOTE_SAVED" }, "*");
+      // 2. 배경 스크립트에 동기화 신호 전달 (모든 웹 앱 탭에 전파하기 위함)
+      chrome.runtime.sendMessage({ action: "SYNC_DATA" });
 
       handleClose();
     } catch (e: unknown) {

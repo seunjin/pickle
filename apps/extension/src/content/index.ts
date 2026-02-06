@@ -61,6 +61,14 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === "NOTIFY_SYNC") {
+    if (isTopFrame) {
+      window.postMessage({ type: "PICKLE_SYNC_REQUEST" }, "*");
+      logger.debug("[Content] NOTIFY_SYNC delivered to host window");
+    }
+    return false;
+  }
+
   return false;
 });
 
