@@ -1,6 +1,7 @@
 import type { AppUser, Workspace } from "@pickle/contracts";
 import type { User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase";
 import { getUser } from "../api/getUser";
 import { getUserWorkspaces } from "../api/getUserWorkspaces";
@@ -37,20 +38,15 @@ export const SessionProvider = ({
 
       // 이미 같은 유저를 처리 중이면 중복 실행 방지 (병렬 호출 차단)
       if (processingUserIdRef.current === currentUser.id && retryCount === 0) {
-        console.log(
-          "[SessionProvider] fetchUserData - already processing for:",
-          currentUser.id,
-        );
+        logger.debug("fetchUserData - already processing for:", currentUser.id);
         return;
       }
 
       processingUserIdRef.current = currentUser.id;
-      console.log(
-        "[SessionProvider] fetchUserData started for:",
-        currentUser.id,
-        "retry:",
-        retryCount,
-      );
+      logger.debug("fetchUserData started", {
+        userId: currentUser.id,
+        retry: retryCount,
+      });
 
       try {
         // 1. 프로필 정보 조회
@@ -66,9 +62,7 @@ export const SessionProvider = ({
             String(meta?.is_marketing_agreed) === "true";
 
           if (isTermsAgreed && isPrivacyAgreed && isOver14Agreed) {
-            console.log(
-              "[SessionProvider] Fulfilling automatic signup requirements. Calling complete_signup RPC...",
-            );
+            logger.info("Fulfilling automatic signup requirements.");
             try {
               const rpcPromise = supabase.rpc("complete_signup", {
                 p_marketing_agreed: isMarketingAgreed,
@@ -83,9 +77,7 @@ export const SessionProvider = ({
               ])) as { error: any };
 
               if (!completeError) {
-                console.log(
-                  "[SessionProvider] Automatic signup successful. Re-fetching profile...",
-                );
+                logger.info("Automatic signup successful.");
                 userProfile = await getUser(supabase, currentUser.id);
               } else {
                 console.error(
@@ -127,18 +119,14 @@ export const SessionProvider = ({
       } finally {
         if (mounted && retryCount === 0) {
           processingUserIdRef.current = null;
-          console.log(
-            "[SessionProvider] fetchUserData process cycle finished.",
-          );
+          logger.debug("fetchUserData process cycle finished.");
         }
       }
     }
 
     const safetyTimer = setTimeout(() => {
       if (mounted) {
-        console.warn(
-          "[SessionProvider] Safety timeout reached! Forcing isLoading to false.",
-        );
+        logger.warn("Session safety timeout reached!");
         setIsLoading(false);
       }
     }, 5000);
@@ -148,12 +136,10 @@ export const SessionProvider = ({
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      console.log(
-        "[SessionProvider] Auth event received:",
+      logger.debug("Auth state change event", {
         event,
-        "session user:",
-        !!session,
-      );
+        hasSession: !!session,
+      });
 
       const currentUser = session?.user ?? null;
 

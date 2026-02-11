@@ -55,7 +55,7 @@ function AuthCallbackPage() {
           <h2 className="font-bold text-2xl text-white">
             잠시만 기다려 주세요
           </h2>
-          <p className="font-medium text-gray-400 animate-pulse">
+          <p className="animate-pulse font-medium text-gray-400">
             인증 정보를 확인하고 대시보드로 이동하고 있습니다...
           </p>
         </div>

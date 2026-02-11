@@ -6,7 +6,7 @@ export const getUser = async (
   supabase: SupabaseClient<Database>,
   userId: string,
 ): Promise<AppUser | null> => {
-  console.log("[getUser] Fetching user from DB...", userId);
+  logger.debug("Fetching user from DB...", { userId });
 
   // 쿼리가 멈추는 현상을 방지하기 위해 3초 타임아웃 적용
   const fetchPromise = supabase
@@ -28,7 +28,7 @@ export const getUser = async (
   }
 
   const { data, error } = result_db;
-  console.log("[getUser] DB response received:", {
+  logger.debug("DB response received", {
     hasData: !!data,
     hasError: !!error,
   });
@@ -42,7 +42,7 @@ export const getUser = async (
 
   if (!data) return null;
 
-  console.log("[getUser] Raw data from DB:", data);
+  logger.debug("Raw user data from DB", data);
   const result = appUserSchema.safeParse(data);
 
   if (!result.success) {

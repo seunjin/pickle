@@ -1,5 +1,3 @@
-console.log("!!! PIKLE-CLIENT MAIN.TSX STARTING !!!");
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
