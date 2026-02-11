@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
+import { logger } from "@/shared/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,14 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const { user, appUser } = await getServerAuth();
+
+  // 디버깅을 위한 서버 로그
+  logger.info("Landing Page Auth Check", {
+    hasUser: !!user,
+    userId: user?.id,
+    appUserStatus: appUser?.status,
+  });
+
   const isActive = user && appUser?.status === "active";
 
   return (
