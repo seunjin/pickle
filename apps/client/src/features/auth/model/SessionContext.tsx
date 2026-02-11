@@ -165,9 +165,6 @@ export const SessionProvider = ({
           window.location.search.includes("error=");
 
         if (event === "INITIAL_SESSION" && isOauthCallback) {
-          console.log(
-            "[SessionProvider] INITIAL_SESSION received during OAuth callback. Waiting for SIGNED_IN...",
-          );
           return;
         }
 

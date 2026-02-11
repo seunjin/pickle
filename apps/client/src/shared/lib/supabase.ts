@@ -13,5 +13,10 @@ export function createClient() {
 
   // 로컬 개발 환경에서 cookieOptions의 복잡한 설정이 세션 갱신/조회를 방해할 수 있으므로
   // 최소한의 설정만 남기거나 기본값을 사용하도록 단순화합니다.
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
+    cookieOptions: {
+      domain: import.meta.env.VITE_COOKIE_DOMAIN,
+      path: "/",
+    },
+  });
 }

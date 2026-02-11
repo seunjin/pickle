@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useSessionContext } from "@/features/auth/model/SessionContext";
 
