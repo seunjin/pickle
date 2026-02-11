@@ -57,7 +57,7 @@ export default async function SigninPage(props: {
             아직 계정이 없으신가요?
           </span>
           <Link
-            href="/signup"
+            href={`${process.env.NEXT_PUBLIC_APP_URL}/signup`}
             className="font-medium text-[14px] text-base-muted-foreground leading-none transition-colors hover:text-base-primary"
           >
             회원가입

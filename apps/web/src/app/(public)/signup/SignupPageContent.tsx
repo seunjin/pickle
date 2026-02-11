@@ -304,7 +304,7 @@ export default function SignupPageContent() {
               이미 계정이 있으신가요?
             </span>
             <Link
-              href="/signin"
+              href={`${process.env.NEXT_PUBLIC_APP_URL}/signin`}
               className="font-medium text-[14px] text-base-muted-foreground leading-none transition-colors hover:text-base-primary"
             >
               로그인

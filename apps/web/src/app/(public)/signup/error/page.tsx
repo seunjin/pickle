@@ -60,7 +60,7 @@ export default function SignupErrorPage() {
         >
           다른 계정으로 로그인
         </Button>
-        <Link href="/signup">
+        <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/signup`}>
           <Button className="w-42">회원가입</Button>
         </Link>
       </div>

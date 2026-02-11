@@ -37,7 +37,7 @@ export default async function Home() {
 
         <div className="flex flex-col gap-4">
           <Link
-            href={isActive ? "/dashboard" : isPending ? "/signup" : "/signin"}
+            href={`${process.env.NEXT_PUBLIC_APP_URL}${isActive ? "/dashboard" : isPending ? "/signup" : "/signin"}`}
             className="flex h-[48px] min-w-[200px] items-center justify-center rounded-[8px] bg-base-primary font-bold text-[16px] text-black transition-opacity hover:opacity-90"
           >
             시작하기
@@ -48,7 +48,7 @@ export default async function Home() {
                 계정이 없으신가요?
               </span>
               <Link
-                href="/signup"
+                href={`${process.env.NEXT_PUBLIC_APP_URL}/signup`}
                 className="text-center font-medium text-[14px] text-base-muted-foreground transition-colors hover:text-base-primary"
               >
                 회원가입
