@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
-import { logger } from "@/shared/lib/logger";
+import { LandingButton } from "@/features/auth/ui/LandingButton";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Pickle",
@@ -12,14 +12,6 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const { user, appUser } = await getServerAuth();
-
-  // 디버깅을 위한 서버 로그
-  logger.info("Landing Page Auth Check", {
-    hasUser: !!user,
-    userId: user?.id,
-    appUserStatus: appUser?.status,
-  });
-
   const isActive = user && appUser?.status === "active";
 
   return (
@@ -45,12 +37,7 @@ export default async function Home() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <Link
-            href={`${process.env.NEXT_PUBLIC_APP_URL}${isActive ? "/" : "/signup"}`}
-            className="flex h-[48px] min-w-[200px] items-center justify-center rounded-[8px] bg-base-primary font-bold text-[16px] text-black transition-opacity hover:opacity-90"
-          >
-            {isActive ? "대시보드로 이동" : "무료로 시작하기"}
-          </Link>
+          <LandingButton initialIsActive={!!isActive} />
         </div>
       </div>
       <footer className="text-center text-gray-500 text-sm">
