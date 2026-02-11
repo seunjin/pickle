@@ -40,10 +40,22 @@ export async function clearNote(tabId: number) {
 import { getOSDefaultShortcuts, type ShortcutSettings } from "./types";
 
 const SHORTCUTS_KEY = "user_shortcuts";
+const SHORTCUTS_VERSION_KEY = "shortcuts_version";
+const CURRENT_SHORTCUTS_VERSION = "1.1"; // 1.1: New OS-specific default logic (Cmd+Option for Mac, etc)
 
 export async function getShortcuts(): Promise<ShortcutSettings> {
-  const result = await chrome.storage.sync.get(SHORTCUTS_KEY);
+  const result = await chrome.storage.sync.get([
+    SHORTCUTS_KEY,
+    SHORTCUTS_VERSION_KEY,
+  ]);
   const data = result[SHORTCUTS_KEY];
+  const version = result[SHORTCUTS_VERSION_KEY];
+
+  // 버전이 없거나 현재 버전보다 낮으면 초기화 (마이그레이션)
+  if (!version || version !== CURRENT_SHORTCUTS_VERSION) {
+    return resetShortcuts();
+  }
+
   if (!data || typeof data !== "object") return getOSDefaultShortcuts();
   return data as ShortcutSettings;
 }
@@ -65,6 +77,9 @@ export async function updateShortcut(
 
 export async function resetShortcuts(): Promise<ShortcutSettings> {
   const defaults = getOSDefaultShortcuts();
-  await setShortcuts(defaults);
+  await chrome.storage.sync.set({
+    [SHORTCUTS_KEY]: defaults,
+    [SHORTCUTS_VERSION_KEY]: CURRENT_SHORTCUTS_VERSION,
+  });
   return defaults;
 }

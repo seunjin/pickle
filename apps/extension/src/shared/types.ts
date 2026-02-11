@@ -43,18 +43,40 @@ export interface ShortcutSettings {
   [key: string]: string; // action -> key combination (e.g., "capture" -> "Ctrl+Shift+E")
 }
 
-export const isMac =
-  typeof navigator !== "undefined" &&
-  /Macintosh|MacIntel|MacPPC|Mac68K/i.test(navigator.userAgent);
+export type OS = "mac" | "windows" | "linux" | "other";
+
+export const getOS = (): OS => {
+  if (typeof navigator === "undefined") return "other";
+  const ua = navigator.userAgent.toLowerCase();
+
+  if (/macintosh|macintel|macppc|mac68k/i.test(ua)) return "mac";
+  if (/win32|win64|windows|wince/i.test(ua)) return "windows";
+  if (/linux/i.test(ua)) return "linux";
+
+  return "other";
+};
+
+export const isMac = getOS() === "mac";
 
 export const getOSDefaultShortcuts = (): ShortcutSettings => {
-  // 브라우저 기본 단축키와의 충돌을 최소화하기 위해 prefix를 OS별로 다르게 설정합니다.
-  const prefix = isMac ? "Cmd+Shift" : "Alt+Shift";
+  const os = getOS();
 
+  if (os === "mac") {
+    // macOS: Cmd + Option 조합 사용
+    const prefix = "Cmd+Option";
+    return {
+      bookmark: `${prefix}+F`,
+      capture: `${prefix}+E`,
+      text: `${prefix}+S`,
+    };
+  }
+
+  // Windows/Linux/Other: Ctrl + Shift 조합 사용 (Alt+Shift는 IME 충돌 위험)
+  const prefix = "Ctrl+Shift";
   return {
-    bookmark: `${prefix}+B`, // Bookmark (B)
-    capture: `${prefix}+E`, // Capture (E)
-    text: `${prefix}+D`, // Document/Selection (D)
+    bookmark: `${prefix}+F`,
+    capture: `${prefix}+E`,
+    text: `${prefix}+S`,
   };
 };
 

@@ -6,7 +6,7 @@ import { isMac } from "../types";
 export function formatShortcut(e: KeyboardEvent | React.KeyboardEvent): string {
   const modifiers = [];
   if (e.ctrlKey || e.metaKey) modifiers.push(isMac ? "Cmd" : "Ctrl"); // Mac은 Cmd, 윈도우는 Ctrl 표시
-  if (e.altKey) modifiers.push("Alt");
+  if (e.altKey) modifiers.push(isMac ? "Option" : "Alt");
   if (e.shiftKey) modifiers.push("Shift");
 
   const key = e.key.toUpperCase();
@@ -30,7 +30,7 @@ export function isValidShortcut(shortcut: string): {
   error?: string;
 } {
   const parts = shortcut.split("+");
-  const modifiers = ["Ctrl", "Alt", "Shift", "Cmd"];
+  const modifiers = ["Ctrl", "Alt", "Shift", "Cmd", "Option"];
 
   const hasModifier = parts.some((p) => modifiers.includes(p));
   const totalKeys = parts.filter((p) => p !== "").length;
@@ -50,22 +50,35 @@ export function isValidShortcut(shortcut: string): {
     return { isValid: false, error: "최대 3개까지의 키 조합만 허용됩니다." };
   }
 
-  // 특정 차단된 조합 (브라우저 기본 단축키와 겹칠 위험이 높은 것들)
-  const prefix = isMac ? "Cmd" : "Ctrl";
+  // 특정 차단된 조합 (브라우저 기본 단축키 및 시스템 단축키와 겹칠 위험이 높은 것들)
+  const osPrefix = isMac ? "Cmd" : "Ctrl";
   const blocked = [
-    `${prefix}+C`,
-    `${prefix}+V`,
-    `${prefix}+X`,
-    `${prefix}+A`,
-    `${prefix}+T`,
-    `${prefix}+W`,
-  ].concat(
-    ["Ctrl+C", "Ctrl+V", "Ctrl+X", "Ctrl+A", "Ctrl+T", "Ctrl+W"], // 크로스 플랫폼 호환성을 위해 둘 다 차단 검토 가능하나 우선 OS에 맞게 처리
-  );
-  if (blocked.includes(shortcut)) {
+    `${osPrefix}+C`, // Copy
+    `${osPrefix}+V`, // Paste
+    `${osPrefix}+X`, // Cut
+    `${osPrefix}+A`, // Select All
+    `${osPrefix}+T`, // New Tab
+    `${osPrefix}+W`, // Close Tab
+    `${osPrefix}+N`, // New Window
+    `${osPrefix}+R`, // Refresh
+    `${osPrefix}+L`, // Address Bar
+    `${osPrefix}+F`, // Find (단독 Cmd+F만 차단, Cmd+Alt+F 등은 허용되도록 함)
+  ];
+
+  // 단독 조합(Modifier + Key)인 경우만 체크하여 복합 조합(Cmd+Alt+F 등)은 허용
+  if (parts.length === 2 && blocked.includes(shortcut)) {
     return {
       isValid: false,
       error: "브라우저 기본 단축키와 충돌할 수 있는 조합입니다.",
+    };
+  }
+
+  // Windows에서 Alt+Shift 조합은 IME 언어 전환과 충돌하므로 경고/차단 검토
+  if (!isMac && shortcut.includes("Alt+Shift")) {
+    return {
+      isValid: false,
+      error:
+        "Windows에서 Alt+Shift 조합은 언어 전환 단축키와 충돌할 수 있습니다.",
     };
   }
 
