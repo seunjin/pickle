@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Pickle",
   description: "Web의 모든 것을 캡처하고 정리하세요.",
