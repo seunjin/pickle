@@ -57,7 +57,9 @@
       "http://localhost:3000/*",
       "http://localhost:5173/*",
       "https://picklenote.vercel.app/*",
-      "https://*.vercel.app/*"
+      "https://*.vercel.app/*",
+      "https://app.pic-kle.io/*",
+      "https://*.pic-kle.io/*"
     ]
   },
   "content_security_policy": {

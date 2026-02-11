@@ -15,6 +15,7 @@ import {
   setSession,
 } from "@shared/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
+import { syncSessionToClient } from "./sync-session";
 
 /**
  * OAuth 로그인 플로우 실행
@@ -95,6 +96,7 @@ export async function launchOAuthFlow(): Promise<Session | null> {
         };
 
         await setSession(session);
+        syncSessionToClient(session);
         return session;
       }
 
@@ -113,6 +115,9 @@ export async function launchOAuthFlow(): Promise<Session | null> {
 
     // 세션 저장
     await setSession(sessionData.session);
+
+    // Client 앱으로 세션 전파
+    syncSessionToClient(sessionData.session);
 
     return sessionData.session;
   } catch (error) {

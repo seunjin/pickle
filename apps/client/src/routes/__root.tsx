@@ -11,10 +11,16 @@ export const Route = createRootRoute({
 function RootLayout() {
   const { pathname } = useLocation();
 
-  // 로그인/회원가입 페이지는 레이아웃 제외
-  const isAuthPage = pathname === "/signin" || pathname === "/signup";
+  // 로그인/회원가입/동기화/관리자 페이지는 메인 레이아웃 제외
+  const isAuthPage =
+    pathname === "/signin" ||
+    pathname === "/signup" ||
+    pathname.startsWith("/auth/");
 
-  if (isAuthPage) {
+  // Admin은 자체 레이아웃(사이드바)을 가지므로 메인 레이아웃 제외
+  const isAdminPage = pathname.startsWith("/admin");
+
+  if (isAuthPage || isAdminPage) {
     return (
       <>
         <Outlet />

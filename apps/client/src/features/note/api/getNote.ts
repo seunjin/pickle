@@ -3,7 +3,6 @@ import {
   type NoteWithAsset,
   noteWithAssetSchema,
 } from "@pickle/contracts/src/note";
-import type { Tag } from "@pickle/contracts/src/tag";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase";

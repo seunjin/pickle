@@ -44,8 +44,7 @@ export function PopupApp() {
   };
 
   const handleOpenDashboard = () => {
-    const appUrl =
-      import.meta.env.NEXT_PUBLIC_APP_URL || "https://picklenote.vercel.app";
+    const appUrl = import.meta.env.VITE_APP_URL || "https://app.pic-kle.io";
     extensionRuntime.openTab(appUrl);
   };
 

@@ -61,21 +61,39 @@ Background Service Worker는 모든 데이터 및 인증 요청의 중앙 게이
 
 ---
 
-## 4. 웹-익스텐션 세션 동기화 (Sync Strategy)
+## 4. Extension → Client 세션 동기화 (Session Sync Strategy)
 
-사용자가 익스텐션에서 로그인했을 때 웹 대시보드도 자동으로 로그인되도록 하는 브릿지 엔드포인트를 사용합니다.
+사용자가 익스텐션에서 로그인했을 때 Client 앱(`app.pic-kle.io`)도 자동으로 로그인되도록 하는 **Hash Fragment 기반 토큰 전달** 방식을 사용합니다.
 
-- **Sync 엔드포인트**: `https://picklenote.io/api/internal/auth/extension-sync`
-- **동작 원리**: 
-  1. 익스텐션이 성공적인 세션 획득 후 위 URL로 토큰을 전달합니다.
-  2. 서버 사이드에서 `Set-Cookie`를 통해 웹 도메인의 인증 쿠키를 설정합니다.
-  3. 보안을 위해 **일회용 암호화 토큰 방식**으로 고도화가 예정되어 있으며, 현재는 HTTPS 암호화 채널을 통한 파라미터 전달 방식을 사용 중입니다.
+- **Sync 방식**: Extension 로그인 성공 → `app.pic-kle.io/auth/extension-sync#access_token=...&refresh_token=...` 탭 자동 오픈
+- **동작 원리**:
+  1. Extension이 OAuth 성공 후 `syncSessionToClient()` 호출
+  2. Client 앱의 `/auth/extension-sync` 라우트가 hash에서 토큰 추출
+  3. `supabase.auth.setSession()`으로 세션 설정
+  4. URL hash에서 토큰 제거 후 대시보드(`/`)로 리다이렉트
+- **보안 에스에이**: Hash fragment(`#`)는 서버로 전송되지 않아 접근 로그에 남지 않습니다.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Ext as Extension (Background)
+    participant Client as Client App (app.pic-kle.io)
+
+    User->>Ext: 로그인 (Google OAuth)
+    Ext->>Ext: chrome.identity → Supabase 세션 획득
+    Ext->>Ext: chrome.storage.local에 세션 저장
+    Ext->>Client: chrome.tabs.create("app.pic-kle.io/auth/extension-sync#tokens")
+    Client->>Client: hash에서 토큰 추출 + URL hash 제거
+    Client->>Client: supabase.auth.setSession(tokens)
+    Client->>Client: /dashboard로 리다이렉트
+```
 
 ---
 
 ## 5. 보안 수칙 (Security Guidelines)
 
 - **Sensitive Data Storage**: 사용자 세션은 반드시 `sync`가 아닌 `local` 스토리지(`chrome.storage.local`)에 저장하여 외부 동기화 위협을 차단합니다.
+- **Token Exposure Prevention**: 세션 동기화 시 hash fragment(`#`)를 사용하여 토큰이 서버 로그에 남지 않도록 하고, client에서 토큰 추출 후 즉시 URL hash를 제거합니다.
 - **Serialization Safety**: `safeSendMessage`를 통해 전달되는 모든 인증 정보는 불변성(Immutability)을 보장하기 위해 직렬화 검증을 거칩니다.
 - **RLS Enforced**: 모든 DB 직접 호출은 Supabase RLS에 의존하며, Anon Key가 탈취되더라도 타인의 데이터에 접근할 수 없도록 스키마 수준에서 방어합니다.
 

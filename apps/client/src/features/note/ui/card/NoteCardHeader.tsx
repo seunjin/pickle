@@ -56,17 +56,15 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="bottom" sideOffset={5}>
               {readOnly ? (
-                <>
-                  <DropdownMenuItem asChild>
-                    <button
-                      type="button"
-                      className="w-full cursor-pointer"
-                      onClick={handleRestore}
-                    >
-                      <Icon name="refresh_16" /> 복구하기
-                    </button>
-                  </DropdownMenuItem>
-                </>
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer"
+                    onClick={handleRestore}
+                  >
+                    <Icon name="refresh_16" /> 복구하기
+                  </button>
+                </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem asChild>
                   <button

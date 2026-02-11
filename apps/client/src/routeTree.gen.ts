@@ -15,8 +15,12 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AuthSyncRouteImport } from './routes/auth/sync'
+import { Route as AuthExtensionSyncRouteImport } from './routes/auth/extension-sync'
+import { Route as AdminLegalRouteImport } from './routes/admin/legal'
 
 const TrashRoute = TrashRouteImport.update({
   id: '/trash',
@@ -48,26 +52,50 @@ const BookmarksRoute = BookmarksRouteImport.update({
   path: '/bookmarks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthSyncRoute = AuthSyncRouteImport.update({
   id: '/auth/sync',
   path: '/auth/sync',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthExtensionSyncRoute = AuthExtensionSyncRouteImport.update({
+  id: '/auth/extension-sync',
+  path: '/auth/extension-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLegalRoute = AdminLegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/trash': typeof TrashRoute
+  '/admin/legal': typeof AdminLegalRoute
+  '/auth/extension-sync': typeof AuthExtensionSyncRoute
   '/auth/sync': typeof AuthSyncRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,30 +105,41 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/trash': typeof TrashRoute
+  '/admin/legal': typeof AdminLegalRoute
+  '/auth/extension-sync': typeof AuthExtensionSyncRoute
   '/auth/sync': typeof AuthSyncRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/trash': typeof TrashRoute
+  '/admin/legal': typeof AdminLegalRoute
+  '/auth/extension-sync': typeof AuthExtensionSyncRoute
   '/auth/sync': typeof AuthSyncRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/bookmarks'
     | '/search'
     | '/settings'
     | '/signin'
     | '/signup'
     | '/trash'
+    | '/admin/legal'
+    | '/auth/extension-sync'
     | '/auth/sync'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,27 +149,36 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/trash'
+    | '/admin/legal'
+    | '/auth/extension-sync'
     | '/auth/sync'
+    | '/admin'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/bookmarks'
     | '/search'
     | '/settings'
     | '/signin'
     | '/signup'
     | '/trash'
+    | '/admin/legal'
+    | '/auth/extension-sync'
     | '/auth/sync'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BookmarksRoute: typeof BookmarksRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   TrashRoute: typeof TrashRoute
+  AuthExtensionSyncRoute: typeof AuthExtensionSyncRoute
   AuthSyncRoute: typeof AuthSyncRoute
 }
 
@@ -178,12 +226,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookmarksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/auth/sync': {
       id: '/auth/sync'
@@ -192,17 +254,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/extension-sync': {
+      id: '/auth/extension-sync'
+      path: '/auth/extension-sync'
+      fullPath: '/auth/extension-sync'
+      preLoaderRoute: typeof AuthExtensionSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/legal': {
+      id: '/admin/legal'
+      path: '/legal'
+      fullPath: '/admin/legal'
+      preLoaderRoute: typeof AdminLegalRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminLegalRoute: typeof AdminLegalRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLegalRoute: AdminLegalRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BookmarksRoute: BookmarksRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   TrashRoute: TrashRoute,
+  AuthExtensionSyncRoute: AuthExtensionSyncRoute,
   AuthSyncRoute: AuthSyncRoute,
 }
 export const routeTree = rootRouteImport

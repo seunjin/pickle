@@ -7,7 +7,9 @@
 ```bash
 root/
 ├── apps/               # 실행 가능한 애플리케이션 (Applications)
-│   ├── web/            # Next.js App Router (메인 서비스)
+│   ├── web/            # Next.js App Router (SEO/퍼블릭 페이지 전용)
+│   ├── client/         # Vite + React + TanStack Router (대시보드/관리자 CSR)
+│   ├── admin/          # Vite + React (client에 병합 예정, deprecated)
 │   └── extension/      # Chrome Extension (Vite + React)
 │
 ├── packages/           # 공유 패키지 (Shared Libraries)
@@ -31,9 +33,14 @@ graph TD
     Web --> UI[packages/ui]
     Web --> Icons[packages/icons]
     
+    Client[apps/client] --> Contracts
+    Client --> UI
+    Client --> Icons
+    
     Extension[apps/extension] --> Contracts
     Extension --> UI
     Extension --> Icons
+    Extension -.->|session sync| Client
     
     UI --> Contracts
     UI --> Icons
@@ -42,14 +49,19 @@ graph TD
 ## 📦 주요 패키지 설명
 
 ### 1. `apps/web` (Next.js)
-*   사용자용 웹 대시보드 및 랜딩 페이지.
-*   **Supabase**와 직접 통신하여 데이터를 처리합니다.
+*   SEO가 필요한 퍼블릭 페이지(랜딩, 약관, 공지 등)를 담당합니다.
+*   SSR/SSG를 활용하여 검색 엔진 최적화를 제공합니다.
+
+### 2. `apps/client` (Vite + React + TanStack Router)
+*   사용자 대시보드 및 관리자 기능을 CSR으로 제공합니다.
+*   `app.pic-kle.io`에 배포되며, Extension과 직접 연동합니다.
 *   FSD-lite 아키텍처를 따릅니다.
 
-### 2. `apps/extension` (Whale/Chrome Extension)
+### 3. `apps/extension` (Whale/Chrome Extension)
 *   브라우저 사이드바에서 동작하는 확장 프로그램.
-*   웹과 동일한 DB를 사용하지만, API 호출 방식이나 UI구성이 다를 수 있습니다.
-*   **`@pickle/contracts`를 통해 웹과 데이터 규격을 맞춥니다.**
+*   Client 앱과 동일한 DB를 사용하지만, API 호출 방식이나 UI구성이 다를 수 있습니다.
+*   로그인 성공 시 Client 앱으로 세션을 자동 전파합니다.
+*   **`@pickle/contracts`를 통해 Client와 데이터 규격을 맞춥니다.**
 
 ### 3. `packages/contracts`
 *   **데이터의 규격(Schema)**을 정의하는 곳입니다.

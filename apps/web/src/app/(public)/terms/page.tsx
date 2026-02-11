@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalContent } from "@/app/(client)/legal/LegalContent";
+import { LegalContent } from "./LegalContent";
 
 export const metadata: Metadata = {
   title: "Terms | Pickle",

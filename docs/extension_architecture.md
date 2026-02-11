@@ -61,5 +61,20 @@ Pickle은 네이버 블로그와 같이 메인 콘텐츠가 `iframe` 내부에 �
 
 보안과 성능의 균형을 위해 권한 체계를 다음과 같이 구성합니다:
 
-- **Background Direct DB Access**: 모든 DB 쓰기 로직은 백그라운드에서만 수행됩니다. 이는 `access_token` 등 민감한 인증 정보가 컨텐트 스크립트(웹페이지 공격에 노출될 수 있는 영역)에 노출되는 것을 차단하기 위함입니다.
-- **Security Group**: `supabase-js` 클라이언트를 백그라운드에 상주시키고, RLS(Row Level Security) 정책을 통해 사용자별 접근 권한을 철저히 격리합니다. 
+- **Background Direct DB Access**: 모든 DB 쓰기 로직은 백그라운드에서만 수행됩니다. 이는 `access_token` 등 민감한 인증 정보가 컨텐트 스크립트에 노출되는 것을 차단하기 위함입니다.
+- **Security Group**: `supabase-js` 클라이언트를 백그라운드에 상주시키고, RLS(Row Level Security) 정책을 통해 사용자별 접근 권한을 철저히 격리합니다.
+
+---
+
+## 7. 세션 동기화 및 인증 보안 (Session Synchronization)
+
+익스텐션에서 시작된 인증 상태를 대시보드 앱(`apps/client`)과 안전하게 공유하기 위해 **Hash Fragment 기반 세션 전파** 메커니즘을 사용합니다.
+
+### 7-1. Extension → Client 세션 전파
+1.  **동기화 트리거**: 익스텐션에서 로그인 성공 시, 백그라운드 스크립트가 세션 토큰(`access_token`, `refresh_token`)을 획득합니다.
+2.  **안전한 토큰 전달**: 토큰을 URL의 Hash Fragment(`#`)에 포함하여 `app.pic-kle.io/auth/extension-sync` 경로를 새 탭으로 엽니다.
+3.  **URL 자가 정화**: 클라이언트 앱은 Hash에서 토큰을 추출하여 Supabase 세션을 설정한 즉시 `history.replaceState`를 통해 URL에서 토큰을 제거합니다.
+4.  **보안 이점**: 토큰이 서버 로그에 남는 것을 방지하고, 브라우저 히스토리에도 남지 않도록 설계되었습니다.
+
+### 7-2. External Connection 허용
+- `manifest.json`의 `externally_connectable` 설정을 통해 `app.pic-kle.io` 도메인에서의 메시지 전송을 허용하여, 웹 대시보드에서도 익스텐션의 상태를 제어하거나 동기화 요청을 보낼 수 있습니다.
