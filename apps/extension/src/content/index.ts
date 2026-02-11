@@ -172,9 +172,14 @@ function initShortcutListener() {
           metadata = extractMetadata();
         } catch (_err) {}
 
+        const selection = window.getSelection();
+        const selectionText = selection?.toString() || "";
+
         const message: Record<string, unknown> = {
           action: `RUN_${action.toUpperCase()}_FLOW`,
           fromShortcut: true,
+          selectionText: selectionText,
+          url: window.location.href,
           metadata,
         };
 

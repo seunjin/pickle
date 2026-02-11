@@ -291,37 +291,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "RUN_TEXT_FLOW") {
     const tabId = sender.tab?.id;
     if (tabId) {
-      sendMessageToContentScript(tabId, { action: "GET_SELECTION" })
-        .then((response) => {
-          const text = response?.text || "";
-          if (text) {
-            setNote(tabId, {
-              text,
-              url: sender.tab?.url,
-              timestamp: Date.now(),
-              mode: "text",
-            }).then(() => {
-              sendMessageToContentScript(
-                tabId,
-                {
-                  action: "OPEN_OVERLAY",
-                  mode: "text",
-                  tabId: tabId,
-                },
-                { frameId: 0 },
-              );
-              if (request.metadata) {
-                updateNote(tabId, { pageMeta: request.metadata });
-              }
-              sendResponse({ success: true, tabId });
-            });
-          } else {
-            sendResponse({ success: false, error: "No text selected" });
-          }
-        })
-        .catch((err) => {
-          sendResponse({ success: false, error: err.message });
+      const handleTextFlow = async (text: string, url?: string) => {
+        await setNote(tabId, {
+          text: text || "",
+          url: url || sender.tab?.url,
+          timestamp: Date.now(),
+          mode: "text",
         });
+
+        await sendMessageToContentScript(
+          tabId,
+          {
+            action: "OPEN_OVERLAY",
+            mode: "text",
+            tabId: tabId,
+          },
+          { frameId: 0 },
+        );
+
+        if (request.metadata) {
+          await updateNote(tabId, { pageMeta: request.metadata });
+        }
+        sendResponse({ success: true, tabId });
+      };
+
+      if (request.selectionText) {
+        handleTextFlow(request.selectionText, request.url);
+      } else {
+        sendMessageToContentScript(tabId, { action: "GET_SELECTION" })
+          .then((response) => {
+            handleTextFlow(response?.text || "", sender.tab?.url);
+          })
+          .catch((err) => {
+            sendResponse({ success: false, error: err.message });
+          });
+      }
       return true; // 비동기 응답
     }
     return false;
