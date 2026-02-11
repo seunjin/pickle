@@ -46,7 +46,10 @@ export const GoogleAuthButton = ({
     try {
       // CSR 앱 자체적으로 리다이렉트를 처리 (BFF 의존성 제거)
       // next 파라미터가 있으면 해당 경로로, 없으면 루트로 리다이렉트
-      const callbackUrl = new URL(next || "/", window.location.origin);
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      if (next) {
+        callbackUrl.searchParams.set("next", next);
+      }
 
       console.log(
         "[GoogleAuthButton] Using direct CSR callback URL:",

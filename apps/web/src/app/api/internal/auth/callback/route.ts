@@ -114,21 +114,26 @@ export async function GET(request: Request) {
         }
       }
 
-      // 세션 생성 성공 및 active 유저 시 목적지로 이동
-      // 만약 next가 기본값('/')이면 대시보드로 이동
-      const destination = next === "/" ? "/dashboard" : next;
+      // 서버 사이드 콜백 처리 완료 후, Client 앱의 전용 콜백 페이지로 최종 리다이렉트합니다.
+      // 이곳에서 브라우저 세션 안착을 기다린 후 최종 목적지로 이동하게 됩니다.
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
+      const callbackFinalUrl = new URL("/auth/callback", appUrl);
 
-      // destination이 전체 URL 형태(http:// 등)이면 origin을 붙이지 않고 바로 이동
-      if (destination.startsWith("http")) {
-        return NextResponse.redirect(destination);
+      if (next && next !== "/") {
+        callbackFinalUrl.searchParams.set("next", next);
       }
 
-      return NextResponse.redirect(`${origin}${destination}`);
+      return NextResponse.redirect(callbackFinalUrl.toString());
     } else {
       logger.error("Auth callback error", { error });
     }
   }
 
   // 인증 코드 교환에 실패하거나 코드가 없는 경우 에러 페이지 대신 로그인 페이지로 이동
-  return NextResponse.redirect(`${origin}/signin?error=auth_failed`);
+  const signinUrl = new URL(
+    "/signin",
+    process.env.NEXT_PUBLIC_APP_URL || origin,
+  );
+  signinUrl.searchParams.set("error", "auth_failed");
+  return NextResponse.redirect(signinUrl.toString());
 }
