@@ -34,7 +34,8 @@ chrome.contextMenus.onClicked.addListener(
   async (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
     try {
       if (info.menuItemId === "open-app") {
-        const appUrl = import.meta.env.VITE_APP_URL || "https://app.pic-kle.io";
+        const appUrl =
+          import.meta.env.NEXT_PUBLIC_APP_URL || "https://app.pic-kle.io";
         chrome.tabs.create({ url: appUrl });
         return;
       }
