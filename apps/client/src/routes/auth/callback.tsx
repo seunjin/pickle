@@ -8,14 +8,18 @@ import { useEffect } from "react";
 import { useUser } from "@/features/auth/model/useUser";
 
 export const Route = createFileRoute("/auth/callback")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      next: (search.next as string) || "/",
+    };
+  },
   component: AuthCallbackPage,
 });
 
 function AuthCallbackPage() {
   const { user, appUser, isLoading } = useUser();
   const navigate = useNavigate();
-  const search = useSearch({ from: "/auth/callback" }) as { next?: string };
-  const next = search.next || "/";
+  const { next } = useSearch({ from: "/auth/callback" });
 
   useEffect(() => {
     if (!isLoading) {
