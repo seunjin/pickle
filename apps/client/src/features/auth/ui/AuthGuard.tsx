@@ -10,13 +10,18 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
+        console.log(
+          "[AuthGuard] No user session found, redirecting to /signin",
+        );
         navigate({ to: "/signin", replace: true });
         return;
       }
 
       if (!appUser || appUser.status !== "active") {
         console.log(
-          "[AuthGuard] App user not active, redirecting to /signup?reason=no_profile",
+          "[AuthGuard] App user not active or missing profile",
+          { status: appUser?.status },
+          "redirecting to /signup?reason=no_profile",
         );
         // 프로필이 없는 유저가 signin 페이지로 계속 튕기는 루프를 방지하기 위해 signup 페이지로 유도합니다.
         navigate({

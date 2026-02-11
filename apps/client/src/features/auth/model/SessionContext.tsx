@@ -158,6 +158,19 @@ export const SessionProvider = ({
       const currentUser = session?.user ?? null;
 
       if (!currentUser) {
+        // OAuth 콜백 중(URL에 code/error가 있음)이라면 INITIAL_SESSION에서 바로 로딩을 풀지 않고 대기합니다.
+        // 곧이어 SIGNED_IN 이벤트가 발생하거나 safetyTimer가 작동할 것입니다.
+        const isOauthCallback =
+          window.location.search.includes("code=") ||
+          window.location.search.includes("error=");
+
+        if (event === "INITIAL_SESSION" && isOauthCallback) {
+          console.log(
+            "[SessionProvider] INITIAL_SESSION received during OAuth callback. Waiting for SIGNED_IN...",
+          );
+          return;
+        }
+
         setUser(null);
         setAppUser(null);
         setWorkspace(null);
