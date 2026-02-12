@@ -1,5 +1,6 @@
 export * from "./asset";
 export * from "./auth";
+export * from "./beta-application";
 export * from "./common";
 export type { Database } from "./database";
 export * from "./database-generated";

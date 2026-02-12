@@ -14,20 +14,24 @@ export function LandingButton({
   initialIsActive,
 }: {
   initialIsActive: boolean;
+  initialIsPending: boolean;
+  initialHasApplied: boolean;
 }) {
   const { user, appUser, isLoading } = useSessionContext();
 
-  // 클라이언트 사이드에서 최종 판단 (active 상태인 유저인지 확인)
+  const isUserLoggedIn = !!user;
   const isActive = isLoading
     ? initialIsActive
-    : !!user && appUser?.status === "active";
+    : isUserLoggedIn && appUser?.status === "active";
+
+  if (!isActive) return null;
 
   return (
     <Link
-      href={`${process.env.NEXT_PUBLIC_APP_URL}${isActive ? "/" : "/signup"}`}
+      href={`${process.env.NEXT_PUBLIC_APP_URL}/`}
       className="flex h-[48px] min-w-[200px] items-center justify-center rounded-[8px] bg-base-primary font-bold text-[16px] text-black transition-opacity hover:opacity-90"
     >
-      {isActive ? "대시보드로 이동" : "무료로 시작하기"}
+      대시보드로 이동
     </Link>
   );
 }

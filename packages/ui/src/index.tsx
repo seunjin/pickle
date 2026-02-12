@@ -5,6 +5,7 @@ export * from "./dialog";
 export * from "./dropdown-menu";
 export * from "./error/ErrorView";
 export * from "./input";
+export * from "./pickle-caustic-glass";
 export * from "./popover";
 export * from "./resizable";
 export * from "./scroll-area";

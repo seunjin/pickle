@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@pickle/ui/base.css";
+@plugin "@tailwindcss/typography";
 
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../../../packages/icons/src/**/*.{ts,tsx}";
@@ -33,4 +34,49 @@
   background-image: url("/bg.png");
   background-size: cover;
   z-index: -2;
+}
+
+@utility prose-legal {
+  @apply prose prose-invert max-w-none text-neutral-300;
+
+  h1 {
+    @apply mt-8 mb-4 font-bold text-2xl text-white;
+  }
+  h2 {
+    @apply mt-6 mb-3 font-bold text-xl text-white/90;
+  }
+  h3 {
+    @apply mt-4 mb-2 font-bold text-lg text-white/80;
+  }
+  p {
+    @apply my-4 leading-relaxed;
+  }
+  ul {
+    @apply my-4 list-disc pl-6;
+  }
+  ol {
+    @apply my-4 list-decimal pl-6;
+  }
+  li {
+    @apply my-1;
+    p {
+      margin: 0;
+    }
+  }
+  blockquote {
+    @apply border-base-primary border-l-4 bg-neutral-800/50 py-2 pr-4 pl-6 italic;
+  }
+  table {
+    @apply my-6 w-full table-fixed border-collapse border border-neutral-800 bg-base-background;
+  }
+  th,
+  td {
+    @apply border border-neutral-800 p-2 text-left text-sm;
+    p {
+      margin: 0;
+    }
+  }
+  th {
+    @apply bg-neutral-800/50 font-semibold;
+  }
 }

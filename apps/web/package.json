@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@pickle/contracts": "workspace:^",
     "@pickle/icons": "workspace:^",
     "@pickle/ui": "workspace:^",
@@ -28,6 +29,7 @@
     "next": "16.0.10",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.70.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "require-in-the-middle": "^8.0.1",

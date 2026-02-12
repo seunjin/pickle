@@ -21,6 +21,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AuthSyncRouteImport } from './routes/auth/sync'
 import { Route as AuthExtensionSyncRouteImport } from './routes/auth/extension-sync'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AdminWaitlistRouteImport } from './routes/admin/waitlist'
 import { Route as AdminLegalRouteImport } from './routes/admin/legal'
 
 const TrashRoute = TrashRouteImport.update({
@@ -83,6 +84,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLegalRoute = AdminLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/trash': typeof TrashRoute
   '/admin/legal': typeof AdminLegalRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/extension-sync': typeof AuthExtensionSyncRoute
   '/auth/sync': typeof AuthSyncRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/trash': typeof TrashRoute
   '/admin/legal': typeof AdminLegalRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/extension-sync': typeof AuthExtensionSyncRoute
   '/auth/sync': typeof AuthSyncRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/trash': typeof TrashRoute
   '/admin/legal': typeof AdminLegalRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/extension-sync': typeof AuthExtensionSyncRoute
   '/auth/sync': typeof AuthSyncRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/trash'
     | '/admin/legal'
+    | '/admin/waitlist'
     | '/auth/callback'
     | '/auth/extension-sync'
     | '/auth/sync'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/trash'
     | '/admin/legal'
+    | '/admin/waitlist'
     | '/auth/callback'
     | '/auth/extension-sync'
     | '/auth/sync'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/trash'
     | '/admin/legal'
+    | '/admin/waitlist'
     | '/auth/callback'
     | '/auth/extension-sync'
     | '/auth/sync'
@@ -281,6 +293,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/waitlist': {
+      id: '/admin/waitlist'
+      path: '/waitlist'
+      fullPath: '/admin/waitlist'
+      preLoaderRoute: typeof AdminWaitlistRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/legal': {
       id: '/admin/legal'
       path: '/legal'
@@ -293,11 +312,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminLegalRoute: typeof AdminLegalRoute
+  AdminWaitlistRoute: typeof AdminWaitlistRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminLegalRoute: AdminLegalRoute,
+  AdminWaitlistRoute: AdminWaitlistRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

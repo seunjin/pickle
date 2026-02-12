@@ -62,6 +62,51 @@ export type Database = {
           },
         ];
       };
+      allowed_emails: {
+        Row: {
+          created_at: string;
+          email: string;
+        };
+        Insert: {
+          created_at?: string;
+          email: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string;
+        };
+        Relationships: [];
+      };
+      beta_applications: {
+        Row: {
+          created_at: string;
+          email: string;
+          id: string;
+          is_confirmed: boolean;
+          message: string | null;
+          status: Database["public"]["Enums"]["beta_application_status"];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          email: string;
+          id?: string;
+          is_confirmed?: boolean;
+          message?: string | null;
+          status?: Database["public"]["Enums"]["beta_application_status"];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string;
+          id?: string;
+          is_confirmed?: boolean;
+          message?: string | null;
+          status?: Database["public"]["Enums"]["beta_application_status"];
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       folders: {
         Row: {
           color: string | null;
@@ -417,6 +462,7 @@ export type Database = {
       };
     };
     Enums: {
+      beta_application_status: "pending" | "approved" | "rejected";
       legal_document_type: "service" | "privacy" | "marketing";
       user_status: "pending" | "active" | "suspended" | "deleted";
       workspace_role: "owner" | "member";
