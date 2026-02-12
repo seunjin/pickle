@@ -80,3 +80,24 @@
     @apply bg-neutral-800/50 font-semibold;
   }
 }
+
+@utility text-shine {
+  background: linear-gradient(
+    110deg,
+    var(--color-base-primary) 20%,
+    #ffffff 40%,
+    var(--color-base-primary) 60%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+  display: inline-block;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}

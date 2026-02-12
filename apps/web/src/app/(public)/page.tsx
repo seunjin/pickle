@@ -32,7 +32,7 @@ export default async function Home() {
           </div>
           <h1 className="font-bold text-[40px] leading-[1.1] md:text-[56px]">
             웹의 모든 조각을 <br />
-            하나의 피클로.
+            하나의 <span className="text-shine">피클</span>로.
           </h1>
           <p className="text-[18px] text-gray-300 leading-[1.4] md:text-[20px]">
             흩어져 있는 아이디어와 캡처를 한 곳에 모으고

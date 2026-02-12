@@ -124,7 +124,7 @@ export function BetaApplicationForm() {
           </label>
           <Textarea
             id="message"
-            placeholder="피클에 기대하는 점이나 사용 목적을 적어주세요."
+            placeholder="베타 테스트에 참여하고 싶은 이유를 자유롭게 적어주세요. (선택)"
             className="min-h-[100px]"
             {...register("message")}
           />
@@ -158,6 +158,7 @@ export function BetaApplicationForm() {
           variant="primary"
           disabled={isSubmitting}
           isPending={isSubmitting}
+          className="mt-4 h-[48px] font-bold text-[15px]"
         >
           베타 참여 신청하기
         </Button>
