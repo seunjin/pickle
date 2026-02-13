@@ -109,6 +109,7 @@ export function BetaApplicationForm() {
             placeholder="example@gmail.com"
             {...register("email")}
             aria-invalid={!!errors.email}
+            size={"large"}
           />
           {errors.email && (
             <span className="text-red-500 text-xs">{errors.email.message}</span>
@@ -127,6 +128,7 @@ export function BetaApplicationForm() {
             placeholder="베타 테스트에 참여하고 싶은 이유를 자유롭게 적어주세요. (선택)"
             className="min-h-[100px]"
             {...register("message")}
+            size={"large"}
           />
           {errors.message && (
             <span className="text-red-500 text-xs">
