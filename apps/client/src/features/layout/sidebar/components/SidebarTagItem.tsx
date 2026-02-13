@@ -24,13 +24,22 @@ interface SidebarTagItemProps extends SidebarItemBaseProps {
   icon: IconName;
   tagId: string;
   tagStyle: keyof typeof TAG_VARIANTS;
+  totalCount?: number;
 }
 /**
  * 태그 리스트의 개별 아이템 컴포넌트
  * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
 export const SidebarTagItem = (props: SidebarTagItemProps) => {
-  const { tagId, icon, tagStyle, label, active, ...baseProps } = props;
+  const {
+    tagId,
+    icon,
+    tagStyle,
+    label,
+    active,
+    totalCount = 0,
+    ...baseProps
+  } = props;
   const [open, setOpen] = useState<boolean>(false);
   const dialog = useDialog();
   const toast = useToast();
@@ -122,71 +131,83 @@ export const SidebarTagItem = (props: SidebarTagItemProps) => {
         active={active}
         {...baseProps}
         rightSection={
-          <DropdownMenu open={open} onOpenChange={setOpen}>
-            <DropdownMenuTrigger asChild>
-              <ActionButton
-                variant={"subAction"}
-                icon="ellipsis_16"
-                forceFocus={open}
-                className={cn(
-                  "opacity-0 transition-opacity group-hover/tag:opacity-100",
-                  open && "opacity-100",
-                )}
-              />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              side="bottom"
-              sideOffset={10}
-              className="w-fit"
-              onCloseAutoFocus={(e) => {
-                if (preventFocusRestore.current) {
-                  e.preventDefault();
-                  preventFocusRestore.current = false;
-                }
-              }}
-            >
-              <DropdownMenuItem asChild>
-                <button
-                  type="button"
-                  className="w-full cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    preventFocusRestore.current = true;
-                    setIsEditing(true);
-                  }}
-                >
-                  <Icon name="edit_16" /> 이름 바꾸기
-                </button>
-              </DropdownMenuItem>
-              <TagColorPalette
-                color={tempColor}
-                onColorChange={setTempColor}
-                onOpenChange={(isOpen) => {
-                  if (!isOpen && tempColor !== tagStyle) {
-                    updateTagMutation.mutate({
-                      tagId,
-                      input: { style: tempColor },
-                    });
+          <div className="flex items-center gap-1">
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+              <DropdownMenuTrigger asChild>
+                <ActionButton
+                  variant={"subAction"}
+                  icon="ellipsis_16"
+                  forceFocus={open}
+                  className={cn(
+                    "pointer-events-auto cursor-pointer! opacity-0 transition-opacity group-hover/tag:opacity-100",
+                    open && "opacity-100",
+                  )}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                side="bottom"
+                sideOffset={10}
+                className="w-fit"
+                onCloseAutoFocus={(e) => {
+                  if (preventFocusRestore.current) {
+                    e.preventDefault();
+                    preventFocusRestore.current = false;
                   }
                 }}
-              />
-
-              <DropdownMenuItem asChild>
-                <button
-                  type="button"
-                  className="w-full cursor-pointer text-base-danger"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete();
+              >
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      preventFocusRestore.current = true;
+                      setIsEditing(true);
+                    }}
+                  >
+                    <Icon name="edit_16" /> 이름 바꾸기
+                  </button>
+                </DropdownMenuItem>
+                <TagColorPalette
+                  color={tempColor}
+                  onColorChange={setTempColor}
+                  onOpenChange={(isOpen) => {
+                    if (!isOpen && tempColor !== tagStyle) {
+                      updateTagMutation.mutate({
+                        tagId,
+                        input: { style: tempColor },
+                      });
+                    }
                   }}
-                >
-                  <Icon name="trash_16" />
-                  태그 삭제
-                </button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                />
+
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer text-base-danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
+                  >
+                    <Icon name="trash_16" />
+                    태그 삭제
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {totalCount > 0 && (
+              <span
+                className={cn(
+                  "flex h-5 min-w-5 cursor-default items-center justify-center rounded-sm bg-green-100/16 px-1.5 font-medium text-xs transition-opacity",
+                  active ? "text-base-primary" : "text-base-muted-foreground",
+                )}
+              >
+                {totalCount}
+              </span>
+            )}
+          </div>
         }
       />
       {isEditing && (

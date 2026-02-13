@@ -27,7 +27,7 @@ export async function getTags({
 
   const { data, error } = await supabase
     .from("tags")
-    .select("*")
+    .select("*, note_tags:note_tags(count)")
     .eq("workspace_id", targetWorkspaceId)
     .order("name", { ascending: true });
 
@@ -35,5 +35,11 @@ export async function getTags({
     throw new Error(error.message);
   }
 
-  return data.map((tag) => tagSchema.parse(tag));
+  return data.map((tag) => {
+    const parsed = tagSchema.parse(tag);
+    return {
+      ...parsed,
+      totalCount: (tag.note_tags as any)?.[0]?.count || 0,
+    };
+  });
 }

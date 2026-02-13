@@ -23,13 +23,14 @@ import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
 
 interface SidebarFolderItemProps extends Omit<SidebarItemBaseProps, "icon"> {
   folderId: string;
+  totalCount?: number;
 }
 /**
  * 폴더 리스트의 개별 아이템 컴포넌트
  * 이름 변경, 삭제 등의 관리 기능을 포함합니다.
  */
 export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
-  const { folderId, active, forceFocus, ...baseProps } = props;
+  const { folderId, totalCount = 0, active, forceFocus, ...baseProps } = props;
   const [open, setOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const dialog = useDialog();
@@ -122,62 +123,75 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
             )}
           />
         }
+        active={active}
         forceFocus={open}
         {...baseProps}
         rightSection={
-          <DropdownMenu open={open} onOpenChange={setOpen}>
-            <DropdownMenuTrigger asChild>
-              <ActionButton
-                variant={"subAction"}
-                icon="ellipsis_16"
-                forceFocus={open}
-                className={cn(
-                  "opacity-0 transition-opacity group-hover/folder:opacity-100",
-                  open && "opacity-100",
-                )}
-              />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              side="bottom"
-              sideOffset={10}
-              className="w-fit"
-              onCloseAutoFocus={(e) => {
-                if (preventFocusRestore.current) {
-                  e.preventDefault();
-                  preventFocusRestore.current = false;
-                }
-              }}
-            >
-              <DropdownMenuItem asChild>
-                <button
-                  type="button"
-                  className="w-full cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    preventFocusRestore.current = true;
-                    setIsEditing(true);
-                  }}
-                >
-                  <Icon name="edit_16" /> 이름 바꾸기
-                </button>
-              </DropdownMenuItem>
+          <div className="flex items-center gap-1">
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+              <DropdownMenuTrigger asChild>
+                <ActionButton
+                  variant={"subAction"}
+                  icon="ellipsis_16"
+                  forceFocus={open}
+                  className={cn(
+                    "pointer-events-auto cursor-pointer! opacity-0 transition-opacity group-hover/folder:opacity-100",
+                    open && "opacity-100",
+                  )}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                side="bottom"
+                sideOffset={10}
+                className="w-fit"
+                onCloseAutoFocus={(e) => {
+                  if (preventFocusRestore.current) {
+                    e.preventDefault();
+                    preventFocusRestore.current = false;
+                  }
+                }}
+              >
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      preventFocusRestore.current = true;
+                      setIsEditing(true);
+                    }}
+                  >
+                    <Icon name="edit_16" /> 이름 바꾸기
+                  </button>
+                </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button
-                  type="button"
-                  className="w-full cursor-pointer text-base-danger"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete();
-                  }}
-                >
-                  <Icon name="trash_16" />
-                  폴더 삭제
-                </button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem asChild>
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer text-base-danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
+                  >
+                    <Icon name="trash_16" />
+                    폴더 삭제
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {totalCount > 0 && (
+              <span
+                className={cn(
+                  "flex h-5 min-w-5 cursor-default items-center justify-center rounded-sm bg-green-100/16 px-1.5 font-medium text-xs transition-opacity",
+                  active ? "text-base-primary" : "text-base-muted-foreground",
+                )}
+              >
+                {totalCount}
+              </span>
+            )}
+          </div>
         }
       />
       {isEditing && (

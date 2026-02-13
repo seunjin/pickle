@@ -9,6 +9,7 @@ export const folderSchema = z.object({
   deleted_at: z.string().datetime({ offset: true }).nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
+  totalCount: z.number().optional(), // 폴더 내 노트 개수
 });
 
 export type Folder = z.infer<typeof folderSchema>;

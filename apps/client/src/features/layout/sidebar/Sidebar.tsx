@@ -113,7 +113,7 @@ export const Sidebar = () => {
                   <span className="font-semibold text-[13px] text-neutral-650 leading-none tracking-wider">
                     FOLDERS
                   </span>
-                  {folders.length === 0 && (
+                  {folders.length > 0 && (
                     <Icon
                       name={foldersFolding ? "arrow_up_16" : "arrow_down_16"}
                       className="text-inherit"
@@ -144,6 +144,7 @@ export const Sidebar = () => {
                           folderId={folder.id}
                           href={`/?folderId=${folder.id}`}
                           label={folder.name}
+                          totalCount={folder.totalCount}
                           active={
                             pathname === "/" && search.folderId === folder.id
                           }
@@ -200,6 +201,7 @@ export const Sidebar = () => {
                       href={`/?tagId=${tag.id}`}
                       icon="tag_16"
                       label={tag.name}
+                      totalCount={tag.totalCount}
                       active={active}
                     />
                   );

@@ -27,6 +27,7 @@ export const tagSchema = z.object({
   style: z.enum(TAG_COLORS),
   created_at: z.string(),
   updated_at: z.string(),
+  totalCount: z.number().optional(), // 태그가 달린 노트 개수
 });
 
 export type Tag = z.infer<typeof tagSchema>;
