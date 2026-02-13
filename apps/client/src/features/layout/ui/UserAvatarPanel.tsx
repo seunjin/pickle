@@ -54,7 +54,7 @@ export function UserAvatarPanel() {
       <DropdownMenuContent align="end" className="min-w-[260px] px-2 pt-5 pb-3">
         {/* 프로필 */}
         <div className="px-3 pb-4">
-          <div className="flex items-center gap-3 pb-5">
+          <div className="flex items-center gap-3">
             <img
               src={avatar_url}
               alt="Avatar"
@@ -69,9 +69,9 @@ export function UserAvatarPanel() {
               </span>
             </div>
           </div>
-          <Button className="w-full" size={"h32"}>
+          {/* <Button className="w-full" size={"h32"}>
             플랜 업그레이드
-          </Button>
+          </Button> */}
         </div>
 
         <DropdownMenuSeparator className="-mx-2" />
@@ -79,7 +79,7 @@ export function UserAvatarPanel() {
         {/* 스토리지 사용량 */}
         <div className="pt-5 pb-4">
           <div className="flex flex-col gap-4 px-3">
-            <span className="font-medium text-[13px] text-neutral-200 leading-none">
+            <span className="font-medium text-[14px] text-neutral-200 leading-none">
               스토리지 사용량
             </span>
             <div className="pb-3">
@@ -87,7 +87,7 @@ export function UserAvatarPanel() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 rounded-lg bg-neutral-900 p-3 text-[11px] text-neutral-500">
+          <div className="flex flex-col gap-1.5 rounded-lg bg-neutral-900 p-3 text-[12px] text-neutral-500">
             <div className="flex justify-between">
               <span>이미지</span>
               <span className="text-neutral-300">

@@ -18,6 +18,7 @@ export async function getLatestLegalDocument(
     .from("legal_documents")
     .select("*")
     .eq("type", type)
+    .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

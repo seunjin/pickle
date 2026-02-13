@@ -3,7 +3,7 @@ import { z } from "zod";
 import { LegalContent } from "@/features/legal/ui/LegalContent";
 
 const legalSearchSchema = z.object({
-  tab: z.enum(["service", "privacy", "marketing"]).optional().catch("service"),
+  tab: z.enum(["service", "privacy", "marketing"]).optional(),
 });
 
 export const Route = createFileRoute("/legal")({

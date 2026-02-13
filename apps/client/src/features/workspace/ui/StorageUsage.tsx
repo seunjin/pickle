@@ -34,7 +34,7 @@ export const StorageUsage = () => {
           }}
         />
       </div>
-      <div className="flex items-center justify-between font-medium text-[10px] text-neutral-300">
+      <div className="flex items-center justify-between font-medium text-[12px] text-neutral-300">
         <span>사용량 {formatBytes(total_used_bytes, 1)}</span>
         <span className="text-base-muted-foreground">
           {formatBytes(limit_bytes, 0)}

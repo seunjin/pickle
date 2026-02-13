@@ -12,15 +12,16 @@ const TABS = [
 
 export function LegalContent() {
   const navigate = useNavigate();
-  const { tab = "service" } = useSearch({ from: "/legal" });
+  const { tab } = useSearch({ from: "/legal" });
 
-  const activeTab = (TABS.find((t) => t.id === tab)?.id || "service") as
-    | "service"
-    | "privacy"
-    | "marketing";
+  const activeTab =
+    (TABS.find((t) => t.id === tab)?.id as
+      | "service"
+      | "privacy"
+      | "marketing") || "service";
 
   return (
-    <div className="mx-auto grid h-full w-[min(100%,800px)] grid-rows-[auto_1fr_auto] px-6 py-12.5">
+    <div className="mx-auto grid h-full w-[min(100%,800px)] grid-rows-[auto_1fr_auto] ">
       <div>
         {/* 탭 헤더 */}
         <div className="flex items-center gap-8 pb-10">
@@ -31,7 +32,8 @@ export function LegalContent() {
               onClick={() =>
                 navigate({
                   to: "/legal",
-                  search: { tab: t.id },
+                  search: (prev) => ({ ...prev, tab: t.id }),
+                  replace: true,
                 })
               }
               className={cn(

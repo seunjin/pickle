@@ -16,6 +16,8 @@ import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
 import { SidebarNavItem } from "./components/SidebarNavItem";
 import { SidebarTagItem } from "./components/SidebarTagItem";
 
+const client = createClient();
+
 export const Sidebar = () => {
   const { pathname } = useLocation();
   const search = useSearch({ strict: false }) as any;
@@ -23,7 +25,6 @@ export const Sidebar = () => {
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
   const { workspace } = useSessionContext();
-  const client = createClient();
 
   const workspaceId = workspace?.id;
 
@@ -97,7 +98,7 @@ export const Sidebar = () => {
               <SidebarNavItem
                 href="/bookmarks"
                 icon="bookmark_16"
-                label="북마크"
+                label="즐겨찾기"
                 active={pathname.includes("/bookmarks")}
               />
             </div>
