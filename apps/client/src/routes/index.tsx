@@ -7,9 +7,11 @@ export const Route = createFileRoute("/")({
 });
 
 function DashboardPage() {
+  const { folderId, tagId } = Route.useSearch() as any;
+
   return (
     <AuthGuard>
-      <NoteListWithFilter />
+      <NoteListWithFilter folderId={folderId} tagId={tagId} />
     </AuthGuard>
   );
 }

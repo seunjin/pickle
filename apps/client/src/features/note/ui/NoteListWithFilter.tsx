@@ -39,7 +39,8 @@ export function NoteListWithFilter({
           workspaceId,
           filter: {
             onlyBookmarked,
-            folderId,
+            // folderId와 tagId가 모두 없을 경우에만 인박스(folderId: null)로 간주
+            folderId: folderId === undefined && !tagId ? null : folderId,
             tagId: tagId || undefined,
             type:
               selectedType === "all"
