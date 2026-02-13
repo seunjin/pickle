@@ -101,9 +101,17 @@ export const searchNotes = async (
   }
 
   if (q && q.trim() !== "") {
-    queryBuilder = queryBuilder.textSearch("fts_tokens", q, {
+    // 접두사 검색(Prefix Search)을 위해 각 단어 뒤에 :*를 붙이고 &로 결합합니다.
+    const searchTerms = q
+      .trim()
+      .split(/\s+/)
+      .filter((term) => term.length > 0)
+      .map((term) => `${term}:*`)
+      .join(" & ");
+
+    queryBuilder = queryBuilder.textSearch("fts_tokens", searchTerms, {
       config: "simple",
-      type: "plain",
+      type: "raw" as any,
     });
   }
 
