@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@pickle/contracts": "workspace:^",
@@ -36,11 +39,16 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/router-devtools": "^1.157.16",
     "@tanstack/router-plugin": "^1.157.16",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^28.1.0",
     "tailwindcss": "^4",
     "typescript": "^5.9.3",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "vitest": "^4.0.18"
   }
 }
