@@ -78,11 +78,8 @@ if (!globalThis.PointerEvent) {
   // @ts-expect-error
   globalThis.PointerEvent = class PointerEvent extends MouseEvent {};
 }
-// @ts-expect-error
 globalThis.HTMLElement.prototype.hasPointerCapture = vi.fn(() => false);
-// @ts-expect-error
 globalThis.HTMLElement.prototype.setPointerCapture = vi.fn();
-// @ts-expect-error
 globalThis.HTMLElement.prototype.releasePointerCapture = vi.fn();
 
 import { useSearchNoteFilter } from "../model/useSearchNoteFilter";

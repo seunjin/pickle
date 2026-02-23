@@ -1,6 +1,6 @@
 import type { Tag } from "@pickle/contracts";
 import type { SelectOption } from "@pickle/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { folderQueries } from "@/features/folder/model/folderQueries";
@@ -26,14 +26,23 @@ export function useSearchNoteFilter({
   const [tagFilterOpen, setTagFilterOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
 
-  // 폴더 목록 조회
-  const { data: folders = [] } = useQuery(folderQueries.list(client));
-
-  // 태그 목록 조회
-  const { data: tags = [] } = useQuery({
-    ...tagQueries.list({ client, workspaceId }),
-    enabled: !!workspaceId,
+  // 다중 쿼리 병렬 처리 (Waterfall 방지)
+  const results = useQueries({
+    queries: [
+      {
+        ...folderQueries.list(client),
+      },
+      {
+        ...tagQueries.list({ client, workspaceId }),
+        enabled: !!workspaceId,
+      },
+    ],
   });
+
+  const [{ data: folders = [] }, { data: tags = [] }] = results as [
+    { data: { id: string; name: string; totalCount: number }[] },
+    { data: Tag[] },
+  ];
 
   // 폴더 옵션 구성
   const folderOptions = useMemo<SelectOption[]>(() => {

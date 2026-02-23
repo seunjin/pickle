@@ -1,6 +1,6 @@
 import { Icon } from "@pickle/icons";
 import { ScrollArea, Tooltip } from "@pickle/ui";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { useLocation, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSessionContext } from "@/features/auth/model/SessionContext";
@@ -28,35 +28,65 @@ export const Sidebar = () => {
 
   const workspaceId = workspace?.id;
 
-  // 폴더 목록 조회
-  const { data: folders = [] } = useSuspenseQuery(folderQueries.list(client));
-
   // 폴더 생성 mutation
   const createFolderMutation = useCreateFolder(workspaceId ?? "");
 
-  // 태그 목록 조회 (workspace 로드 후에만 실행)
-  const { data: tags = [] } = useQuery({
-    ...tagQueries.list({ workspaceId }),
-    enabled: !!workspaceId,
+  // 다중 쿼리 병렬 처리 (Waterfall 방지)
+  const results = useQueries({
+    queries: [
+      {
+        ...folderQueries.list(client),
+      },
+      {
+        ...tagQueries.list({ workspaceId }),
+        enabled: !!workspaceId,
+      },
+      {
+        ...noteQueries.list({
+          workspaceId,
+          filter: { folderId: null },
+        }),
+        enabled: !!workspaceId,
+      },
+      {
+        ...noteQueries.trash({ workspaceId }),
+        enabled: !!workspaceId,
+      },
+    ],
   });
 
-  // Inbox 노트 목록 조회 (뱃지용, workspace 로드 후에만 실행)
-  const { data: inboxData } = useQuery({
-    ...noteQueries.list({
-      workspaceId,
-      filter: { folderId: null },
-    }),
-    enabled: !!workspaceId,
-  });
+  const [
+    { data: folders = [] },
+    { data: tags = [] },
+    { data: inboxData },
+    { data: trashData },
+  ] = results as [
+    { data: { id: string; name: string; totalCount: number }[] },
+    {
+      data: {
+        id: string;
+        name: string;
+        style:
+          | "gray"
+          | "purple"
+          | "blue"
+          | "yellow"
+          | "orange"
+          | "green"
+          | "cyan"
+          | "indigo"
+          | "magenta"
+          | "lime"
+          | "emerald"
+          | "red";
+        totalCount: number;
+      }[];
+    },
+    { data: { totalCount?: number } },
+    { data: { totalCount?: number } },
+  ];
 
   const inboxTotalCount = inboxData?.totalCount || 0;
-
-  // 휴지통 노트 목록 조회 (알림용, workspace 로드 후에만 실행)
-  const { data: trashData } = useQuery({
-    ...noteQueries.trash({ workspaceId }),
-    enabled: !!workspaceId,
-  });
-
   const trashTotalCount = trashData?.totalCount || 0;
 
   const handleCreateFolder = (name: string) => {

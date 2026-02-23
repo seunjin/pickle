@@ -16,6 +16,27 @@ export default defineConfig({
     }),
     react(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "zustand"],
+          "router-vendor": ["@tanstack/react-router", "@tanstack/react-query"],
+          "editor-vendor": [
+            "@tiptap/react",
+            "@tiptap/starter-kit",
+            "@tiptap/extension-placeholder",
+            "@tiptap/extension-table",
+            "@tiptap/extension-table-row",
+            "@tiptap/extension-table-header",
+            "@tiptap/extension-table-cell",
+          ],
+          "supabase-vendor": ["@supabase/supabase-js", "@supabase/ssr"],
+          "ui-vendor": ["lucide-react", "motion", "@pickle/ui"],
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
