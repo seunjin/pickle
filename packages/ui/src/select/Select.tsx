@@ -24,6 +24,7 @@ interface SelectProps {
   placeholder?: React.ReactNode;
   value?: SelectOptionValue;
   onValueChange?: (value: SelectOptionValue) => void;
+  "aria-label"?: string;
 }
 export function Select({
   options,
@@ -32,6 +33,7 @@ export function Select({
   placeholder,
   value,
   onValueChange,
+  "aria-label": ariaLabel,
 }: SelectProps) {
   const [open, setOpen] = useState<boolean>(false);
   return (
@@ -44,6 +46,10 @@ export function Select({
         disabled={disabled}
       >
         <SelectTrigger
+          aria-label={
+            ariaLabel ||
+            (typeof placeholder === "string" ? placeholder : undefined)
+          }
           className={cn(
             "w-full bg-form-input-background",
             open && "outline outline-base-primary [&_svg]:rotate-180",
