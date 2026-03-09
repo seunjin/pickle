@@ -1,3 +1,4 @@
+import type { TagColor } from "@pickle/contracts";
 import { Icon } from "@pickle/icons";
 import { ScrollArea, Tooltip } from "@pickle/ui";
 import { useQueries } from "@tanstack/react-query";
@@ -7,6 +8,7 @@ import { useSessionContext } from "@/features/auth/model/SessionContext";
 import { useCreateFolder } from "@/features/folder/model/folderMutations";
 import { folderQueries } from "@/features/folder/model/folderQueries";
 import { noteQueries } from "@/features/note/model/noteQueries";
+import { useCreateTag } from "@/features/tag/model/tagMutations";
 import { tagQueries } from "@/features/tag/model/tagQueries";
 import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase";
@@ -14,6 +16,7 @@ import { SidebarFolderInput } from "./components/SidebarFolderInput";
 import { SidebarFolderItem } from "./components/SidebarFolderItem";
 import { SidebarFolderLoading } from "./components/SidebarFolderLoading";
 import { SidebarNavItem } from "./components/SidebarNavItem";
+import { SidebarTagInput } from "./components/SidebarTagInput";
 import { SidebarTagItem } from "./components/SidebarTagItem";
 
 const client = createClient();
@@ -24,12 +27,16 @@ export const Sidebar = () => {
   const [foldersFolding, setFoldersFolding] = useState<boolean>(true);
   const [tagsFolding, setTagsFolding] = useState<boolean>(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
+  const [isCreatingTag, setIsCreatingTag] = useState<boolean>(false);
   const { workspace } = useSessionContext();
 
   const workspaceId = workspace?.id;
 
   // 폴더 생성 mutation
   const createFolderMutation = useCreateFolder(workspaceId ?? "");
+
+  // 태그 생성 mutation
+  const createTagMutation = useCreateTag();
 
   // 다중 쿼리 병렬 처리 (Waterfall 방지)
   const results = useQueries({
@@ -97,6 +104,21 @@ export const Sidebar = () => {
       {
         onError: (error) => {
           logger.error("Failed to create folder", { error });
+        },
+      },
+    );
+  };
+
+  const handleCreateTag = (name: string, style: TagColor) => {
+    setIsCreatingTag(false);
+
+    if (!workspaceId) return;
+
+    createTagMutation.mutate(
+      { name, workspace_id: workspaceId, style },
+      {
+        onError: (error) => {
+          logger.error("Failed to create tag", { error });
         },
       },
     );
@@ -221,30 +243,65 @@ export const Sidebar = () => {
                 </button>
               </div>
 
-              {tagsFolding &&
-                tags.map((tag) => {
-                  const active = pathname === "/" && search.tagId === tag.id;
-                  return (
-                    <SidebarTagItem
-                      key={tag.id}
-                      tagId={tag.id}
-                      tagStyle={tag.style}
-                      href={`/?tagId=${tag.id}`}
-                      icon="tag_16"
-                      label={tag.name}
-                      totalCount={tag.totalCount}
-                      active={active}
-                    />
-                  );
-                })}
-              {/* 태그 노데이터 */}
-              {tags.length === 0 && (
-                <div className="flex h-8 items-center px-3">
-                  <span className="text-[15px] text-base-disabled">
-                    태그없음
-                  </span>
+              <div className="flex min-h-[40px] flex-col gap-1">
+                {tagsFolding && (
+                  <>
+                    {/* 새 태그 생성 입력창 */}
+                    {isCreatingTag && (
+                      <SidebarTagInput
+                        onCreate={handleCreateTag}
+                        onCancel={() => setIsCreatingTag(false)}
+                      />
+                    )}
+
+                    {/* 생성 중인 태그 로딩 (폴더 로딩과 동일하므로 재사용) */}
+                    {createTagMutation.isPending && <SidebarFolderLoading />}
+
+                    <div className="flex flex-col">
+                      {tags.map((tag) => {
+                        const active =
+                          pathname === "/" && search.tagId === tag.id;
+                        return (
+                          <SidebarTagItem
+                            key={tag.id}
+                            tagId={tag.id}
+                            tagStyle={tag.style}
+                            href={`/?tagId=${tag.id}`}
+                            icon="tag_16"
+                            label={tag.name}
+                            totalCount={tag.totalCount}
+                            active={active}
+                          />
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
+                {/* 태그 노데이터 */}
+                {tagsFolding && !isCreatingTag && tags.length === 0 && (
+                  <div className="flex h-8 items-center px-3">
+                    <span className="text-[15px] text-base-disabled">
+                      태그없음
+                    </span>
+                  </div>
+                )}
+
+                {/* 새 태그 버튼 */}
+                <div className="px-3 py-2">
+                  <button
+                    type="button"
+                    className="flex w-full cursor-pointer items-center gap-2 text-neutral-600 text-sm transition-colors hover:text-base-foreground"
+                    onClick={() => {
+                      setTagsFolding(true);
+                      setIsCreatingTag(true);
+                    }}
+                  >
+                    <Icon name="plus_16" className="text-color-[inherit]" />
+                    <span>새 태그 생성하기</span>
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 

@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import { Icon } from "@pickle/icons";
 import {
   ActionButton,
@@ -47,6 +48,11 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const preventFocusRestore = useRef(false);
+
+  // DnD Droppable 연동
+  const { isOver, setNodeRef } = useDroppable({
+    id: folderId,
+  });
 
   // 편집 모드 진입 시 자동 포커스
   useEffect(() => {
@@ -108,7 +114,13 @@ export const SidebarFolderItem = (props: SidebarFolderItemProps) => {
   };
 
   return (
-    <div className="group/folder relative">
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "group/folder relative rounded-[6px] transition-all",
+        isOver && "bg-neutral-800 ring-2 ring-base-primary ring-inset",
+      )}
+    >
       <SidebarItemBase
         icon={
           <Icon

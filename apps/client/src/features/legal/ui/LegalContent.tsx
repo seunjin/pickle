@@ -21,7 +21,7 @@ export function LegalContent() {
       | "marketing") || "service";
 
   return (
-    <div className="mx-auto grid h-full w-[min(100%,800px)] grid-rows-[auto_1fr_auto] ">
+    <div className="mx-auto grid h-full w-[min(100%,800px)] grid-rows-[auto_1fr_auto]">
       <div>
         {/* 탭 헤더 */}
         <div className="flex items-center gap-8 pb-10">

@@ -1,6 +1,8 @@
+import { useDraggable } from "@dnd-kit/core";
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { useDialog } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
+import { forwardRef } from "react";
 import { NoteDetailDrawer } from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
 import { OverflowTagGroup } from "./OverflowTagGroup";
@@ -14,12 +16,29 @@ interface NoteCardProps {
 export function NoteCard({ note, readOnly }: NoteCardProps) {
   const dialog = useDialog();
 
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: note.id,
+    data: { note }, // ড্র래그 시 DragOverlay에서 사용할 타이틀 등을 위해 원본 전달
+  });
+
+  const style = {
+    // OS에서 파일을 옮기듯 원본 위치는 고정하고 불투명도만 적용합니다.
+    // transform 속성을 제거하여 원본 카드가 마우스를 따라 이동하지 않게 수정했습니다.
+    opacity: isDragging ? 0.4 : undefined,
+  };
+
   const handleCardClick = () => {
     dialog.open(() => <NoteDetailDrawer note={note} readOnly={readOnly} />);
   };
 
   return (
-    <NoteCardContainer onClick={handleCardClick}>
+    <NoteCardContainer
+      ref={setNodeRef}
+      style={style}
+      attributes={attributes}
+      listeners={listeners}
+      onClick={handleCardClick}
+    >
       {/* thumbnail */}
       {note.type === "text" ? (
         <div className="overflow-hidden px-4 pt-3 pb-4">
@@ -62,18 +81,25 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
   );
 }
 
-function NoteCardContainer({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-}) {
+const NoteCardContainer = forwardRef<
+  HTMLDivElement,
+  {
+    children: React.ReactNode;
+    onClick?: () => void;
+    style?: React.CSSProperties;
+    attributes?: any;
+    listeners?: any;
+  }
+>(({ children, onClick, style, attributes, listeners }, ref) => {
   return (
     <div
+      ref={ref}
       onClick={onClick}
       role="button"
       tabIndex={0}
+      style={style}
+      {...attributes}
+      {...listeners}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           onClick?.();
@@ -86,4 +112,4 @@ function NoteCardContainer({
       {children}
     </div>
   );
-}
+});
