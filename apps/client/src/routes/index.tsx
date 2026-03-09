@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AuthGuard } from "@/features/auth/ui/AuthGuard";
 import { NoteListWithFilter } from "@/features/note/ui/NoteListWithFilter";
 
 export const Route = createFileRoute("/")({
@@ -9,9 +8,5 @@ export const Route = createFileRoute("/")({
 function DashboardPage() {
   const { folderId, tagId } = Route.useSearch() as any;
 
-  return (
-    <AuthGuard>
-      <NoteListWithFilter folderId={folderId} tagId={tagId} />
-    </AuthGuard>
-  );
+  return <NoteListWithFilter folderId={folderId} tagId={tagId} />;
 }

@@ -9,10 +9,16 @@ import {
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { Icon } from "@pickle/icons";
-import { ScrollArea } from "@pickle/ui";
-import { createRootRoute, Outlet, useLocation } from "@tanstack/react-router";
+import { ScrollArea, Spinner } from "@pickle/ui";
+import {
+  createRootRoute,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useUser } from "@/features/auth/model/useUser";
 import { SidebarWrapper } from "@/features/layout/sidebar/SidebarWrapper";
 import { AppHeader } from "@/features/layout/ui/AppHeader";
 import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
@@ -25,6 +31,8 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, appUser, isLoading } = useUser();
   const updateNoteMutation = useUpdateNoteMutation();
   const deleteNoteMutation = useDeleteNoteMutation();
   // 단순 string ID가 아니라 드래그된 노트의 상세 정보(주로 title)를 가지도록 변경
@@ -98,6 +106,25 @@ function RootLayout() {
   // Admin은 자체 레이아웃(사이드바)을 가지므로 메인 레이아웃 제외
   const isAdminPage = pathname.startsWith("/admin");
 
+  // 1. AuthGuard 전역 통합 로직
+  useEffect(() => {
+    if (!isLoading && !isAuthPage && !isAdminPage) {
+      if (!user) {
+        navigate({ to: "/signin", replace: true });
+        return;
+      }
+
+      if (!appUser || appUser.status !== "active") {
+        navigate({
+          to: "/signup",
+          search: { reason: "no_profile" },
+          replace: true,
+        });
+        return;
+      }
+    }
+  }, [user, appUser, isLoading, navigate, isAuthPage, isAdminPage]);
+
   if (isAuthPage || isAdminPage) {
     return (
       <>
@@ -106,6 +133,15 @@ function RootLayout() {
           <TanStackRouterDevtools initialIsOpen={false} />
         )}
       </>
+    );
+  }
+
+  // 로딩 중이거나 미인증/미승인 상태일 때 레이아웃 완전 차단
+  if (isLoading || !user || appUser?.status !== "active") {
+    return (
+      <div className="effect-bg flex h-dvh flex-col items-center justify-center bg-base-background">
+        <Spinner className="size-8 text-base-primary" />
+      </div>
     );
   }
 

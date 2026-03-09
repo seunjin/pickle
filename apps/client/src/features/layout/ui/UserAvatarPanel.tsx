@@ -28,8 +28,6 @@ export function UserAvatarPanel() {
 
   const avatar_url = appUser?.avatar_url;
 
-  if (!avatar_url) return null;
-
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -38,7 +36,7 @@ export function UserAvatarPanel() {
           className="group/avatar inline-flex shrink-0 items-center gap-0.5 overflow-hidden outline-none"
         >
           <img
-            src={avatar_url}
+            src={avatar_url || ""}
             alt="Avatar"
             className="size-8 rounded-full border border-base-border object-cover"
           />
@@ -56,7 +54,7 @@ export function UserAvatarPanel() {
         <div className="px-3 pb-4">
           <div className="flex items-center gap-3">
             <img
-              src={avatar_url}
+              src={avatar_url || ""}
               alt="Avatar"
               className="size-10 rounded-full border border-base-border object-cover"
             />
@@ -112,8 +110,8 @@ export function UserAvatarPanel() {
         <DropdownMenuSeparator className="-mx-2" />
 
         <div className="flex flex-col gap-[5px] pt-2">
-          {(appUser.authority === "super_admin" ||
-            appUser.authority === "admin") && (
+          {(appUser?.authority === "super_admin" ||
+            appUser?.authority === "admin") && (
             <DropdownMenuItem asChild>
               <Link to={"/admin" as any}>
                 <button
