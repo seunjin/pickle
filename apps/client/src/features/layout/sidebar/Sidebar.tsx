@@ -144,6 +144,7 @@ export const Sidebar = () => {
                 label="Inbox"
                 badge={inboxTotalCount}
                 active={pathname === "/" && !search.folderId && !search.tagId}
+                droppableId="inbox"
               />
 
               {/* 북마크 */}
@@ -312,6 +313,7 @@ export const Sidebar = () => {
               icon="trash_16"
               label="휴지통"
               active={pathname === "/trash"}
+              droppableId="trash"
               rightSection={
                 trashTotalCount > 0 && (
                   <Tooltip

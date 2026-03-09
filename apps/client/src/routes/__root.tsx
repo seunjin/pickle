@@ -15,6 +15,7 @@ import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useState } from "react";
 import { SidebarWrapper } from "@/features/layout/sidebar/SidebarWrapper";
 import { AppHeader } from "@/features/layout/ui/AppHeader";
+import { useDeleteNoteMutation } from "@/features/note/model/useDeleteNoteMutation";
 import { useUpdateNoteMutation } from "@/features/note/model/useUpdateNoteMutation";
 import { logger } from "@/shared/lib/logger";
 
@@ -25,6 +26,7 @@ export const Route = createRootRoute({
 function RootLayout() {
   const { pathname } = useLocation();
   const updateNoteMutation = useUpdateNoteMutation();
+  const deleteNoteMutation = useDeleteNoteMutation();
   // 단순 string ID가 아니라 드래그된 노트의 상세 정보(주로 title)를 가지도록 변경
   const [activeNote, setActiveNote] = useState<NoteWithAsset | null>(null);
 
@@ -54,16 +56,34 @@ function RootLayout() {
     // active.id = 드래그된 노트 id
     // over.id = 드롭된 폴더 id
     const noteId = String(active.id);
-    const folderId = String(over.id);
+    const destinationId = String(over.id);
 
-    // "inbox" 등 특정 ID의 경우 null로 처리할 수 있는 로직 추가 고려
-    const targetFolderId = folderId === "inbox" ? null : folderId;
+    // 1. 휴지통으로 이동 (삭제)
+    if (destinationId === "trash") {
+      deleteNoteMutation.mutate(noteId);
+      return;
+    }
+
+    // 2. 인박스 또는 폴더로 이동 (복구 로직 포함)
+    const isRestoring = !!activeNote?.deleted_at;
+    const targetFolderId = destinationId === "inbox" ? null : destinationId;
 
     updateNoteMutation.mutate(
-      { noteId, payload: { folder_id: targetFolderId } },
+      {
+        noteId,
+        payload: {
+          folder_id: targetFolderId,
+          // 휴지통에 있던 노트를 꺼낼 때는 deleted_at을 null로 처리하여 복구합니다.
+          ...(isRestoring ? { deleted_at: null } : {}),
+        },
+      },
       {
         onError: (error) => {
-          logger.error("Failed to move note", { error, noteId, folderId });
+          logger.error("Failed to move note", {
+            error,
+            noteId,
+            destinationId,
+          });
         },
       },
     );
@@ -95,6 +115,18 @@ function RootLayout() {
       collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      accessibility={{
+        announcements: {
+          onDragStart: () => "",
+          onDragMove: () => "",
+          onDragOver: () => "",
+          onDragEnd: () => "",
+          onDragCancel: () => "",
+        },
+        screenReaderInstructions: {
+          draggable: "",
+        },
+      }}
     >
       <div className="flex h-dvh bg-base-background text-base-foreground">
         <aside className="h-full w-75 shrink-0 border-base-border border-r">

@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import { Icon, type IconName } from "@pickle/icons";
 import { cn } from "@pickle/ui/lib/utils";
 import { SidebarItemBase, type SidebarItemBaseProps } from "./SidebarItemBase";
@@ -11,12 +12,19 @@ export const SidebarNavItem = ({
   badge,
   icon,
   rightSection,
+  droppableId,
   ...props
 }: Omit<SidebarItemBaseProps, "icon" | "rightSection"> & {
   badge?: number;
   icon: IconName;
   rightSection?: React.ReactNode;
+  droppableId?: string;
 }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: droppableId ?? "",
+    disabled: !droppableId,
+  });
+
   const badgeElement =
     badge !== undefined && badge > 0 ? (
       <span
@@ -33,22 +41,30 @@ export const SidebarNavItem = ({
   const { active, forceFocus } = props;
 
   return (
-    <SidebarItemBase
-      {...props}
-      icon={
-        <Icon
-          name={icon}
-          className={cn(
-            "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
-            active && "text-base-primary group-hover:text-base-primary",
-            !active && forceFocus && "text-neutral-300",
-            active &&
-              forceFocus &&
-              "text-base-primary group-hover:text-base-primary",
-          )}
-        />
-      }
-      rightSection={rightSection ?? badgeElement}
-    />
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "group/nav relative rounded-[6px] transition-all",
+        isOver && "bg-neutral-800 ring-2 ring-base-primary ring-inset",
+      )}
+    >
+      <SidebarItemBase
+        {...props}
+        icon={
+          <Icon
+            name={icon}
+            className={cn(
+              "w-5 shrink-0 transition-colors group-hover:text-neutral-300",
+              active && "text-base-primary group-hover:text-base-primary",
+              !active && forceFocus && "text-neutral-300",
+              active &&
+                forceFocus &&
+                "text-base-primary group-hover:text-base-primary",
+            )}
+          />
+        }
+        rightSection={rightSection ?? badgeElement}
+      />
+    </div>
   );
 };

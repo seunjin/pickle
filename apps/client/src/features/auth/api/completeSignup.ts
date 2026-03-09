@@ -1,8 +1,8 @@
 import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase";
 
-interface SignupResponse {
-  status: "success" | "error";
+export interface SignupResponse {
+  status: "success" | "error" | "pending";
   message?: string;
   detail?: string;
   hint?: string;

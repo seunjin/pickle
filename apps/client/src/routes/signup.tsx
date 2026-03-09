@@ -23,7 +23,7 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
-  const { user, appUser, isLoading } = useUser();
+  const { user, appUser, isLoading, refreshAppUser } = useUser();
   const navigate = useNavigate();
   const searchParams = useSearch({ from: "/signup" }) as { next?: string };
   const next = searchParams.next || "/";
@@ -83,6 +83,48 @@ function SignupPage() {
 
   if (isLoading || appUser?.status === "active") {
     return <PageSpinner />;
+  }
+
+  if (appUser?.status === "pending") {
+    return (
+      <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] py-10">
+        <div className="mx-auto flex w-100 flex-1 flex-col items-center justify-center pb-8">
+          <div className="pb-10">
+            <img src="/pickle-with-logo.svg" alt="pickle-with-logo" />
+          </div>
+          <PickleCausticGlass className="w-full text-center">
+            <div className="pb-6">
+              <Icon
+                name="notice_16"
+                className="mx-auto mb-4 size-10 text-base-primary"
+              />
+              <h1 className="pb-2 font-bold text-[22px] leading-[1.3]">
+                Beta Approval Pending
+              </h1>
+              <p className="text-[15px] text-white/90 leading-relaxed">
+                피클 오픈 베타에 신청해 주셔서 감사합니다!
+                <br />
+                현재 승인 대기 중이며, 관리자의 승인이 완료된 후
+                <br />
+                서비스를 정상적으로 이용하실 수 있습니다.
+              </p>
+            </div>
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => refreshAppUser()}
+                className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
+              >
+                승인 상태 확인하기
+              </button>
+            </div>
+          </PickleCausticGlass>
+        </div>
+        <footer className="text-center text-gray-500 text-sm">
+          © 2026 Pickle. All rights reserved.
+        </footer>
+      </div>
+    );
   }
 
   return (
@@ -242,14 +284,20 @@ function SignupPage() {
                   !agreements.privacy
                 }
                 onClick={
-                  user && (!appUser || appUser.status === "pending")
+                  user && (!appUser || (appUser.status as string) === "pending")
                     ? async () => {
                         try {
                           setIsCompleting(true);
-                          await completeSignup({
+                          const response = await completeSignup({
                             marketing_agreed: agreements.marketing,
                             is_over_14: isOver14,
                           });
+
+                          if ((response.status as string) === "pending") {
+                            await refreshAppUser();
+                            setIsCompleting(false);
+                            return;
+                          }
 
                           navigate({ to: "/", replace: true });
                         } catch (error: unknown) {

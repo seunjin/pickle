@@ -2,6 +2,7 @@ import { useDraggable } from "@dnd-kit/core";
 import type { NoteWithAsset } from "@pickle/contracts/src/note";
 import { useDialog } from "@pickle/ui";
 import { cn } from "@pickle/ui/lib/utils";
+import { useLocation, useSearch } from "@tanstack/react-router";
 import { forwardRef } from "react";
 import { NoteDetailDrawer } from "@/features/layout/note-detail/NoteDetailDrawer";
 import { NoteCardHeader } from "./card/NoteCardHeader";
@@ -15,9 +16,18 @@ interface NoteCardProps {
 
 export function NoteCard({ note, readOnly }: NoteCardProps) {
   const dialog = useDialog();
+  const search = useSearch({ strict: false }) as any;
+  const { pathname } = useLocation();
+
+  // 특정 '장소(Inbox, Folder)'가 아닌 '필터/상태' 기반 페이지에서는 드래그를 비활성화합니다.
+  const isDragDisabled =
+    !!search.tagId ||
+    pathname.includes("/bookmarks") ||
+    pathname.includes("/trash");
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: note.id,
+    disabled: isDragDisabled,
     data: { note }, // ড্র래그 시 DragOverlay에서 사용할 타이틀 등을 위해 원본 전달
   });
 
@@ -38,6 +48,8 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
       attributes={attributes}
       listeners={listeners}
       onClick={handleCardClick}
+      draggable={!isDragDisabled}
+      className={cn(isDragDisabled && "select-none")}
     >
       {/* thumbnail */}
       {note.type === "text" ? (
@@ -89,8 +101,19 @@ const NoteCardContainer = forwardRef<
     style?: React.CSSProperties;
     attributes?: any;
     listeners?: any;
+    draggable?: boolean;
+    className?: string;
   }
->(({ children, onClick, style, attributes, listeners }, ref) => {
+>((props, ref) => {
+  const {
+    children,
+    onClick,
+    style,
+    attributes,
+    listeners,
+    draggable,
+    className,
+  } = props;
   return (
     <div
       ref={ref}
@@ -106,8 +129,10 @@ const NoteCardContainer = forwardRef<
         }
       }}
       className={cn(
-        "group/note-card grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag",
+        "group/note-card grid cursor-pointer grid-rows-[140px_1fr] overflow-hidden rounded-[16px] border border-base-border bg-neutral-900 text-tag transition-all",
+        className,
       )}
+      draggable={draggable}
     >
       {children}
     </div>
