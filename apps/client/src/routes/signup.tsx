@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { completeSignup } from "@/features/auth/api/completeSignup";
+import { getBetaApplication } from "@/features/auth/api/getBetaApplication";
 import { useUser } from "@/features/auth/model/useUser";
 import { GoogleAuthButton } from "@/features/auth/ui/GoogleAuthButton";
 import {
@@ -37,13 +38,27 @@ function SignupPage() {
     marketing: false,
   });
 
+  const [betaApplication, setBetaApplication] = useState<any>(null);
+  const [isCheckingApplication, setIsCheckingApplication] = useState(false);
+
   // 이미 활성화된 유저라면 리다이렉트
   useEffect(() => {
     if (!isLoading && appUser?.status === "active") {
       navigate({ to: next, replace: true });
       return;
     }
-  }, [isLoading, appUser, navigate, next]);
+
+    // 펜딩 상태일 때 베타 신청 여부 확인
+    if (!isLoading && user?.email && appUser?.status === "pending") {
+      const checkApplication = async () => {
+        setIsCheckingApplication(true);
+        const data = await getBetaApplication(user.email!);
+        setBetaApplication(data);
+        setIsCheckingApplication(false);
+      };
+      checkApplication();
+    }
+  }, [isLoading, appUser, navigate, next, user?.email]);
 
   const handleAgreementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -86,6 +101,9 @@ function SignupPage() {
   }
 
   if (appUser?.status === "pending") {
+    const hasApplied = !!betaApplication;
+    const wwwUrl = import.meta.env.VITE_WWW_URL || "";
+
     return (
       <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] py-10">
         <div className="mx-auto flex w-100 flex-1 flex-col items-center justify-center pb-8">
@@ -99,23 +117,57 @@ function SignupPage() {
                 className="mx-auto mb-4 size-10 text-base-primary"
               />
               <h1 className="pb-2 font-bold text-[22px] leading-[1.3]">
-                Beta Approval Pending
+                {hasApplied ? "Beta Approval Pending" : "Beta Access Required"}
               </h1>
               <p className="text-[15px] text-white/90 leading-relaxed">
-                피클 오픈 베타에 신청해 주셔서 감사합니다!
-                <br />
-                현재 승인 대기 중이며, 관리자의 승인이 완료된 후
-                <br />
-                서비스를 정상적으로 이용하실 수 있습니다.
+                {hasApplied ? (
+                  <>
+                    피클 오픈 베타에 신청해 주셔서 감사합니다!
+                    <br />
+                    현재 승인 대기 중이며, 관리자의 승인이 완료된 후
+                    <br />
+                    서비스를 정상적으로 이용하실 수 있습니다.
+                  </>
+                ) : (
+                  <>
+                    피클은 현재 클로즈드 베타 기간입니다.
+                    <br />
+                    서비스를 이용하시려면 먼저 베타 참여 신청이 필요합니다.
+                    <br />
+                    아래 버튼을 눌러 신청서를 제출해 주세요!
+                  </>
+                )}
               </p>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col gap-3">
+              {hasApplied ? (
+                <button
+                  type="button"
+                  onClick={() => refreshAppUser()}
+                  className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
+                >
+                  승인 상태 확인하기
+                </button>
+              ) : (
+                <a
+                  href={wwwUrl}
+                  className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
+                >
+                  베타 참여 신청하러 가기
+                </a>
+              )}
               <button
                 type="button"
-                onClick={() => refreshAppUser()}
-                className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
+                onClick={async () => {
+                  const { createClient } = await import(
+                    "@/shared/lib/supabase"
+                  );
+                  await createClient().auth.signOut();
+                  navigate({ to: "/signin", replace: true });
+                }}
+                className="text-gray-400 text-sm hover:underline"
               >
-                승인 상태 확인하기
+                다른 계정으로 로그인하기
               </button>
             </div>
           </PickleCausticGlass>
