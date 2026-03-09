@@ -102,7 +102,7 @@ function SignupPage() {
 
   if (appUser?.status === "pending") {
     const hasApplied = !!betaApplication;
-    const wwwUrl = import.meta.env.VITE_WWW_URL || "";
+    const wwwUrl = "https://pic-kle.io/";
 
     return (
       <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] py-10">
