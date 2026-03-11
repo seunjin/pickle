@@ -72,7 +72,8 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
                     className="w-full cursor-pointer"
                     onClick={handleDelete}
                   >
-                    <Icon name="trash_16" /> 휴지통으로 이동
+                    <Icon name="trash_16" />{" "}
+                    {note.deleted_at ? "삭제하기" : "휴지통으로 이동"}
                   </button>
                 </DropdownMenuItem>
               )}
