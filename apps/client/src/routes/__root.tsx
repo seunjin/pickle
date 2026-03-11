@@ -136,14 +136,8 @@ function RootLayout() {
     );
   }
 
-  // 로딩 중이거나 미인증/미승인 상태일 때 레이아웃 완전 차단
-  if (isLoading || !user || appUser?.status !== "active") {
-    return (
-      <div className="effect-bg flex h-dvh flex-col items-center justify-center bg-base-background">
-        <Spinner className="size-8 text-base-primary" />
-      </div>
-    );
-  }
+  // 로딩 중이거나 미인증/미승인 상태일 때도 레이아웃 골격은 렌더링 (LCP 최적화)
+  const isInitialLoading = isLoading || !user || appUser?.status !== "active";
 
   return (
     <DndContext
@@ -166,14 +160,27 @@ function RootLayout() {
     >
       <div className="flex h-dvh bg-base-background text-base-foreground">
         <aside className="h-full w-75 shrink-0 border-base-border border-r">
-          <SidebarWrapper />
+          {isInitialLoading ? (
+            <div className="flex h-full flex-col gap-4 bg-neutral-900 p-4 font-bold">
+              <div className="h-8 w-3/4 animate-pulse rounded bg-neutral-800" />
+              <div className="h-4 w-1/2 animate-pulse rounded bg-neutral-800" />
+            </div>
+          ) : (
+            <SidebarWrapper />
+          )}
         </aside>
         <div className="grid flex-1 grid-rows-[auto_1fr]">
           <AppHeader />
           <main className="overflow-auto">
             <ScrollArea className="h-full">
               <div className="h-[calc(100dvh-var(--web-header-height))] p-10">
-                <Outlet />
+                {isInitialLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <Spinner className="size-8 text-base-primary" />
+                  </div>
+                ) : (
+                  <Outlet />
+                )}
               </div>
             </ScrollArea>
           </main>

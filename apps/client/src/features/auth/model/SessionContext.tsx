@@ -95,13 +95,16 @@ export const SessionProvider = ({
         }
 
         if (mounted) {
-          setAppUser(userProfile);
           if (userProfile) {
+            // 프로필이 있는 경우 워크스페이스 조회와 상태 업데이트를 효율적으로 처리
             const workspaces = await getUserWorkspaces(
               supabase,
               currentUser.id,
             );
+            setAppUser(userProfile);
             if (workspaces.length > 0) setWorkspace(workspaces[0]);
+          } else {
+            setAppUser(null);
           }
           setIsLoading(false);
         }
