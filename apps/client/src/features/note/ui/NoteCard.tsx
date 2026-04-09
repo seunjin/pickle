@@ -65,7 +65,7 @@ export function NoteCard({ note, readOnly }: NoteCardProps) {
       {/* content */}
       <div className="grid min-w-0 grid-rows-[auto_1fr] px-4 pt-3 pb-4">
         <div className="min-w-0 pb-[14px]">
-          <NoteCardHeader note={note} type={note.type} />
+          <NoteCardHeader note={note} type={note.type} readOnly={readOnly} />
 
           <div
             className={cn(

@@ -25,6 +25,8 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
   const { mutate: restoreNote } = useRestoreNoteMutation();
 
   const isBookmarked = !!note.bookmarked_at;
+  const isInTrash = !!note.deleted_at;
+  const isReadOnly = !!readOnly;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,7 +57,7 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="bottom" sideOffset={5}>
-              {readOnly ? (
+              {isInTrash ? (
                 <DropdownMenuItem asChild>
                   <button
                     type="button"
@@ -72,18 +74,17 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
                     className="w-full cursor-pointer"
                     onClick={handleDelete}
                   >
-                    <Icon name="trash_16" />{" "}
-                    {note.deleted_at ? "삭제하기" : "휴지통으로 이동"}
+                    <Icon name="trash_16" /> 휴지통으로 이동
                   </button>
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          {!readOnly && (
+          {!isReadOnly && (
             <BookmarkButton
               noteId={note.id}
               active={isBookmarked}
-              readonly={readOnly}
+              readonly={isReadOnly}
             />
           )}
         </div>
