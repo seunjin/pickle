@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { BookmarkButton } from "@/features/layout/ui/BookmarkButton";
 import { useDeleteNoteMutation } from "../../model/useDeleteNoteMutation";
+import { usePermanentlyDeleteNoteMutation } from "../../model/usePermanentlyDeleteNoteMutation";
 import { useRestoreNoteMutation } from "../../model/useRestoreNoteMutation";
 import { TypeLabel } from "../TypeLabel";
 
@@ -22,6 +23,7 @@ interface NoteCardHeaderProps {
 export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const { mutate: deleteNote } = useDeleteNoteMutation();
+  const { mutate: permanentlyDeleteNote } = usePermanentlyDeleteNoteMutation();
   const { mutate: restoreNote } = useRestoreNoteMutation();
 
   const isBookmarked = !!note.bookmarked_at;
@@ -37,6 +39,12 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
   const handleRestore = (e: React.MouseEvent) => {
     e.stopPropagation();
     restoreNote(note.id);
+    setIsMenuOpen(false);
+  };
+
+  const handlePermanentDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    permanentlyDeleteNote(note.id);
     setIsMenuOpen(false);
   };
 
@@ -58,15 +66,26 @@ export function NoteCardHeader({ type, note, readOnly }: NoteCardHeaderProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="bottom" sideOffset={5}>
               {isInTrash ? (
-                <DropdownMenuItem asChild>
-                  <button
-                    type="button"
-                    className="w-full cursor-pointer"
-                    onClick={handleRestore}
-                  >
-                    <Icon name="refresh_16" /> 복구하기
-                  </button>
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuItem asChild>
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer"
+                      onClick={handleRestore}
+                    >
+                      <Icon name="refresh_16" /> 복구하기
+                    </button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer"
+                      onClick={handlePermanentDelete}
+                    >
+                      <Icon name="trash_16" /> 삭제하기
+                    </button>
+                  </DropdownMenuItem>
+                </>
               ) : (
                 <DropdownMenuItem asChild>
                   <button
