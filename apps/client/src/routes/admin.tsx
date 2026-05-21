@@ -62,7 +62,7 @@ function AdminLayout() {
             to="/admin/waitlist"
             className="rounded-md px-3 py-2 hover:bg-slate-800 hover:text-white [&.active]:bg-slate-800 [&.active]:text-white"
           >
-            대기열 관리
+            신청 내역
           </Link>
         </nav>
       </aside>

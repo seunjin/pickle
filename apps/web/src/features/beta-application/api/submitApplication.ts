@@ -6,7 +6,7 @@ import { logger } from "@/shared/lib/logger";
 import { createClient } from "@/shared/lib/supabase/client";
 
 /**
- * 일반 사용자가 베타 참여를 신청합니다.
+ * 일반 사용자가 참여 의사를 제출합니다.
  */
 export const submitApplication = async (params: SubmitApplicationInput) => {
   const supabase = createClient();
@@ -33,7 +33,7 @@ export const submitApplication = async (params: SubmitApplicationInput) => {
       throw new Error("이미 신청된 이메일입니다.");
     }
 
-    logger.error("Failed to submit beta application", { email, error });
+    logger.error("Failed to submit application", { email, error });
     throw new Error(
       "신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
     );

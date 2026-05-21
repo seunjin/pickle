@@ -1,7 +1,7 @@
 import { createClient } from "@/shared/lib/supabase";
 
 /**
- * 현재 사용자의 베타 신청 내역을 조회합니다. (RLS 정책 필요)
+ * 현재 사용자의 신청 내역을 조회합니다. (RLS 정책 필요)
  */
 export const getBetaApplication = async (email: string) => {
   const supabase = createClient();
@@ -13,7 +13,7 @@ export const getBetaApplication = async (email: string) => {
     .maybeSingle();
 
   if (error) {
-    console.error("[getBetaApplication] Error:", error);
+    console.error("[getApplication] Error:", error);
     return null;
   }
 
