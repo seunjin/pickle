@@ -23,9 +23,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // 3. 로그인했으나 가입 대기 상태 (약관 미동의) -> 로그인 페이지로 보내서 확인창 띄움
+      // 3. 로그인했으나 가입이 완료되지 않은 상태 -> 가입 페이지로 이동
       if (appUser.status === "pending") {
-        router.replace("/signin?reason=no_profile");
+        router.replace("/signup?reason=incomplete");
         return;
       }
 

@@ -68,10 +68,10 @@ function AdminWaitlistPage() {
       <header className="flex items-center justify-between">
         <div>
           <h2 className="font-bold text-3xl text-white tracking-tight">
-            베타 대기열 관리
+            신청 내역 관리
           </h2>
           <p className="mt-1 text-slate-400">
-            신청자를 확인하고 서비스 접근 권한을 부여하세요.
+            오픈 전환 전 접수된 신청 내역을 확인합니다.
           </p>
         </div>
         <Button
@@ -94,10 +94,7 @@ function AdminWaitlistPage() {
       </section>
 
       <footer className="text-slate-500 text-sm">
-        <p>
-          ⚠️ 승인 처리 후 구글 클라우드 콘솔에서도 수동으로 테스트 사용자를
-          등록해야 로그인이 가능합니다.
-        </p>
+        오픈 전환 이후 신규 가입자는 별도 승인 없이 서비스를 사용할 수 있습니다.
       </footer>
     </div>
   );

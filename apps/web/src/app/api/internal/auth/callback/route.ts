@@ -108,9 +108,8 @@ export async function GET(request: Request) {
         }
 
         if (userProfile.status === "pending") {
-          logger.warn("User is pending. Signing out");
-          await supabase.auth.signOut();
-          return NextResponse.redirect(`${origin}/signup?reason=no_profile`);
+          logger.warn("User signup is incomplete. Redirecting to signup");
+          return NextResponse.redirect(`${origin}/signup?reason=incomplete`);
         }
       }
 

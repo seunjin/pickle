@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getServerAuth } from "@/features/auth/api/getServerAuth";
 import { LandingButton } from "@/features/auth/ui/LandingButton";
-import { BetaApplicationForm } from "@/features/beta-application/ui/BetaApplicationForm";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,10 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const { user, appUser, betaApplication } = await getServerAuth();
+  const { user, appUser } = await getServerAuth();
   const isActive = user && appUser?.status === "active";
   const isPending = user && appUser?.status === "pending";
-  const hasApplied = !!betaApplication;
 
   return (
     <div className="effect-bg grid min-h-dvh grid-rows-[1fr_auto] px-6 py-10">
@@ -44,63 +42,47 @@ export default async function Home() {
         <div className="flex w-full max-w-[480px] flex-col gap-4">
           {isActive ? (
             <div className="flex justify-center">
-              <LandingButton
-                initialIsActive={true}
-                initialIsPending={false}
-                initialHasApplied={hasApplied}
-              />
+              <LandingButton initialIsActive={true} />
             </div>
           ) : (
-            <>
-              {/* 이미 신청한 PENDING 유저에게는 폼 대신 상태 메시지 노출 */}
-              {isPending && hasApplied ? (
-                <PickleCausticGlass className="w-full">
-                  <div className="flex flex-col items-center gap-4 py-4 text-center">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-green-500/20 font-bold text-2xl text-green-500">
-                      ✓
-                    </div>
-                    <h3 className="font-bold text-xl">참여 신청 완료</h3>
-                    <p className="text-center text-neutral-400 text-sm">
-                      사용자님의 신청서를 소중히 검토하고 있습니다.
-                      <br />
-                      승인이 완료되면 이메일({user?.email})로 알림을
-                      보내드릴게요!
+            <PickleCausticGlass className="w-full">
+              <div className="flex flex-col items-center gap-4 py-4 text-center">
+                {isPending ? (
+                  <>
+                    <h3 className="font-bold text-xl">가입을 완료해 주세요</h3>
+                    <p className="text-neutral-400 text-sm">
+                      약관 동의만 마치면 바로 피클을 사용할 수 있습니다.
                     </p>
-                  </div>
-                </PickleCausticGlass>
-              ) : (
-                <div className="flex flex-col items-center gap-4">
-                  {isPending && !hasApplied && (
-                    <div className="mb-2 text-center">
-                      <h3 className="font-bold text-white text-xl">
-                        계정이 생성되었습니다!
-                      </h3>
-                      <p className="mt-1 text-gray-400 text-sm">
-                        하지만 현재는 비공개 베타 기간입니다. 아래 신청서를
-                        제출해 주시면 검토 후 즉시 승인해 드릴게요.
-                      </p>
+                    <Link
+                      href={`${process.env.NEXT_PUBLIC_APP_URL}/signup`}
+                      className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
+                    >
+                      가입 완료하기
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href={`${process.env.NEXT_PUBLIC_APP_URL}/signup`}
+                      className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
+                    >
+                      무료로 시작하기
+                    </Link>
+                    <div className="flex items-center gap-[5px] text-neutral-500 text-sm">
+                      <span className="text-[14px] text-gray-500 leading-none">
+                        이미 계정이 있으신가요?
+                      </span>
+                      <Link
+                        href={`${process.env.NEXT_PUBLIC_APP_URL}/signin`}
+                        className="font-medium text-[14px] text-base-muted-foreground leading-none transition-colors hover:text-base-primary"
+                      >
+                        로그인하기
+                      </Link>
                     </div>
-                  )}
-                  <BetaApplicationForm />
-                  {!user && (
-                    <>
-                      <div className="mt-2 flex items-center gap-[5px] text-neutral-500 text-sm">
-                        <span className="text-[14px] text-gray-500 leading-none">
-                          이미 권한이 있으신가요?
-                        </span>
-
-                        <Link
-                          href={`${process.env.NEXT_PUBLIC_APP_URL}/signin`}
-                          className="font-medium text-[14px] text-base-muted-foreground leading-none transition-colors hover:text-base-primary"
-                        >
-                          로그인하기
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-            </>
+                  </>
+                )}
+              </div>
+            </PickleCausticGlass>
           )}
         </div>
       </div>
