@@ -39,7 +39,7 @@ function AdminWaitlistPage() {
       await approveApplication(supabase, { id, email });
       toast.success({
         title: "승인 완료",
-        description: `${email} 주소가 화이트리스트에 추가되었습니다.`,
+        description: `${email} 신청 상태가 승인으로 변경되었습니다.`,
       });
       loadApplications();
     } catch (_error) {

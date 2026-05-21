@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/shared/lib/logger";
 
 /**
- * (Admin) 베타 신청을 거절합니다.
+ * (Admin) 접수된 신청을 거절합니다.
  */
 export const rejectApplication = async (
   supabase: SupabaseClient<Database>,
@@ -17,7 +17,7 @@ export const rejectApplication = async (
     .eq("id", id);
 
   if (error) {
-    logger.error("Failed to reject beta application", { id, error });
+    logger.error("Failed to reject application", { id, error });
     throw new Error("거절 처리 중 오류가 발생했습니다.");
   }
 

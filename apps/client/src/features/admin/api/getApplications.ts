@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/shared/lib/logger";
 
 /**
- * (Admin) 베타 신청 목록을 가져옵니다.
+ * (Admin) 접수된 신청 목록을 가져옵니다.
  */
 export const getApplications = async (supabase: SupabaseClient<Database>) => {
   const { data, error } = await supabase
@@ -12,7 +12,7 @@ export const getApplications = async (supabase: SupabaseClient<Database>) => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    logger.error("Failed to get beta applications", { error });
+    logger.error("Failed to get applications", { error });
     throw error;
   }
 
