@@ -49,7 +49,7 @@ export function BetaApplicationForm() {
       await submitApplication(data);
       toast.success({
         title: "신청이 완료되었습니다!",
-        description: "관리자 승인 후 안내 메일이 발송됩니다.",
+        description: "확인 후 안내 메일이 발송됩니다.",
       });
       setIsSubmitted(true);
       reset();
@@ -90,12 +90,10 @@ export function BetaApplicationForm() {
     <PickleCausticGlass className="w-full max-w-[480px]">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-[20px] text-white">
-            오픈 베타 참여 신청
-          </h3>
+          <h3 className="font-bold text-[20px] text-white">피클 참여 신청</h3>
           <p className="text-gray-400 text-sm">
-            현재 서비스는 초대 기반으로 운영되고 있습니다. <br />
-            신청해 주시면 순차적으로 승인해 드립니다.
+            피클 사용에 관심이 있다면 연락처를 남겨주세요. <br />
+            확인 후 필요한 안내를 드립니다.
           </p>
         </div>
 
@@ -125,7 +123,7 @@ export function BetaApplicationForm() {
           </label>
           <Textarea
             id="message"
-            placeholder="베타 테스트에 참여하고 싶은 이유를 자유롭게 적어주세요. (선택)"
+            placeholder="피클에 기대하는 점을 자유롭게 적어주세요. (선택)"
             className="min-h-[100px]"
             {...register("message")}
             size={"large"}
@@ -144,8 +142,8 @@ export function BetaApplicationForm() {
               htmlFor="is_confirmed"
               className="cursor-pointer select-none text-gray-400 text-sm leading-tight"
             >
-              오픈 베타 기간 중 기능 및 정책에 변경이 있을 수 있음을 확인했으며,
-              개인정보(이메일) 수집 및 안내 메일 발송에 동의합니다.
+              기능 및 정책에 변경이 있을 수 있음을 확인했으며, 개인정보(이메일)
+              수집 및 안내 메일 발송에 동의합니다.
             </label>
           </div>
           {errors.is_confirmed && (
@@ -162,7 +160,7 @@ export function BetaApplicationForm() {
           isPending={isSubmitting}
           className="mt-4 h-[48px] font-bold text-[15px]"
         >
-          베타 참여 신청하기
+          참여 신청하기
         </Button>
       </form>
     </PickleCausticGlass>

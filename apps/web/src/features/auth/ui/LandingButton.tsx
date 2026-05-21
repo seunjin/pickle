@@ -14,8 +14,6 @@ export function LandingButton({
   initialIsActive,
 }: {
   initialIsActive: boolean;
-  initialIsPending: boolean;
-  initialHasApplied: boolean;
 }) {
   const { user, appUser, isLoading } = useSessionContext();
 

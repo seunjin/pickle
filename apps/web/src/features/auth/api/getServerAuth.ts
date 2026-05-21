@@ -16,19 +16,14 @@ export const getServerAuth = async () => {
     return { user: null, appUser: null, workspace: null, supabase };
   }
 
-  // ✅ 병렬로 appUser, workspaces, betaApplication을 조회하여 성능 최적화
-  const [appUser, workspaces, { data: betaApplication }] = await Promise.all([
+  // 병렬로 appUser, workspaces를 조회하여 성능 최적화
+  const [appUser, workspaces] = await Promise.all([
     getUser(supabase, user.id),
     getUserWorkspaces(supabase, user.id),
-    supabase
-      .from("beta_applications")
-      .select("*")
-      .eq("email", user.email || "")
-      .maybeSingle(),
   ]);
 
   // 첫 번째 워크스페이스를 기본값으로 사용
   const workspace = workspaces.length > 0 ? workspaces[0] : null;
 
-  return { user, appUser, workspace, betaApplication, supabase };
+  return { user, appUser, workspace, supabase };
 };

@@ -12,7 +12,7 @@ export const betaApplicationSchema = z.object({
   id: z.string().uuid().optional(),
   email: z.string().email("올바른 이메일 형식이 아닙니다."),
   is_confirmed: z.boolean().refine((val) => val === true, {
-    message: "베타 신청 안내 사항을 확인해 주세요.",
+    message: "신청 안내 사항을 확인해 주세요.",
   }),
   status: betaApplicationStatusSchema.default("pending"),
   message: z
