@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const extensionInstallUrl =
   import.meta.env.VITE_EXTENSION_INSTALL_URL ||
-  "https://chromewebstore.google.com/search/Pickle";
+  "https://chromewebstore.google.com/detail/pickle/fpcppclijlpdiffpaibjejninonhbpno";
 
 export const Route = createFileRoute("/extension")({
   component: ExtensionGuidePage,
@@ -25,9 +25,9 @@ const installSteps = [
 ];
 
 const shortcuts = [
-  { label: "익스텐션 열기", value: "Ctrl + Shift + Y" },
-  { label: "화면 캡처", value: "Ctrl + Shift + E" },
-  { label: "북마크 저장", value: "Ctrl + Shift + B" },
+  { label: "북마크", mac: "Cmd+Option+F", windows: "Ctrl+Shift+F" },
+  { label: "화면 캡처", mac: "Cmd+Option+E", windows: "Ctrl+Shift+E" },
+  { label: "텍스트", mac: "Cmd+Option+S", windows: "Ctrl+Shift+S" },
 ];
 
 function ExtensionGuidePage() {
@@ -57,14 +57,6 @@ function ExtensionGuidePage() {
             >
               <Icon name="download_16" className="size-4" />
               Chrome 웹스토어에서 설치
-            </a>
-            <a
-              href="chrome://extensions/shortcuts"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-base-border px-4 font-bold text-base-foreground text-sm transition-colors hover:border-base-primary hover:text-base-primary"
-            >
-              단축키 설정
             </a>
           </div>
         </header>
@@ -116,19 +108,30 @@ function ExtensionGuidePage() {
           </div>
 
           <aside className="rounded-[8px] border border-base-border bg-base-foreground-background p-6">
-            <h2 className="font-bold text-base-foreground text-xl">단축키</h2>
+            <h2 className="font-bold text-base-foreground text-xl">
+              기본 단축키
+            </h2>
+            <p className="mt-2 text-base-muted text-sm leading-[1.55]">
+              웹 대시보드는 안내만 제공합니다. 단축키 변경은 Pickle 익스텐션
+              팝업의 설정에서 가능합니다.
+            </p>
             <div className="mt-5 flex flex-col gap-3">
               {shortcuts.map((shortcut) => (
                 <div
                   key={shortcut.label}
-                  className="flex items-center justify-between gap-3"
+                  className="flex flex-col gap-2 rounded-[6px] bg-base-background px-4 py-3"
                 >
-                  <span className="text-base-muted text-sm">
+                  <span className="font-medium text-base-foreground text-sm">
                     {shortcut.label}
                   </span>
-                  <kbd className="rounded-[4px] border border-base-border bg-base-background px-2 py-1 font-semibold text-base-foreground text-xs">
-                    {shortcut.value}
-                  </kbd>
+                  <div className="flex flex-wrap gap-2">
+                    <kbd className="rounded-[4px] border border-base-border px-2 py-1 font-semibold text-base-foreground text-xs">
+                      macOS: {shortcut.mac}
+                    </kbd>
+                    <kbd className="rounded-[4px] border border-base-border px-2 py-1 font-semibold text-base-foreground text-xs">
+                      Windows/Linux: {shortcut.windows}
+                    </kbd>
+                  </div>
                 </div>
               ))}
             </div>
