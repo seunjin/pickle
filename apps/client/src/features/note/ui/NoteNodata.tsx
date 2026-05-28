@@ -1,3 +1,6 @@
+import { Icon } from "@pickle/icons";
+import { Link } from "@tanstack/react-router";
+
 export type NodataType = "default" | "bookmarks" | "trash" | "search";
 
 interface NoteNodataProps {
@@ -21,6 +24,13 @@ export function NoteNodata({ type = "default" }: NoteNodataProps) {
             <p className="text-[15px] text-neutral-500 leading-none">
               웹에서 마음에 드는 내용을 바로 모아보세요.
             </p>
+            <Link
+              to="/extension"
+              className="mt-5 inline-flex h-9 items-center justify-center gap-2 rounded-[8px] bg-base-primary px-4 font-bold text-black text-sm transition-opacity hover:opacity-90"
+            >
+              <Icon name="download_16" className="size-4" />
+              익스텐션 설치하기
+            </Link>
           </div>
         );
       case "bookmarks":

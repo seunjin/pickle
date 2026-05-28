@@ -51,6 +51,7 @@ export async function updateSession(request: NextRequest) {
     "/signup",
     "/api",
     "/auth",
+    "/extension",
     "/terms",
     "/favicon.ico",
     "/site.webmanifest",

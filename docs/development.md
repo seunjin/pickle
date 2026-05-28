@@ -26,6 +26,7 @@ pnpm install
 각 앱의 `.env.example` 파일을 복사하여 `.env` 파일을 생성하고 필요한 값을 입력합니다.
 
 - **Web**: `apps/web/.env`
+- **Client**: `apps/client/.env`
 - **Extension**: `apps/extension/.env`
 
 ---

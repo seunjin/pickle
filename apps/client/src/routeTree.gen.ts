@@ -15,6 +15,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as LegalRouteImport } from './routes/legal'
+import { Route as ExtensionRouteImport } from './routes/extension'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -53,6 +54,11 @@ const SearchRoute = SearchRouteImport.update({
 const LegalRoute = LegalRouteImport.update({
   id: '/legal',
   path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExtensionRoute = ExtensionRouteImport.update({
+  id: '/extension',
+  path: '/extension',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookmarksRoute = BookmarksRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
+  '/extension': typeof ExtensionRoute
   '/legal': typeof LegalRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bookmarks': typeof BookmarksRoute
+  '/extension': typeof ExtensionRoute
   '/legal': typeof LegalRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
+  '/extension': typeof ExtensionRoute
   '/legal': typeof LegalRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/bookmarks'
+    | '/extension'
     | '/legal'
     | '/search'
     | '/settings'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bookmarks'
+    | '/extension'
     | '/legal'
     | '/search'
     | '/settings'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/bookmarks'
+    | '/extension'
     | '/legal'
     | '/search'
     | '/settings'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   BookmarksRoute: typeof BookmarksRoute
+  ExtensionRoute: typeof ExtensionRoute
   LegalRoute: typeof LegalRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/legal'
       fullPath: '/legal'
       preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/extension': {
+      id: '/extension'
+      path: '/extension'
+      fullPath: '/extension'
+      preLoaderRoute: typeof ExtensionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookmarks': {
@@ -348,6 +368,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   BookmarksRoute: BookmarksRoute,
+  ExtensionRoute: ExtensionRoute,
   LegalRoute: LegalRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
