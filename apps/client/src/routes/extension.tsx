@@ -49,10 +49,10 @@ const shortcuts = [
 
 function ExtensionGuidePage() {
   return (
-    <div className="h-full overflow-auto bg-base-background">
+    <div className="h-full bg-base-background">
       <div className="mx-auto flex w-full max-w-[880px] flex-col px-8 py-10">
         <header className="flex flex-col gap-5 border-base-border border-b pb-8">
-          <div className="flex size-12 items-center justify-center rounded-[8px] bg-base-primary text-black">
+          <div className="flex size-12 items-center justify-center rounded-lg bg-base-primary text-black">
             <Icon name="download_16" />
           </div>
           <div>
@@ -71,9 +71,9 @@ function ExtensionGuidePage() {
           {guideSteps.map((step, index) => (
             <article
               key={step.title}
-              className="grid gap-4 rounded-[8px] border border-base-border bg-base-foreground-background p-5 sm:grid-cols-[56px_1fr]"
+              className="grid gap-4 rounded-lg border border-base-border bg-base-foreground-background p-5 sm:grid-cols-[56px_1fr]"
             >
-              <span className="flex size-10 items-center justify-center rounded-[8px] bg-base-primary/15 font-bold text-base-primary text-sm">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-base-primary/15 font-bold text-base-primary text-sm">
                 0{index + 1}
               </span>
               <div className="min-w-0">
@@ -88,7 +88,7 @@ function ExtensionGuidePage() {
                     href={step.actionHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-base-primary px-4 font-bold text-black text-sm transition-opacity hover:opacity-90"
+                    className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-base-primary px-4 font-bold text-black text-sm transition-opacity hover:opacity-90"
                   >
                     <Icon name="download_16" className="size-4" />
                     {step.actionLabel}
@@ -107,7 +107,7 @@ function ExtensionGuidePage() {
             {saveTypes.map(([title, description]) => (
               <div
                 key={title}
-                className="rounded-[8px] border border-base-border bg-base-foreground-background px-5 py-4"
+                className="rounded-lg border border-base-border bg-base-foreground-background px-5 py-4"
               >
                 <h3 className="font-bold text-base-foreground text-sm">
                   {title}
@@ -132,16 +132,16 @@ function ExtensionGuidePage() {
             {shortcuts.map((shortcut) => (
               <div
                 key={shortcut.label}
-                className="rounded-[8px] border border-base-border bg-base-foreground-background px-5 py-4"
+                className="rounded-lg border border-base-border bg-base-foreground-background px-5 py-4"
               >
                 <span className="font-medium text-base-foreground text-sm">
                   {shortcut.label}
                 </span>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <kbd className="rounded-[4px] border border-base-border px-2 py-1 font-semibold text-base-foreground text-xs">
+                  <kbd className="rounded-sm border border-base-border px-2 py-1 font-semibold text-base-foreground text-xs">
                     macOS: {shortcut.mac}
                   </kbd>
-                  <kbd className="rounded-[4px] border border-base-border px-2 py-1 font-semibold text-base-foreground text-xs">
+                  <kbd className="rounded-sm border border-base-border px-2 py-1 font-semibold text-base-foreground text-xs">
                     Windows/Linux: {shortcut.windows}
                   </kbd>
                 </div>
