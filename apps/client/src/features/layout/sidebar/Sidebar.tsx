@@ -154,6 +154,13 @@ export const Sidebar = () => {
                 label="즐겨찾기"
                 active={pathname.includes("/bookmarks")}
               />
+
+              <SidebarNavItem
+                href="/extension"
+                icon="download_16"
+                label="익스텐션"
+                active={pathname === "/extension"}
+              />
             </div>
 
             {/* FOLDERS 섹션 */}

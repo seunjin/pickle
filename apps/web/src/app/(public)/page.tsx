@@ -41,8 +41,14 @@ export default async function Home() {
 
         <div className="flex w-full max-w-[480px] flex-col gap-4">
           {isActive ? (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-3">
               <LandingButton initialIsActive={true} />
+              <Link
+                href="/extension"
+                className="font-medium text-[14px] text-base-muted-foreground transition-colors hover:text-base-primary"
+              >
+                익스텐션 설치 안내
+              </Link>
             </div>
           ) : (
             <PickleCausticGlass className="w-full">
@@ -59,6 +65,12 @@ export default async function Home() {
                     >
                       가입 완료하기
                     </Link>
+                    <Link
+                      href="/extension"
+                      className="font-medium text-[14px] text-base-muted-foreground transition-colors hover:text-base-primary"
+                    >
+                      익스텐션 설치 안내
+                    </Link>
                   </>
                 ) : (
                   <>
@@ -67,6 +79,12 @@ export default async function Home() {
                       className="flex h-12 w-full items-center justify-center rounded-full bg-base-primary font-bold text-black transition-opacity hover:opacity-90"
                     >
                       무료로 시작하기
+                    </Link>
+                    <Link
+                      href="/extension"
+                      className="font-medium text-[14px] text-base-muted-foreground transition-colors hover:text-base-primary"
+                    >
+                      익스텐션 설치 안내
                     </Link>
                     <div className="flex items-center gap-[5px] text-neutral-500 text-sm">
                       <span className="text-[14px] text-gray-500 leading-none">
