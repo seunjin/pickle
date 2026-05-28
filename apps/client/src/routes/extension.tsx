@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const extensionInstallUrl =
   import.meta.env.VITE_EXTENSION_INSTALL_URL ||
-  "https://chromewebstore.google.com/search/Pickle";
+  "https://chromewebstore.google.com/detail/pickle/fpcppclijlpdiffpaibjejninonhbpno";
 
 export const Route = createFileRoute("/extension")({
   component: ExtensionGuidePage,

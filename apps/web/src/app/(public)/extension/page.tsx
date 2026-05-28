@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const extensionInstallUrl =
   process.env.NEXT_PUBLIC_EXTENSION_INSTALL_URL ||
-  "https://chromewebstore.google.com/search/Pickle";
+  "https://chromewebstore.google.com/detail/pickle/fpcppclijlpdiffpaibjejninonhbpno";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.pic-kle.io";
 
